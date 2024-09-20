@@ -1,25 +1,25 @@
-import pygame
 from pygame.locals import *
+
+from .entities.Wall import Wall
+from .game_core.InteractiveGameLoop import InteractiveGameLoop
+from .game_core.Universe import Universe
+from .support.Point import Point
+from .world.World import World
 
 
 def main():
-    pygame.init()
+    universe = Universe()
+    world = World(universe)
+    universe.world = world
 
-    surface = pygame.display.set_mode((500, 500), flags=RESIZABLE)
-    fps_keeper = pygame.time.Clock()
+    world.add_entity(
+        Wall(
+            world,
+            universe,
+            position=Point.ONE * 100,
+            size=Point.ONE * 100,
+        )
+    )
 
-    while True:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                return 0
-            pass
-        pass
-
-        surface.fill((255, 255, 255))
-
-        pygame.draw.circle(surface, (255, 0, 0), (200, 200), 100, width=1)
-
-        pygame.display.update()
-        fps_keeper.tick(60)
-    pass
+    game_loop = InteractiveGameLoop(universe)
+    game_loop.run()
