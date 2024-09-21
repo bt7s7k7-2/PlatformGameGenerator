@@ -4,30 +4,33 @@ from typing import TYPE_CHECKING, List
 from pygame import Surface
 
 if TYPE_CHECKING:
+    from .Actor import Actor
     from ..game_core.Universe import Universe
-    from .Entity import Entity
 
 from ..support.Color import Color
 
 
 class World:
-    entities: List["Entity"] = []
+    actors: List["Actor"] = []
     background_color = Color.BLACK
 
-    def add_entity(self, entity: "Entity"):
-        self.entities.append(entity)
+    def add_actor(self, actor: "Actor"):
+        actor.world = self
+        self.actors.append(actor)
 
-    def remove_entity(self, entity: "Entity"):
-        if not entity in self.entities:
+    def remove_actor(self, actor: "Actor"):
+        if not actor in self.actors:
             return
 
-        self.entities.pop(self.entities.index(entity))
+        actor.world = None
+
+        self.actors.pop(self.actors.index(actor))
 
     def draw(self, surface: Surface):
         surface.fill(astuple(self.background_color))
 
-        for entity in self.entities:
-            entity.draw(surface)
+        for actor in self.actors:
+            actor.draw(surface)
 
     def __init__(self, universe: "Universe") -> None:
         self.universe = universe

@@ -12,9 +12,8 @@ def main():
     world = World(universe)
     universe.world = world
 
-    world.add_entity(
+    world.add_actor(
         Wall(
-            world,
             universe,
             position=Point.ONE * 100,
             size=Point.ONE * 100,
