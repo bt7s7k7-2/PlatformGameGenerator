@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 import pygame
 
+from ..support.constants import CAMERA_SCALE, ROOM_HEIGHT, ROOM_WIDTH
 from .InputState import InputState
 
 if TYPE_CHECKING:
@@ -14,7 +15,7 @@ class InteractiveGameLoop:
     def run(self):
         pygame.init()
 
-        surface = pygame.display.set_mode((500, 500), flags=pygame.RESIZABLE)
+        surface = pygame.display.set_mode((CAMERA_SCALE * ROOM_WIDTH, CAMERA_SCALE * ROOM_HEIGHT))
         fps_keeper = pygame.time.Clock()
 
         input = self.universe.di.inject(InputState)

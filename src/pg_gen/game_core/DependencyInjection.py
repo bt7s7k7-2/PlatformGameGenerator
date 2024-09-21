@@ -21,7 +21,7 @@ class DependencyInjection:
         self._lookup.pop(service_type)
         pass
 
-    def inject[T](self, service_type: type[T]) -> T:
+    def try_inject[T](self, service_type: type[T]) -> T | None:
         if service_type in self._lookup:
             return self._lookup[service_type]
 
@@ -29,6 +29,13 @@ class DependencyInjection:
             instance = service_type()
             self.register(service_type, instance)
             return instance
+
+        return None
+
+    def inject[T](self, service_type: type[T]) -> T:
+        service = self.try_inject(service_type)
+        if service is not None:
+            return service
 
         raise KeyError(f"Cannot find service {service_type}")
 

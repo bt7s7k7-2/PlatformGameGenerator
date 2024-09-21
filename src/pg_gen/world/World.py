@@ -27,6 +27,10 @@ class World:
         if CollisionFlags.TRIGGER in actor.collision_flags:
             self._triggers.append(actor)
 
+    def add_actors(self, *actors: "Actor"):
+        for actor in actors:
+            self.add_actor(actor)
+
     def remove_actor(self, actor: "Actor"):
         if not actor in self._actors:
             return

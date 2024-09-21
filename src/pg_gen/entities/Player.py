@@ -25,6 +25,11 @@ class Player(Actor):
 
     def __post_init__(self):
         self._input = self.universe.di.inject(InputState)
+        self.universe.di.register(Player, self)
+
+    def remove(self):
+        self.universe.di.unregister(Player, self)
+        return super().remove()
 
     def draw(self, surface: Surface):
         pygame.draw.rect(

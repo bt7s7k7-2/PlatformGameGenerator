@@ -2,14 +2,17 @@ from dataclasses import astuple, dataclass, field
 
 from pygame import Surface
 
+from ..entities.Player import Player
+from ..entities.Wall import Wall
 from ..game_core.InputState import InputState
 from ..game_core.ResourceProvider import ResourceProvider
 from ..support.Color import Color
+from ..support.constants import ROOM_HEIGHT, ROOM_WIDTH
 from ..support.Direction import Direction
 from ..support.Point import Point
 from ..world.Actor import Actor
 from ..world.World import World
-from .MapGenerator import RoomInfo
+from .MapGenerator import NOT_CONNECTED, RoomInfo
 
 
 @dataclass
@@ -56,6 +59,81 @@ class RoomController(Actor):
         assert self.room is not None
         world = World(self.universe)
 
+        entrance_size = 3
+        corridor_length = 2
+        world.add_actors(
+            Wall(
+                self.universe,
+                position=Point.ZERO,
+                size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
+            ),
+            Wall(
+                self.universe,
+                position=Point(ROOM_WIDTH / 2 + entrance_size / 2, 0),
+                size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
+            ),
+            Wall(
+                self.universe,
+                position=Point(0, 1 + entrance_size),
+                size=Point(corridor_length, ROOM_HEIGHT - 1 - entrance_size),
+            ),
+            Wall(
+                self.universe,
+                position=Point(ROOM_WIDTH - corridor_length, 1 + entrance_size),
+                size=Point(corridor_length, ROOM_HEIGHT - 1 - entrance_size),
+            ),
+            Wall(
+                self.universe,
+                position=Point(0, ROOM_HEIGHT - 1),
+                size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
+            ),
+            Wall(
+                self.universe,
+                position=Point(ROOM_WIDTH / 2 + entrance_size / 2, ROOM_HEIGHT - 1),
+                size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
+            ),
+        )
+
+        if self.room.get_connection(Direction.LEFT) == NOT_CONNECTED:
+            world.add_actor(
+                Wall(
+                    self.universe,
+                    position=Point(0, 1),
+                    size=Point(1, entrance_size),
+                )
+            )
+
+        if self.room.get_connection(Direction.RIGHT) == NOT_CONNECTED:
+            world.add_actor(
+                Wall(
+                    self.universe,
+                    position=Point(ROOM_WIDTH - 1, 1),
+                    size=Point(1, entrance_size),
+                )
+            )
+
+        if self.room.get_connection(Direction.UP) == NOT_CONNECTED:
+            world.add_actor(
+                Wall(
+                    self.universe,
+                    position=Point(ROOM_WIDTH / 2 - entrance_size / 2, 0),
+                    size=Point(entrance_size, 1),
+                )
+            )
+
+        if self.room.get_connection(Direction.DOWN) == NOT_CONNECTED:
+            world.add_actor(
+                Wall(
+                    self.universe,
+                    position=Point(ROOM_WIDTH / 2 - entrance_size / 2, ROOM_HEIGHT - 1),
+                    size=Point(entrance_size, 1),
+                )
+            )
+
+        player = self.universe.di.try_inject(Player)
+        if player is not None:
+            world.add_actor(player)
+
         world.add_actor(self)
         self.universe.world = world
 
@@ -71,7 +149,7 @@ class RoomController(Actor):
             font = self.universe.di.inject(ResourceProvider).font
 
             current_room_color = Color.GREEN.to_pygame_color(opacity=127)
-            door_color = Color.WHITE.to_pygame_color(opacity=127)
+            door_color = Color.WHITE.to_pygame_color()
             bgcolor = Color.BLACK.to_pygame_color(opacity=127)
 
             for room in map.get_rooms():

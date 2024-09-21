@@ -36,13 +36,16 @@ class ProgressionMarker:
         return False
 
 
+NOT_CONNECTED = -1
+
+
 @dataclass()
 class RoomInfo:
     seed: float
     position: Point
     area: int
     provides_key = 0
-    _connections: List[int] = field(default_factory=lambda: [-1] * 4, init=False)
+    _connections: List[int] = field(default_factory=lambda: [NOT_CONNECTED] * 4, init=False)
 
     def get_connection(self, direction: Direction):
         return self._connections[direction]
@@ -141,7 +144,7 @@ class MapGenerator:
                     direction = directions[directionIndex]
                     directions.pop(directionIndex)
 
-                    already_connected = curr_room.get_connection(direction) != -1
+                    already_connected = curr_room.get_connection(direction) != NOT_CONNECTED
                     if already_connected:
                         continue
 
