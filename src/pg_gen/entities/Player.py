@@ -20,7 +20,7 @@ class Player(Actor):
     _input: InputState = field(init=False, repr=False)
     _resource_provider: ResourceProvider | None = field(init=False, repr=False, default=None)
 
-    _velocity: Point = Point.ZERO
+    velocity: Point = Point.ZERO
     _is_grounded: bool = False
 
     def __post_init__(self):
@@ -50,28 +50,30 @@ class Player(Actor):
             if self._input.right:
                 move_vector += Point.RIGHT
 
-            self._velocity = move_vector * GROUND_VELOCITY + Point.DOWN * 0.01
+            self.velocity = move_vector * GROUND_VELOCITY + Point.DOWN * 0.01
 
             if self._input.jump:
-                self._velocity += Point.UP * JUMP_IMPULSE
+                self.velocity += Point.UP * JUMP_IMPULSE
         else:
-            self._velocity += Point.DOWN * (GRAVITY * delta)
+            self.velocity += Point.DOWN * (GRAVITY * delta)
 
             if self._input.left:
-                self._velocity += Point.LEFT * delta * AIR_ACCELERATION
+                self.velocity += Point.LEFT * delta * AIR_ACCELERATION
 
             if self._input.right:
-                self._velocity += Point.RIGHT * delta * AIR_ACCELERATION
+                self.velocity += Point.RIGHT * delta * AIR_ACCELERATION
 
-            if abs(self._velocity.x) > GROUND_VELOCITY:
-                self._velocity = Point(copysign(GROUND_VELOCITY, self._velocity.x), self._velocity.y)
+            if abs(self.velocity.x) > GROUND_VELOCITY:
+                self.velocity = Point(copysign(GROUND_VELOCITY, self.velocity.x), self.velocity.y)
 
-        self.position += self._velocity * delta
+        self.position += self.velocity * delta
         collision_resolution = self.world.resolve_collisions(self)
         self.position += collision_resolution
 
         # Make sure that if the ceiling is hit we reset the vertical velocity
-        if collision_resolution.y > 0 and self._velocity.y < 0:
-            self._velocity = self._velocity * Point.RIGHT
+        if collision_resolution.y > 0 and self.velocity.y < 0:
+            self.velocity = self.velocity * Point.RIGHT
 
         self._is_grounded = collision_resolution.y < 0
+
+        self.world.check_triggers(self)

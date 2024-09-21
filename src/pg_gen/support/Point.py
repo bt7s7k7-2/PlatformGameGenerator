@@ -30,7 +30,7 @@ class Point:
     def normalize(self):
         mag = self.magnitude()
         if mag == 0:
-            raise ValueError("Cannot normalize a zero vector")
+            return Point.ZERO
         return Point(self.x / mag, self.y / mag)
 
     def down(self):

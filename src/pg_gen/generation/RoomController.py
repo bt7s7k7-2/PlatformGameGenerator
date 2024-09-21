@@ -7,12 +7,13 @@ from ..entities.Wall import Wall
 from ..game_core.InputState import InputState
 from ..game_core.ResourceProvider import ResourceProvider
 from ..support.Color import Color
-from ..support.constants import ROOM_HEIGHT, ROOM_WIDTH
+from ..support.constants import JUMP_IMPULSE, ROOM_HEIGHT, ROOM_WIDTH
 from ..support.Direction import Direction
 from ..support.Point import Point
 from ..world.Actor import Actor
 from ..world.World import World
 from .MapGenerator import NOT_CONNECTED, RoomInfo
+from .RoomTrigger import RoomTrigger
 
 
 @dataclass
@@ -29,37 +30,32 @@ class RoomController(Actor):
         if self.room is None:
             return
 
-        teleport = Point.ZERO
-
         if self._input.teleport_up:
-            teleport += Point.UP
-        if self._input.teleport_left:
-            teleport += Point.LEFT
-        if self._input.teleport_right:
-            teleport += Point.RIGHT
-        if self._input.teleport_down:
-            teleport += Point.DOWN
+            self.switch_rooms(Direction.UP)
+        elif self._input.teleport_left:
+            self.switch_rooms(Direction.LEFT)
+        elif self._input.teleport_right:
+            self.switch_rooms(Direction.RIGHT)
+        elif self._input.teleport_down:
+            self.switch_rooms(Direction.DOWN)
 
-        if teleport == Point.ZERO:
-            return
-
-        self.switch_rooms(teleport)
-
-    def switch_rooms(self, offset: Point):
+    def switch_rooms(self, direction: Direction):
         assert self.room is not None
+        offset = Point.from_direction(direction)
         next_position = self.room.position + offset
         if not self.universe.map.has_room(next_position):
             print(f"Tried to teleport to invalid room {next_position}")
             return
 
         next_room = self.universe.map.get_room(next_position)
-        self.universe.queue_task(lambda: RoomController(self.universe, room=next_room).initialize_room())
+        self.universe.queue_task(lambda: RoomController(self.universe, room=next_room).initialize_room(direction.invert()))
 
-    def initialize_room(self):
+    def initialize_room(self, entrance: Direction | None = None):
         assert self.room is not None
         world = World(self.universe)
 
         entrance_size = 3
+        gap_size = 4
         corridor_length = 2
         world.add_actors(
             Wall(
@@ -92,6 +88,21 @@ class RoomController(Actor):
                 position=Point(ROOM_WIDTH / 2 + entrance_size / 2, ROOM_HEIGHT - 1),
                 size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
             ),
+            Wall(
+                self.universe,
+                position=Point(corridor_length + gap_size, entrance_size + 1),
+                size=Point(ROOM_WIDTH - corridor_length * 2 - gap_size * 2, 1),
+            ),
+            Wall(
+                self.universe,
+                position=Point(2, 1 + entrance_size + ROOM_HEIGHT / 3),
+                size=Point(corridor_length, 1),
+            ),
+            Wall(
+                self.universe,
+                position=Point(ROOM_WIDTH - corridor_length - 2, 1 + entrance_size + ROOM_HEIGHT / 3),
+                size=Point(corridor_length, 1),
+            ),
         )
 
         if self.room.get_connection(Direction.LEFT) == NOT_CONNECTED:
@@ -100,6 +111,16 @@ class RoomController(Actor):
                     self.universe,
                     position=Point(0, 1),
                     size=Point(1, entrance_size),
+                )
+            )
+        else:
+            world.add_actor(
+                RoomTrigger(
+                    self.universe,
+                    position=Point(-1.5, 1),
+                    size=Point(1, entrance_size),
+                    room_controller=self,
+                    direction=Direction.LEFT,
                 )
             )
 
@@ -111,6 +132,16 @@ class RoomController(Actor):
                     size=Point(1, entrance_size),
                 )
             )
+        else:
+            world.add_actor(
+                RoomTrigger(
+                    self.universe,
+                    position=Point(ROOM_WIDTH + 0.5, 1),
+                    size=Point(1, entrance_size),
+                    room_controller=self,
+                    direction=Direction.RIGHT,
+                )
+            )
 
         if self.room.get_connection(Direction.UP) == NOT_CONNECTED:
             world.add_actor(
@@ -118,6 +149,16 @@ class RoomController(Actor):
                     self.universe,
                     position=Point(ROOM_WIDTH / 2 - entrance_size / 2, 0),
                     size=Point(entrance_size, 1),
+                )
+            )
+        else:
+            world.add_actor(
+                RoomTrigger(
+                    self.universe,
+                    position=Point(ROOM_WIDTH / 2 - entrance_size / 2, -1.5),
+                    size=Point(entrance_size, 1),
+                    room_controller=self,
+                    direction=Direction.UP,
                 )
             )
 
@@ -129,10 +170,40 @@ class RoomController(Actor):
                     size=Point(entrance_size, 1),
                 )
             )
+        else:
+            world.add_actor(
+                RoomTrigger(
+                    self.universe,
+                    position=Point(ROOM_WIDTH / 2 - entrance_size / 2, ROOM_HEIGHT + 0.5),
+                    size=Point(entrance_size, 1),
+                    room_controller=self,
+                    direction=Direction.DOWN,
+                )
+            )
 
         player = self.universe.di.try_inject(Player)
         if player is not None:
             world.add_actor(player)
+
+            if entrance == Direction.LEFT or entrance == Direction.RIGHT:
+                player.position = (
+                    Point(
+                        ROOM_WIDTH / 2 - ((player.position.x + player.size.x / 2) - ROOM_WIDTH / 2) - player.size.x / 2,
+                        player.position.y,
+                    )
+                    - Point.from_direction(entrance) * 0.1
+                )
+            elif entrance == Direction.UP or entrance == Direction.DOWN:
+                player.position = (
+                    Point(
+                        player.position.x,
+                        ROOM_HEIGHT / 2 - ((player.position.y + player.size.y / 2) - ROOM_HEIGHT / 2) - player.size.y / 2,
+                    )
+                    - Point.from_direction(entrance) * 1
+                )
+
+            if entrance == Direction.DOWN:
+                player.velocity = Point(player.velocity.x, -JUMP_IMPULSE)
 
         world.add_actor(self)
         self.universe.world = world
