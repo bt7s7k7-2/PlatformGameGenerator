@@ -12,15 +12,11 @@ class DependencyInjection:
 
     def unregister[T](self, service_type: type[T], value: T):
         if not service_type in self._lookup:
-            raise ValueError(
-                f"Tried to unregister {service_type}, but this service was never registered"
-            )
+            raise ValueError(f"Tried to unregister {service_type}, but this service was never registered")
 
         prev = self._lookup[service_type]
         if prev is not value:
-            raise ValueError(
-                f"Tried to unregister {service_type}, but the registered service is different"
-            )
+            raise ValueError(f"Tried to unregister {service_type}, but the registered service is different")
 
         self._lookup.pop(service_type)
         pass
