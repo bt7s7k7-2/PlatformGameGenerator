@@ -42,6 +42,7 @@ class InteractiveGameLoop:
             input.right = keys[pygame.K_d]
             input.down = keys[pygame.K_s]
             input.jump = keys[pygame.K_SPACE]
+            input.show_map = keys[pygame.K_m]
 
             world = self.universe.world
             if world is not None:

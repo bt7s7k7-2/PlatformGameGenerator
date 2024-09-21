@@ -17,7 +17,9 @@ class Color:
     CYAN: ClassVar["Color"]
     MAGENTA: ClassVar["Color"]
 
-    def to_pygame_color(self):
+    def to_pygame_color(self, opacity: int | None = None):
+        if opacity is not None:
+            return (self.r, self.g, self.b, opacity)
         return (self.r, self.g, self.b)
 
     def __mul__(self, other: float | int):

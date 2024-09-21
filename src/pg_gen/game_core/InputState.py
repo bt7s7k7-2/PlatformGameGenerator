@@ -4,5 +4,6 @@ class InputState:
     jump = False
     up = False
     down = False
+    show_map = False
 
     __singleton_service__ = True

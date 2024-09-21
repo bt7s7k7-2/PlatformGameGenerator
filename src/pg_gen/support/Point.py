@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from math import floor, sqrt
 from typing import ClassVar
 
+from .Direction import Direction
+
 
 @dataclass(frozen=True)
 class Point:
@@ -37,7 +39,7 @@ class Point:
     def right(self):
         return Point(self.x, 0)
 
-    def to_pygame_rect(self, size: "Point", scale: float):
+    def to_pygame_rect(self, size: "Point", scale: float = 1.0):
         # To floor our value to integer pixel coordinates we add a small constant
         # to counteract floating point imprecision and therefore prevent one-off
         # errors in position
@@ -50,18 +52,17 @@ class Point:
         return (x, y, width, height)
 
     @staticmethod
-    def min(a: "Point", b: "Point"):
-        return Point(
-            min(a.x, b.x),
-            min(a.y, b.y),
-        )
+    def from_direction(direction: Direction):
+        if direction == Direction.LEFT:
+            return Point.LEFT
+        if direction == Direction.RIGHT:
+            return Point.RIGHT
+        if direction == Direction.UP:
+            return Point.UP
+        if direction == Direction.DOWN:
+            return Point.DOWN
 
-    @staticmethod
-    def max(a: "Point", b: "Point"):
-        return Point(
-            max(a.x, b.x),
-            max(a.y, b.y),
-        )
+        assert False, "Invalid direction enum value"
 
     def __repr__(self) -> str:
         return f"Point({self.x:.2f}, {self.y:.2f})"
