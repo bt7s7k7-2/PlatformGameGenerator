@@ -8,7 +8,7 @@ from pygame import Surface
 from ..game_core.InputState import InputState
 from ..game_core.ResourceProvider import ResourceProvider
 from ..support.Color import Color
-from ..support.constants import AIR_ACCELERATION, CAMERA_SCALE, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE
+from ..support.constants import AIR_ACCELERATION, AIR_DRAG, CAMERA_SCALE, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE
 from ..support.Point import Point
 from ..world.Actor import Actor
 
@@ -55,6 +55,11 @@ class Player(Actor):
             if self._input.jump:
                 self.velocity += Point.UP * JUMP_IMPULSE
         else:
+            drag = self.velocity.right().normalize() * -AIR_DRAG * delta
+            if drag.magnitude() > abs(self.velocity.x):
+                drag = drag.normalize() * abs(self.velocity.x)
+            self.velocity += drag
+
             self.velocity += Point.DOWN * (GRAVITY * delta)
 
             if self._input.left:
