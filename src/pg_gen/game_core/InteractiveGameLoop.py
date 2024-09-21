@@ -21,11 +21,26 @@ class InteractiveGameLoop:
         start_time = time.monotonic()
 
         while True:
+            input.teleport_up = False
+            input.teleport_down = False
+            input.teleport_left = False
+            input.teleport_right = False
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     return
-                pass
+                elif event.type == pygame.KEYDOWN and event:
+                    key = event.key
+
+                    if key == pygame.K_j:
+                        input.teleport_left = True
+                    elif key == pygame.K_l:
+                        input.teleport_right = True
+                    elif key == pygame.K_i:
+                        input.teleport_up = True
+                    elif key == pygame.K_k:
+                        input.teleport_down = True
             pass
 
             now = time.monotonic()
@@ -48,6 +63,8 @@ class InteractiveGameLoop:
             if world is not None:
                 world.update(delta_time)
                 world.draw(surface)
+
+            self.universe.execute_pending_tasks()
 
             pygame.display.update()
             fps_keeper.tick(60)

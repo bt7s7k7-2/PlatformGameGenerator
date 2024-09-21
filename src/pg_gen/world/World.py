@@ -17,10 +17,6 @@ from ..support.Color import Color
 class World:
     background_color = Color.BLACK
 
-    _actors: List["Actor"] = []
-    _triggers: List["Actor"] = []
-    _colliders: List["Actor"] = []
-
     def add_actor(self, actor: "Actor"):
         actor.world = self
         self._actors.append(actor)
@@ -80,4 +76,7 @@ class World:
 
     def __init__(self, universe: "Universe") -> None:
         self.universe = universe
+        self._actors: List["Actor"] = []
+        self._triggers: List["Actor"] = []
+        self._colliders: List["Actor"] = []
         pass
