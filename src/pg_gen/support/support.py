@@ -34,3 +34,5 @@ def resolve_intersection(pos_a: Point, size_a: Point, pos_b: Point, size_b: Poin
         return Point(0, move_down)
     elif minimum_displacement == move_up:
         return Point(0, -move_up)
+
+    raise ValueError("Invalid retuned value from min in resolve_intersection")
