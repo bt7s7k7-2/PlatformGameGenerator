@@ -1,5 +1,3 @@
-from pygame.locals import *
-
 from .entities.Player import Player
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
