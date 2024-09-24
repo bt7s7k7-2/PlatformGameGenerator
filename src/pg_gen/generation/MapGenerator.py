@@ -3,8 +3,9 @@ from random import Random
 from typing import Dict, List
 
 from ..support.Direction import Direction
-from ..support.keys import MAX_KEY_TYPE
+from ..support.keys import KEY_COLORS, MAX_KEY_TYPE
 from ..support.Point import Point
+from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
 
 
 class ProgressionMarker:
@@ -28,6 +29,11 @@ class ProgressionMarker:
         if self._key_state[key] == 0:
             self._key_state.pop(key)
 
+    def has_key(self, key: int):
+        # self._key_state dict will only have values larger than zero,
+        # so if a value is present it is non-zero
+        return key in self._key_state
+
     def __repr__(self):
         return repr(self._key_state)
 
@@ -37,32 +43,14 @@ class ProgressionMarker:
         return False
 
 
-NOT_CONNECTED = -1
-
-
-@dataclass()
-class RoomInfo:
-    seed: float
-    position: Point
-    area: int
-    provides_key = -1
-    _connections: List[int] = field(default_factory=lambda: [NOT_CONNECTED] * 4, init=False)
-
-    def get_connection(self, direction: Direction):
-        return self._connections[direction]
-
-    def set_connection(self, direction: Direction, value: int):
-        self._connections[direction] = value
-
-
 @dataclass(kw_only=True)
 class MapGenerator:
     max_rooms: int = 10
     max_width: int | None = None
     max_height: int | None = None
-    sprawl_chance: float = 0.1
-    lock_chance: float = 0.25
-    key_chance: float = 0.25
+    sprawl_chance: float = 0.5
+    lock_chance: float = 0.75
+    key_chance: float = 0.5
 
     _min_x = 0
     _min_y = 0
@@ -164,17 +152,34 @@ class MapGenerator:
                         hit_existing_room = True
                         break
 
-                    new_room = add_room(next_position, curr_room.area)
+                    area = curr_room.area
+                    required_key = NO_KEY
+
+                    if random_source.random() < self.lock_chance:
+                        possible_keys = [i + 1 for i in range(len(KEY_COLORS))]
+                        while len(possible_keys) > 0:
+                            index = random_source.randint(0, len(possible_keys) - 1)
+                            required_key = possible_keys.pop(index)
+
+                            if progression.has_key(required_key):
+                                progression.decrement_key(required_key)
+                                area = next_area
+                                next_area += 1
+                                break
+
+                            required_key = NO_KEY
+
+                    new_room = add_room(next_position, area)
                     if new_room is None:
                         continue
 
-                    curr_room.set_connection(direction, 0)
-                    new_room.set_connection(direction.invert(), 0)
+                    curr_room.set_connection(direction, required_key)
+                    new_room.set_connection(direction.invert(), NO_KEY)
 
                     if random_source.random() < self.key_chance:
-                        key = random_source.randint(0, MAX_KEY_TYPE)
-                        progression.increment_key(key)
-                        new_room.provides_key = key
+                        required_key = random_source.randint(1, MAX_KEY_TYPE)
+                        progression.increment_key(required_key)
+                        new_room.provides_key = required_key
 
                     curr_room = new_room
                     success = True

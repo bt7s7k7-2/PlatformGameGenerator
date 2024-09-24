@@ -2,6 +2,7 @@ from dataclasses import astuple, dataclass, field
 
 from pygame import Surface
 
+from ..entities.Door import Door
 from ..entities.Key import Key
 from ..entities.Player import Player
 from ..entities.Wall import Wall
@@ -13,7 +14,7 @@ from ..support.Direction import Direction
 from ..support.Point import Point
 from ..world.Actor import Actor
 from ..world.World import World
-from .MapGenerator import NOT_CONNECTED, RoomInfo
+from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
 from .RoomTrigger import RoomTrigger
 
 
@@ -182,8 +183,44 @@ class RoomController(Actor):
                 )
             )
 
-        if self.room.provides_key != -1:
+        if self.room.provides_key != NO_KEY:
             world.add_actor(Key(self.universe, key_type=self.room.provides_key, position=Point(ROOM_WIDTH / 2 - 0.5, entrance_size - 1), room=self.room))
+
+        next_flag = 0
+
+        def get_next_flag():
+            assert self.room is not None
+            nonlocal next_flag
+
+            flag = next_flag
+            next_flag += 1
+
+            if len(self.room.persistent_flags) <= flag:
+                self.room.persistent_flags.append(None)
+
+            return flag
+
+        if self.room.get_connection(Direction.LEFT) > NO_KEY:
+            world.add_actor(
+                Door(
+                    self.universe,
+                    position=Point(1, 1),
+                    room=self.room,
+                    key_type=self.room.get_connection(Direction.LEFT),
+                    flag_index=get_next_flag(),
+                )
+            )
+
+        if self.room.get_connection(Direction.RIGHT) > NO_KEY:
+            world.add_actor(
+                Door(
+                    self.universe,
+                    position=Point(ROOM_WIDTH - 2, 1),
+                    room=self.room,
+                    key_type=self.room.get_connection(Direction.RIGHT),
+                    flag_index=get_next_flag(),
+                )
+            )
 
         player = self.universe.di.try_inject(Player)
         if player is not None:
@@ -235,7 +272,7 @@ class RoomController(Actor):
                 if room == self.room:
                     font.render_to(surface, astuple(origin + Point(tile_size, tile_size)), "X", current_room_color, bgcolor)
 
-                if room.provides_key != -1:
+                if room.provides_key != NO_KEY:
                     font.render_to(surface, astuple(origin), str(room.provides_key), key_color, bgcolor)
 
                 font.render_to(surface, astuple(origin + Point(tile_size, 0)), str(room.get_connection(Direction.UP)), door_color, bgcolor)

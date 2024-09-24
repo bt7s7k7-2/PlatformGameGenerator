@@ -1,10 +1,12 @@
 from dataclasses import dataclass, field
 from math import copysign
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Callable, List
 
 import pygame
 import pygame.freetype
 from pygame import Surface
+
+from ..support.support import find_index_by_predicate
 
 if TYPE_CHECKING:
     from ..world.World import World
@@ -58,6 +60,18 @@ class Player(Actor):
         self.world.add_actor(item)
 
         return True
+
+    def take_inventory_item(self, item_predicate: Callable[[InventoryItem | None], bool]):
+        item_index = find_index_by_predicate(self._inventory, item_predicate)
+        if item_index == -1:
+            return None
+
+        item = self._inventory[item_index]
+        assert item is not None
+        self._inventory[item_index] = None
+
+        item.remove()
+        return item
 
     def transfer_world(self, new_world: "World"):
         super().transfer_world(new_world)

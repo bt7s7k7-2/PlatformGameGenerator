@@ -16,7 +16,7 @@ def main():
     )
     universe = Universe(map_generator)
 
-    map_generator.generate(512)
+    map_generator.generate(516)
 
     world = universe.world = World(universe)
 

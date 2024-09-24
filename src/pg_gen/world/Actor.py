@@ -28,6 +28,8 @@ class Actor:
     def on_trigger(self, trigger: "Actor"): ...
 
     def transfer_world(self, new_world: "World"):
+        if self.world is not None:
+            self.world.remove_actor(self)
         new_world.add_actor(self)
 
     def remove(self):

@@ -1,3 +1,5 @@
+from typing import Callable, Iterable
+
 from .Point import Point
 
 
@@ -36,3 +38,7 @@ def resolve_intersection(pos_a: Point, size_a: Point, pos_b: Point, size_b: Poin
         return Point(0, -move_up)
 
     raise ValueError("Invalid retuned value from min in resolve_intersection")
+
+
+def find_index_by_predicate[T](elements: Iterable[T], predicate: Callable[[T], bool]):
+    return next((i for i, element in enumerate(elements) if predicate(element)), -1)
