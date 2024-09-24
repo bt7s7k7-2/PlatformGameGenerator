@@ -6,6 +6,7 @@ from pygame import Surface
 from ..support.Point import Point
 from ..support.support import is_intersection, resolve_intersection
 from .CollisionFlags import CollisionFlags
+from .SpriteLayer import SpriteLayer
 
 if TYPE_CHECKING:
     from .Actor import Actor
@@ -49,7 +50,16 @@ class World:
         surface.fill(astuple(self.background_color))
 
         for actor in self._actors:
-            actor.draw(surface)
+            if actor.layer == SpriteLayer.BACKGROUND:
+                actor.draw(surface)
+
+        for actor in self._actors:
+            if actor.layer == SpriteLayer.NORMAL:
+                actor.draw(surface)
+
+        for actor in self._actors:
+            if actor.layer == SpriteLayer.GUI:
+                actor.draw(surface)
 
     def update(self, delta: float):
         for actor in self._actors:

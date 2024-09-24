@@ -2,6 +2,7 @@ from dataclasses import astuple, dataclass, field
 
 from pygame import Surface
 
+from ..entities.Key import Key
 from ..entities.Player import Player
 from ..entities.Wall import Wall
 from ..game_core.InputState import InputState
@@ -181,9 +182,12 @@ class RoomController(Actor):
                 )
             )
 
+        if self.room.provides_key != -1:
+            world.add_actor(Key(self.universe, key_type=self.room.provides_key, position=Point(ROOM_WIDTH / 2 - 0.5, entrance_size - 1), room=self.room))
+
         player = self.universe.di.try_inject(Player)
         if player is not None:
-            world.add_actor(player)
+            player.transfer_world(world)
 
             if entrance == Direction.LEFT or entrance == Direction.RIGHT:
                 player.position = (
@@ -220,6 +224,7 @@ class RoomController(Actor):
             font = self.universe.di.inject(ResourceProvider).font
 
             current_room_color = Color.GREEN.to_pygame_color(opacity=127)
+            key_color = Color.RED.to_pygame_color(opacity=127)
             door_color = Color.WHITE.to_pygame_color()
             bgcolor = Color.BLACK.to_pygame_color(opacity=127)
 
@@ -229,6 +234,9 @@ class RoomController(Actor):
 
                 if room == self.room:
                     font.render_to(surface, astuple(origin + Point(tile_size, tile_size)), "X", current_room_color, bgcolor)
+
+                if room.provides_key != -1:
+                    font.render_to(surface, astuple(origin), str(room.provides_key), key_color, bgcolor)
 
                 font.render_to(surface, astuple(origin + Point(tile_size, 0)), str(room.get_connection(Direction.UP)), door_color, bgcolor)
                 font.render_to(surface, astuple(origin + Point(0, tile_size)), str(room.get_connection(Direction.LEFT)), door_color, bgcolor)

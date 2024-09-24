@@ -3,6 +3,7 @@ from random import Random
 from typing import Dict, List
 
 from ..support.Direction import Direction
+from ..support.keys import MAX_KEY_TYPE
 from ..support.Point import Point
 
 
@@ -44,7 +45,7 @@ class RoomInfo:
     seed: float
     position: Point
     area: int
-    provides_key = 0
+    provides_key = -1
     _connections: List[int] = field(default_factory=lambda: [NOT_CONNECTED] * 4, init=False)
 
     def get_connection(self, direction: Direction):
@@ -131,6 +132,7 @@ class MapGenerator:
         pending_rooms.append(root_room)
 
         next_area = 1
+        progression = ProgressionMarker()
 
         while len(pending_rooms) > 0 and len(self._rooms) < self.max_rooms:
             curr_room = random_source.choice(pending_rooms)
@@ -168,6 +170,11 @@ class MapGenerator:
 
                     curr_room.set_connection(direction, 0)
                     new_room.set_connection(direction.invert(), 0)
+
+                    if random_source.random() < self.key_chance:
+                        key = random_source.randint(0, MAX_KEY_TYPE)
+                        progression.increment_key(key)
+                        new_room.provides_key = key
 
                     curr_room = new_room
                     success = True
