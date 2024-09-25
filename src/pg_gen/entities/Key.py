@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 
-import pygame
 from pygame import Surface
 
+from ..game_core.ResourceProvider import ResourceProvider
 from ..generation.RoomInfo import NO_KEY, RoomInfo
 from ..support.constants import CAMERA_SCALE
 from ..support.keys import KEY_COLORS
@@ -18,9 +18,13 @@ class Key(Actor):
     key_type: int = NO_KEY
     room: "RoomInfo | None" = field(default=None)
 
+    _resource_provider: ResourceProvider | None = field(init=False, repr=False, default=None)
+
     def draw(self, surface: Surface):
         color = KEY_COLORS[self.key_type - 1]
-        pygame.draw.rect(surface, color.to_pygame_color(), self.position.to_pygame_rect(self.size, CAMERA_SCALE))
+        self._resource_provider = self._resource_provider or self.universe.di.inject(ResourceProvider)
+        sprite = self._resource_provider.key_sprite
+        sprite.tinted(color).draw(surface, self.position, CAMERA_SCALE)
 
     def on_trigger(self, trigger: Actor):
         if not isinstance(trigger, Player):
@@ -37,6 +41,10 @@ class Key(Actor):
 class KeyItem(InventoryItem):
     key_type: int = NO_KEY
 
+    _resource_provider: ResourceProvider | None = field(init=False, repr=False, default=None)
+
     def draw(self, surface: Surface):
         color = KEY_COLORS[self.key_type - 1]
-        pygame.draw.rect(surface, color.to_pygame_color(), self.position.to_pygame_rect(self.size, CAMERA_SCALE))
+        self._resource_provider = self._resource_provider or self.universe.di.inject(ResourceProvider)
+        sprite = self._resource_provider.key_sprite
+        sprite.tinted(color).draw(surface, self.position, CAMERA_SCALE)

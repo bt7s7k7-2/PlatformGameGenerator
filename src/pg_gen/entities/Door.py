@@ -4,6 +4,7 @@ from enum import Enum
 import pygame
 from pygame import Surface
 
+from ..game_core.ResourceProvider import ResourceProvider
 from ..generation.RoomInfo import NO_KEY, RoomInfo
 from ..support.constants import CAMERA_SCALE
 from ..support.keys import KEY_COLORS
@@ -31,6 +32,8 @@ class Door(Actor):
     state: DoorState = DoorState.CLOSED
     layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
 
+    _resource_provider: ResourceProvider | None = field(init=False, repr=False, default=None)
+
     def __post_init__(self):
         if self.room is not None:
             self.state = self.room.persistent_flags[self.flag_index] or DoorState.CLOSED
@@ -46,10 +49,14 @@ class Door(Actor):
         else:
             color = color * 0.75
             position = self.position
+
+            self._resource_provider = self._resource_provider or self.universe.di.inject(ResourceProvider)
+            sprite = self._resource_provider.door_sprite
+
             if self.state == DoorState.OPEN_LEFT:
                 position -= Point(1, 0)
 
-            pygame.draw.rect(surface, color.to_pygame_color(), position.to_pygame_rect(self.size + Point(1, 0), CAMERA_SCALE))
+            sprite.tinted(color).draw(surface, position, CAMERA_SCALE)
 
     def on_trigger(self, trigger: Actor):
         if not isinstance(trigger, Player):
