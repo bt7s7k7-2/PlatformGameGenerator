@@ -1,5 +1,6 @@
 from dataclasses import astuple, dataclass
 
+import pygame
 from pygame import Surface
 
 from ..entities.Door import Door
@@ -21,19 +22,26 @@ from .RoomTrigger import RoomTrigger
 @dataclass
 class RoomController(GuiElement, ResourceClient, InputClient):
     room: RoomInfo | None = None
+    show_map = False
 
     def update(self, delta: float):
+        self.show_map = self._input.keys[pygame.K_m]
+
         if self.room is None:
             return
 
-        if self._input.teleport_up:
-            self.switch_rooms(Direction.UP)
-        elif self._input.teleport_left:
-            self.switch_rooms(Direction.LEFT)
-        elif self._input.teleport_right:
-            self.switch_rooms(Direction.RIGHT)
-        elif self._input.teleport_down:
-            self.switch_rooms(Direction.DOWN)
+        for event in self._input.events:
+            if event.type == pygame.KEYDOWN and event:
+                key = event.key
+
+                if key == pygame.K_j:
+                    self.switch_rooms(Direction.LEFT)
+                elif key == pygame.K_l:
+                    self.switch_rooms(Direction.RIGHT)
+                elif key == pygame.K_i:
+                    self.switch_rooms(Direction.UP)
+                elif key == pygame.K_k:
+                    self.switch_rooms(Direction.DOWN)
 
     def switch_rooms(self, direction: Direction):
         assert self.room is not None
@@ -244,7 +252,7 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         self.universe.world = world
 
     def draw_gui(self, surface: Surface):
-        if not self._input.show_map:
+        if not self.show_map:
             return
 
         map = self.universe.map

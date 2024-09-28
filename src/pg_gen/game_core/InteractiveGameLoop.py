@@ -22,27 +22,14 @@ class InteractiveGameLoop:
         start_time = time.monotonic()
 
         while True:
-            input.teleport_up = False
-            input.teleport_down = False
-            input.teleport_left = False
-            input.teleport_right = False
+            input.events.clear()
 
             for event in pygame.event.get():
+                input.events.append(event)
+
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     return
-                elif event.type == pygame.KEYDOWN and event:
-                    key = event.key
-
-                    if key == pygame.K_j:
-                        input.teleport_left = True
-                    elif key == pygame.K_l:
-                        input.teleport_right = True
-                    elif key == pygame.K_i:
-                        input.teleport_up = True
-                    elif key == pygame.K_k:
-                        input.teleport_down = True
-            pass
 
             now = time.monotonic()
             delta_time = now - start_time
@@ -53,12 +40,13 @@ class InteractiveGameLoop:
 
             keys = pygame.key.get_pressed()
 
+            input.keys = keys
+
             input.up = keys[pygame.K_w]
             input.left = keys[pygame.K_a]
             input.right = keys[pygame.K_d]
             input.down = keys[pygame.K_s]
             input.jump = keys[pygame.K_SPACE]
-            input.show_map = keys[pygame.K_m]
 
             world = self.universe.world
             if world is not None:
