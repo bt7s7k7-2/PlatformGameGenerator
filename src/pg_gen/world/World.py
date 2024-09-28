@@ -62,10 +62,16 @@ class World:
                 actor.draw(surface)
 
     def update(self, delta: float):
+        if self.universe.paused:
+            delta = 0
+
         for actor in self._actors:
             actor.update(delta)
 
     def check_triggers(self, actor: "Actor"):
+        if self.universe.paused:
+            return
+        
         for trigger in self._triggers:
             if not is_intersection(actor.position, actor.size, trigger.position, trigger.size):
                 continue
@@ -75,6 +81,9 @@ class World:
 
     def resolve_collisions(self, actor: "Actor"):
         resolution_vector = Point.ZERO
+
+        if self.universe.paused:
+            return Point.ZERO
 
         for collider in self._colliders:
             collision = resolve_intersection(actor.position, actor.size, collider.position, collider.size)

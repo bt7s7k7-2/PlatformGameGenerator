@@ -9,6 +9,7 @@ from .DependencyInjection import DependencyInjection
 
 class Universe:
     world: "World | None" = None
+    paused = False
 
     def execute_pending_tasks(self):
         while len(self._pending_tasks) > 0:
