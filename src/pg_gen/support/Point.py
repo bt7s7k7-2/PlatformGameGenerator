@@ -39,6 +39,12 @@ class Point:
     def right(self):
         return Point(self.x, 0)
 
+    def floor(self):
+        return Point(floor(self.x), floor(self.y))
+
+    def round(self):
+        return Point(round(self.x), round(self.y))
+
     def to_pygame_rect(self, size: "Point", scale: float = 1.0):
         # To floor our value to integer pixel coordinates we add a small constant
         # to counteract floating point imprecision and therefore prevent one-off

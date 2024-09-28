@@ -6,6 +6,7 @@ from pygame import Surface
 
 from ..game_core.ResourceClient import ResourceClient
 from ..generation.RoomInfo import NO_KEY, RoomInfo
+from ..level_editor.ActorRegistry import ActorRegistry
 from ..support.constants import CAMERA_SCALE
 from ..support.keys import KEY_COLORS
 from ..support.Point import Point
@@ -72,3 +73,6 @@ class Door(ResourceClient):
             world.remove_actor(self)
             self.collision_flags = CollisionFlags(0)
             world.add_actor(self)
+
+
+ActorRegistry.register_actor(Door)

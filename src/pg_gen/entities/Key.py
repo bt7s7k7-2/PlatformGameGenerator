@@ -4,8 +4,9 @@ from pygame import Surface
 
 from ..game_core.ResourceClient import ResourceClient
 from ..generation.RoomInfo import NO_KEY, RoomInfo
+from ..level_editor.ActorRegistry import ActorRegistry
 from ..support.constants import CAMERA_SCALE
-from ..support.keys import KEY_COLORS
+from ..support.keys import KEY_COLORS, MAX_KEY_TYPE
 from ..world.Actor import Actor
 from ..world.CollisionFlags import CollisionFlags
 from .InventoryItem import InventoryItem
@@ -32,6 +33,10 @@ class Key(ResourceClient):
             self.universe.queue_task(lambda: self.remove())
             if self.room is not None:
                 self.room.provides_key = NO_KEY
+
+
+for key_type in range(MAX_KEY_TYPE):
+    ActorRegistry.register_actor(Key, suffix=str(key_type + 1), default_value=Key(key_type=key_type + 1))
 
 
 @dataclass

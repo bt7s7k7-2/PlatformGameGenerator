@@ -4,6 +4,7 @@ from typing import override
 import pygame
 from pygame import Surface
 
+from ..level_editor.ActorRegistry import ActorRegistry
 from ..support.Color import Color
 from ..support.constants import CAMERA_SCALE
 from ..world.Actor import Actor
@@ -22,3 +23,6 @@ class Wall(Actor):
             color=self.color.to_pygame_color(),
             rect=self.position.to_pygame_rect(self.size, CAMERA_SCALE),
         )
+
+
+ActorRegistry.register_actor(Wall)

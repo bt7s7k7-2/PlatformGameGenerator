@@ -1,9 +1,7 @@
+from copy import copy
 from dataclasses import dataclass
-from typing import Any, Dict, Type
+from typing import Dict, Type
 
-from ..entities.Door import Door
-from ..entities.Key import Key
-from ..entities.Wall import Wall
 from ..world.Actor import Actor
 
 
@@ -11,22 +9,27 @@ from ..world.Actor import Actor
 class ActorType:
     name: str
     type: Type[Actor]
-    arguments: Dict[str, Any]
+    default_value: Actor | None
+
+    def create_instance(self):
+        if self.default_value is not None:
+            return copy(self.default_value)
+        else:
+            return self.type()
 
 
 class ActorRegistry:
 
-    _actor: Dict[str, Type[Actor]] = {}
+    _actor: Dict[str, ActorType] = {}
 
     @staticmethod
     def get_actor_types():
         return ActorRegistry._actor.items()
 
     @staticmethod
-    def register_actor[T: Actor](type: Type[T]):
-        ActorRegistry._actor[type.__name__] = type
+    def register_actor[T: Actor](type: Type[T], /, suffix: str | None = None, default_value: T | None = None):
+        name = type.__name__
+        if suffix != None:
+            name += ":" + suffix
 
-
-ActorRegistry.register_actor(Door)
-ActorRegistry.register_actor(Wall)
-ActorRegistry.register_actor(Key)
+        ActorRegistry._actor[name] = ActorType(name, type, default_value)
