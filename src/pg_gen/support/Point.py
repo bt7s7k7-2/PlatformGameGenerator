@@ -45,6 +45,15 @@ class Point:
     def round(self):
         return Point(round(self.x), round(self.y))
 
+    def is_negative(self):
+        return self.x < 0 or self.y < 0
+
+    def abs(self):
+        return Point(abs(self.x), abs(self.y))
+
+    def quantize(self, grid: float):
+        return (self * (1 / grid)).round() * grid
+
     def to_pygame_rect(self, size: "Point", scale: float = 1.0):
         # To floor our value to integer pixel coordinates we add a small constant
         # to counteract floating point imprecision and therefore prevent one-off
