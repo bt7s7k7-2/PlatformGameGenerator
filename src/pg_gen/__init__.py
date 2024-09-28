@@ -19,11 +19,12 @@ def main():
 
     map_generator.generate(516)
 
-    world = universe.world = World(universe)
+    world = World(universe)
+    universe.set_world(world)
 
-    world.add_actor(Player(universe, position=Point(ROOM_WIDTH / 2, ROOM_HEIGHT / 2)))
+    world.add_actor(Player(position=Point(ROOM_WIDTH / 2, ROOM_HEIGHT / 2)))
 
-    room_controller = RoomController(universe, room=map_generator.get_room(Point.ZERO))
+    room_controller = RoomController(room=map_generator.get_room(Point.ZERO))
     world.add_actor(room_controller)
     room_controller.initialize_room()
 
@@ -34,8 +35,10 @@ def main():
 def start_editor():
     universe = Universe(map=None)
 
-    world = universe.world = World(universe)
-    world.add_actor(LevelEditor(universe))
+    world = World(universe)
+    universe.set_world(world)
+
+    world.add_actor(LevelEditor())
 
     game_loop = InteractiveGameLoop(universe)
     game_loop.run()

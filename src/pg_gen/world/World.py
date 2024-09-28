@@ -20,6 +20,9 @@ class World:
 
     def add_actor(self, actor: "Actor"):
         actor.world = self
+        actor.universe = self.universe
+        actor.on_added()
+
         self._actors.append(actor)
 
         if CollisionFlags.STATIC in actor.collision_flags:
@@ -36,7 +39,7 @@ class World:
         if not actor in self._actors:
             return
 
-        actor.world = None
+        actor.world = None  # type: ignore
 
         self._actors.pop(self._actors.index(actor))
 
@@ -45,6 +48,8 @@ class World:
 
         if CollisionFlags.TRIGGER in actor.collision_flags:
             self._triggers.pop(self._triggers.index(actor))
+
+        actor.on_removed()
 
     def draw(self, surface: Surface):
         surface.fill(astuple(self.background_color))

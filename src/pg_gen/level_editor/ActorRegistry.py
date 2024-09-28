@@ -7,6 +7,13 @@ from ..entities.Wall import Wall
 from ..world.Actor import Actor
 
 
+@dataclass
+class ActorType:
+    name: str
+    type: Type[Actor]
+    arguments: Dict[str, Any]
+
+
 class ActorRegistry:
 
     _actor: Dict[str, Type[Actor]] = {}

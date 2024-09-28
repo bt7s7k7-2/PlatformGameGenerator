@@ -32,7 +32,7 @@ class Door(ResourceClient):
     state: DoorState = DoorState.CLOSED
     layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
 
-    def __post_init__(self):
+    def on_added(self):
         if self.room is not None:
             self.state = self.room.persistent_flags[self.flag_index] or DoorState.CLOSED
             if self.state != DoorState.CLOSED:
@@ -62,13 +62,13 @@ class Door(ResourceClient):
         player_had_key = trigger.take_inventory_item(lambda v: isinstance(v, KeyItem) and v.key_type == self.key_type) is not None
         if player_had_key:
             opened_from_left = self.position.x > trigger.position.x
+
             self.state = DoorState.OPEN_RIGHT if opened_from_left else DoorState.OPEN_LEFT
-            assert self.world is not None
+            if self.room is not None:
+                self.room.persistent_flags[self.flag_index] = self.state
+
             # Remove and insert ourselves from the world so our collision flags get updated
             world = self.world
             world.remove_actor(self)
             self.collision_flags = CollisionFlags(0)
             world.add_actor(self)
-
-            if self.room is not None:
-                self.room.persistent_flags[self.flag_index] = self.state

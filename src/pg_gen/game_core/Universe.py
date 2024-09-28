@@ -8,8 +8,16 @@ from .DependencyInjection import DependencyInjection
 
 
 class Universe:
-    world: "World | None" = None
+
+    @property
+    def world(self):
+        return self._world
+
+    _world: "World | None" = None
     paused = False
+
+    def set_world(self, world: "World"):
+        self._world = world
 
     def execute_pending_tasks(self):
         while len(self._pending_tasks) > 0:

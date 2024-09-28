@@ -64,47 +64,38 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         corridor_length = 2
         world.add_actors(
             Wall(
-                self.universe,
                 position=Point.ZERO,
                 size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
             ),
             Wall(
-                self.universe,
                 position=Point(ROOM_WIDTH / 2 + entrance_size / 2, 0),
                 size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
             ),
             Wall(
-                self.universe,
                 position=Point(0, 1 + entrance_size),
                 size=Point(corridor_length, ROOM_HEIGHT - 1 - entrance_size),
             ),
             Wall(
-                self.universe,
                 position=Point(ROOM_WIDTH - corridor_length, 1 + entrance_size),
                 size=Point(corridor_length, ROOM_HEIGHT - 1 - entrance_size),
             ),
             Wall(
-                self.universe,
                 position=Point(0, ROOM_HEIGHT - 1),
                 size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
             ),
             Wall(
-                self.universe,
                 position=Point(ROOM_WIDTH / 2 + entrance_size / 2, ROOM_HEIGHT - 1),
                 size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
             ),
             Wall(
-                self.universe,
                 position=Point(corridor_length + gap_size, entrance_size + 1),
                 size=Point(ROOM_WIDTH - corridor_length * 2 - gap_size * 2, 1),
             ),
             Wall(
-                self.universe,
                 position=Point(2, 1 + entrance_size + ROOM_HEIGHT / 3),
                 size=Point(corridor_length, 1),
             ),
             Wall(
-                self.universe,
                 position=Point(ROOM_WIDTH - corridor_length - 2, 1 + entrance_size + ROOM_HEIGHT / 3),
                 size=Point(corridor_length, 1),
             ),
@@ -113,7 +104,6 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         if self.room.get_connection(Direction.LEFT) == NOT_CONNECTED:
             world.add_actor(
                 Wall(
-                    self.universe,
                     position=Point(0, 1),
                     size=Point(1, entrance_size),
                 )
@@ -121,7 +111,6 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         else:
             world.add_actor(
                 RoomTrigger(
-                    self.universe,
                     position=Point(-1.5, 1),
                     size=Point(1, entrance_size),
                     room_controller=self,
@@ -132,7 +121,6 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         if self.room.get_connection(Direction.RIGHT) == NOT_CONNECTED:
             world.add_actor(
                 Wall(
-                    self.universe,
                     position=Point(ROOM_WIDTH - 1, 1),
                     size=Point(1, entrance_size),
                 )
@@ -140,7 +128,6 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         else:
             world.add_actor(
                 RoomTrigger(
-                    self.universe,
                     position=Point(ROOM_WIDTH + 0.5, 1),
                     size=Point(1, entrance_size),
                     room_controller=self,
@@ -151,7 +138,6 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         if self.room.get_connection(Direction.UP) == NOT_CONNECTED:
             world.add_actor(
                 Wall(
-                    self.universe,
                     position=Point(ROOM_WIDTH / 2 - entrance_size / 2, 0),
                     size=Point(entrance_size, 1),
                 )
@@ -159,7 +145,6 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         else:
             world.add_actor(
                 RoomTrigger(
-                    self.universe,
                     position=Point(ROOM_WIDTH / 2 - entrance_size / 2, -1.5),
                     size=Point(entrance_size, 1),
                     room_controller=self,
@@ -170,7 +155,6 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         if self.room.get_connection(Direction.DOWN) == NOT_CONNECTED:
             world.add_actor(
                 Wall(
-                    self.universe,
                     position=Point(ROOM_WIDTH / 2 - entrance_size / 2, ROOM_HEIGHT - 1),
                     size=Point(entrance_size, 1),
                 )
@@ -178,7 +162,6 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         else:
             world.add_actor(
                 RoomTrigger(
-                    self.universe,
                     position=Point(ROOM_WIDTH / 2 - entrance_size / 2, ROOM_HEIGHT + 0.5),
                     size=Point(entrance_size, 1),
                     room_controller=self,
@@ -187,7 +170,7 @@ class RoomController(GuiElement, ResourceClient, InputClient):
             )
 
         if self.room.provides_key != NO_KEY:
-            world.add_actor(Key(self.universe, key_type=self.room.provides_key, position=Point(ROOM_WIDTH / 2 - 0.5, entrance_size - 1), room=self.room))
+            world.add_actor(Key(key_type=self.room.provides_key, position=Point(ROOM_WIDTH / 2 - 0.5, entrance_size - 1), room=self.room))
 
         next_flag = 0
 
@@ -206,7 +189,6 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         if self.room.get_connection(Direction.LEFT) > NO_KEY:
             world.add_actor(
                 Door(
-                    self.universe,
                     position=Point(1, 1),
                     room=self.room,
                     key_type=self.room.get_connection(Direction.LEFT),
@@ -217,7 +199,6 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         if self.room.get_connection(Direction.RIGHT) > NO_KEY:
             world.add_actor(
                 Door(
-                    self.universe,
                     position=Point(ROOM_WIDTH - 2, 1),
                     room=self.room,
                     key_type=self.room.get_connection(Direction.RIGHT),
@@ -250,7 +231,7 @@ class RoomController(GuiElement, ResourceClient, InputClient):
                 player.velocity = Point(player.velocity.x, -JUMP_IMPULSE)
 
         world.add_actor(self)
-        self.universe.world = world
+        self.universe.set_world(world)
 
     def draw_gui(self, surface: Surface):
         if not self.show_map:

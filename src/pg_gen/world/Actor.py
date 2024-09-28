@@ -15,15 +15,17 @@ if TYPE_CHECKING:
 
 @dataclass(eq=False)
 class Actor:
-    universe: "Universe" = field(repr=False)
+    universe: "Universe" = field(repr=False, default=None)  # type: ignore
     position: Point = Point.ZERO
     size: Point = Point.ONE
     collision_flags: CollisionFlags = field(default=CollisionFlags(0), repr=False)
-    world: "World | None" = field(repr=False, init=False)
+    world: "World" = field(repr=False, init=False, default=None)  # type: ignore
     layer: SpriteLayer = SpriteLayer.NORMAL
 
     def draw(self, surface: Surface): ...
     def update(self, delta: float): ...
+    def on_added(self): ...
+    def on_removed(self): ...
 
     def on_trigger(self, trigger: "Actor"): ...
 

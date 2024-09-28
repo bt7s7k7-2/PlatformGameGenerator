@@ -27,7 +27,7 @@ class Key(ResourceClient):
         if not isinstance(trigger, Player):
             return
 
-        key_item = KeyItem(self.universe, key_type=self.key_type)
+        key_item = KeyItem(key_type=self.key_type)
         if trigger.add_inventory_item(key_item):
             self.universe.queue_task(lambda: self.remove())
             if self.room is not None:

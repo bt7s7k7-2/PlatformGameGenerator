@@ -27,12 +27,11 @@ class Player(InputClient):
     velocity: Point = Point.ZERO
     _is_grounded: bool = False
 
-    def __post_init__(self):
+    def on_added(self):
         self.universe.di.register(Player, self)
 
-    def remove(self):
+    def on_removed(self):
         self.universe.di.unregister(Player, self)
-        return super().remove()
 
     def draw(self, surface: Surface):
         pygame.draw.rect(
@@ -42,8 +41,6 @@ class Player(InputClient):
         )
 
     def add_inventory_item(self, item: InventoryItem):
-        assert self.world is not None
-
         if None not in self._inventory:
             # No free slot in inventory
             return False
@@ -74,8 +71,6 @@ class Player(InputClient):
                 item.transfer_world(new_world)
 
     def update(self, delta: float):
-        assert self.world is not None
-
         if self._is_grounded:
             move_vector = Point.ZERO
 
