@@ -71,7 +71,7 @@ class World:
     def check_triggers(self, actor: "Actor"):
         if self.universe.paused:
             return
-        
+
         for trigger in self._triggers:
             if not is_intersection(actor.position, actor.size, trigger.position, trigger.size):
                 continue
@@ -85,11 +85,14 @@ class World:
         if self.universe.paused:
             return Point.ZERO
 
+        test_position = actor.position
+
         for collider in self._colliders:
-            collision = resolve_intersection(actor.position, actor.size, collider.position, collider.size)
-            resolution_vector += collision
+            collision = resolve_intersection(test_position, actor.size, collider.position, collider.size)
             if collision != Point.ZERO:
                 collider.on_trigger(actor)
+                resolution_vector += collision
+                test_position += collision
 
         return resolution_vector
 
