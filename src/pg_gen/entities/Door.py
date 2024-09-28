@@ -4,7 +4,7 @@ from enum import Enum
 import pygame
 from pygame import Surface
 
-from ..game_core.ResourceProvider import ResourceProvider
+from ..game_core.ResourceClient import ResourceClient
 from ..generation.RoomInfo import NO_KEY, RoomInfo
 from ..support.constants import CAMERA_SCALE
 from ..support.keys import KEY_COLORS
@@ -23,7 +23,7 @@ class DoorState(Enum):
 
 
 @dataclass
-class Door(Actor):
+class Door(ResourceClient):
     collision_flags: CollisionFlags = field(default=CollisionFlags.STATIC)
     key_type: int = NO_KEY
     flag_index: int = 0
@@ -31,8 +31,6 @@ class Door(Actor):
     size: Point = field(default=Point(1, 3))
     state: DoorState = DoorState.CLOSED
     layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
-
-    _resource_provider: ResourceProvider | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         if self.room is not None:
@@ -50,7 +48,6 @@ class Door(Actor):
             color = color * 0.75
             position = self.position
 
-            self._resource_provider = self._resource_provider or self.universe.di.inject(ResourceProvider)
             sprite = self._resource_provider.door_sprite
 
             if self.state == DoorState.OPEN_LEFT:

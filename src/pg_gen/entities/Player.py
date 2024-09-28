@@ -6,34 +6,28 @@ import pygame
 import pygame.freetype
 from pygame import Surface
 
+from ..game_core.InputClient import InputClient
 from ..support.support import find_index_by_predicate
 
 if TYPE_CHECKING:
     from ..world.World import World
 
-from ..game_core.InputState import InputState
-from ..game_core.ResourceProvider import ResourceProvider
 from ..support.Color import Color
 from ..support.constants import AIR_ACCELERATION, AIR_DRAG, CAMERA_SCALE, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE
 from ..support.Point import Point
-from ..world.Actor import Actor
 from .InventoryItem import InventoryItem
 
 
 @dataclass
-class Player(Actor):
+class Player(InputClient):
     size: Point = field(default=Point(1, 2))
 
     _inventory: List[InventoryItem | None] = field(default_factory=lambda: [None] * 5, init=False)
-
-    _input: InputState = field(init=False, repr=False)
-    _resource_provider: ResourceProvider | None = field(init=False, repr=False, default=None)
 
     velocity: Point = Point.ZERO
     _is_grounded: bool = False
 
     def __post_init__(self):
-        self._input = self.universe.di.inject(InputState)
         self.universe.di.register(Player, self)
 
     def remove(self):

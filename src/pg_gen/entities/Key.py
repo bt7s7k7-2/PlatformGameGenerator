@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 from pygame import Surface
 
-from ..game_core.ResourceProvider import ResourceProvider
+from ..game_core.ResourceClient import ResourceClient
 from ..generation.RoomInfo import NO_KEY, RoomInfo
 from ..support.constants import CAMERA_SCALE
 from ..support.keys import KEY_COLORS
@@ -13,16 +13,13 @@ from .Player import Player
 
 
 @dataclass
-class Key(Actor):
+class Key(ResourceClient):
     collision_flags: CollisionFlags = field(default=CollisionFlags.TRIGGER)
     key_type: int = NO_KEY
     room: "RoomInfo | None" = field(default=None)
 
-    _resource_provider: ResourceProvider | None = field(init=False, repr=False, default=None)
-
     def draw(self, surface: Surface):
         color = KEY_COLORS[self.key_type - 1]
-        self._resource_provider = self._resource_provider or self.universe.di.inject(ResourceProvider)
         sprite = self._resource_provider.key_sprite
         sprite.tinted(color).draw(surface, self.position, CAMERA_SCALE)
 
@@ -38,13 +35,10 @@ class Key(Actor):
 
 
 @dataclass
-class KeyItem(InventoryItem):
+class KeyItem(InventoryItem, ResourceClient):
     key_type: int = NO_KEY
-
-    _resource_provider: ResourceProvider | None = field(init=False, repr=False, default=None)
 
     def draw(self, surface: Surface):
         color = KEY_COLORS[self.key_type - 1]
-        self._resource_provider = self._resource_provider or self.universe.di.inject(ResourceProvider)
         sprite = self._resource_provider.key_sprite
         sprite.tinted(color).draw(surface, self.position, CAMERA_SCALE)

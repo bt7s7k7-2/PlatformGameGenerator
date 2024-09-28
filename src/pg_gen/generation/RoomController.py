@@ -1,4 +1,4 @@
-from dataclasses import astuple, dataclass, field
+from dataclasses import astuple, dataclass
 
 from pygame import Surface
 
@@ -7,8 +7,8 @@ from ..entities.GuiElement import GuiElement
 from ..entities.Key import Key
 from ..entities.Player import Player
 from ..entities.Wall import Wall
-from ..game_core.InputState import InputState
-from ..game_core.ResourceProvider import ResourceProvider
+from ..game_core.InputClient import InputClient
+from ..game_core.ResourceClient import ResourceClient
 from ..support.Color import Color
 from ..support.constants import JUMP_IMPULSE, ROOM_HEIGHT, ROOM_WIDTH
 from ..support.Direction import Direction
@@ -19,14 +19,8 @@ from .RoomTrigger import RoomTrigger
 
 
 @dataclass
-class RoomController(GuiElement):
+class RoomController(GuiElement, ResourceClient, InputClient):
     room: RoomInfo | None = None
-
-    _input: InputState = field(init=False, repr=False)
-    _resource_provider: ResourceProvider | None = field(init=False, repr=False, default=None)
-
-    def __post_init__(self):
-        self._input = self.universe.di.inject(InputState)
 
     def update(self, delta: float):
         if self.room is None:
@@ -253,11 +247,10 @@ class RoomController(GuiElement):
         if not self._input.show_map:
             return
 
-        self._resource_provider = self._resource_provider or self.universe.di.inject(ResourceProvider)
         map = self.universe.map
         start = map.get_start()
         tile_size = 12
-        font = self.universe.di.inject(ResourceProvider).font
+        font = self._resource_provider.font
 
         current_room_color = Color.GREEN.to_pygame_color(opacity=127)
         key_color = Color.RED.to_pygame_color(opacity=127)
