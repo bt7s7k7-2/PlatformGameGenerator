@@ -10,8 +10,7 @@ from ..entities.Player import Player
 from ..entities.Wall import Wall
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
-from ..support.Color import Color
-from ..support.constants import JUMP_IMPULSE, ROOM_HEIGHT, ROOM_WIDTH
+from ..support.constants import HIGHLIGHT_1_COLOR, HIGHLIGHT_2_COLOR, JUMP_IMPULSE, ROOM_HEIGHT, ROOM_WIDTH, TEXT_BG_COLOR, TEXT_COLOR
 from ..support.Direction import Direction
 from ..support.Point import Point
 from ..world.World import World
@@ -27,7 +26,7 @@ class RoomController(GuiElement, ResourceClient, InputClient):
     def update(self, delta: float):
         self.show_map = self._input.keys[pygame.K_m]
 
-        if self.room is None:
+        if self.room is None or self.universe.map is None:
             return
 
         for event in self._input.events:
@@ -45,6 +44,8 @@ class RoomController(GuiElement, ResourceClient, InputClient):
 
     def switch_rooms(self, direction: Direction):
         assert self.room is not None
+        assert self.universe.map is not None
+
         offset = Point.from_direction(direction)
         next_position = self.room.position + offset
         if not self.universe.map.has_room(next_position):
@@ -256,26 +257,24 @@ class RoomController(GuiElement, ResourceClient, InputClient):
             return
 
         map = self.universe.map
+        if map is None:
+            return
+
         start = map.get_start()
         tile_size = 12
         font = self._resource_provider.font
-
-        current_room_color = Color.GREEN.to_pygame_color(opacity=127)
-        key_color = Color.RED.to_pygame_color(opacity=127)
-        door_color = Color.WHITE.to_pygame_color()
-        bgcolor = Color.BLACK.to_pygame_color(opacity=127)
 
         for room in map.get_rooms():
             point = room.position
             origin = (point - start) * (tile_size * 3)
 
             if room == self.room:
-                font.render_to(surface, astuple(origin + Point(tile_size, tile_size)), "X", current_room_color, bgcolor)
+                font.render_to(surface, astuple(origin + Point(tile_size, tile_size)), "X", HIGHLIGHT_1_COLOR, TEXT_BG_COLOR)
 
             if room.provides_key != NO_KEY:
-                font.render_to(surface, astuple(origin), str(room.provides_key), key_color, bgcolor)
+                font.render_to(surface, astuple(origin), str(room.provides_key), HIGHLIGHT_2_COLOR, TEXT_BG_COLOR)
 
-            font.render_to(surface, astuple(origin + Point(tile_size, 0)), str(room.get_connection(Direction.UP)), door_color, bgcolor)
-            font.render_to(surface, astuple(origin + Point(0, tile_size)), str(room.get_connection(Direction.LEFT)), door_color, bgcolor)
-            font.render_to(surface, astuple(origin + Point(tile_size, tile_size * 2)), str(room.get_connection(Direction.DOWN)), door_color, bgcolor)
-            font.render_to(surface, astuple(origin + Point(tile_size * 2, tile_size)), str(room.get_connection(Direction.RIGHT)), door_color, bgcolor)
+            font.render_to(surface, astuple(origin + Point(tile_size, 0)), str(room.get_connection(Direction.UP)), TEXT_COLOR, TEXT_BG_COLOR)
+            font.render_to(surface, astuple(origin + Point(0, tile_size)), str(room.get_connection(Direction.LEFT)), TEXT_COLOR, TEXT_BG_COLOR)
+            font.render_to(surface, astuple(origin + Point(tile_size, tile_size * 2)), str(room.get_connection(Direction.DOWN)), TEXT_COLOR, TEXT_BG_COLOR)
+            font.render_to(surface, astuple(origin + Point(tile_size * 2, tile_size)), str(room.get_connection(Direction.RIGHT)), TEXT_COLOR, TEXT_BG_COLOR)

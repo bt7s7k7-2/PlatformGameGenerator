@@ -13,6 +13,7 @@ build-backend = "hatchling.build"
 
 [project.scripts]
 start = "pg_gen:main"
+start-editor = "pg_gen:start_editor"
 
 [tool.rye]
 managed = true

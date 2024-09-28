@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .support import lerp
+
 
 @dataclass(frozen=True)
 class Color:
@@ -24,6 +26,9 @@ class Color:
 
     def __mul__(self, other: float | int):
         return Color(int(self.r * other), int(self.g * other), int(self.b * other))
+
+    def mix(self, other: "Color", t: float):
+        return Color(int(lerp(self.r, other.r, t)), int(lerp(self.g, other.g, t)), int(lerp(self.b, other.b, t)))
 
 
 Color.WHITE = Color(255, 255, 255)

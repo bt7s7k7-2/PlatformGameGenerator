@@ -42,3 +42,7 @@ def resolve_intersection(pos_a: Point, size_a: Point, pos_b: Point, size_b: Poin
 
 def find_index_by_predicate[T](elements: Iterable[T], predicate: Callable[[T], bool]):
     return next((i for i, element in enumerate(elements) if predicate(element)), -1)
+
+
+def lerp(a: float, b: float, t: float):
+    return b * t + a * (t - 1)

@@ -3,6 +3,7 @@ from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
 from .generation.MapGenerator import MapGenerator
 from .generation.RoomController import RoomController
+from .level_editor.LevelEditor import LevelEditor
 from .support.constants import ROOM_HEIGHT, ROOM_WIDTH
 from .support.Point import Point
 from .world.World import World
@@ -25,6 +26,16 @@ def main():
     room_controller = RoomController(universe, room=map_generator.get_room(Point.ZERO))
     world.add_actor(room_controller)
     room_controller.initialize_room()
+
+    game_loop = InteractiveGameLoop(universe)
+    game_loop.run()
+
+
+def start_editor():
+    universe = Universe(map=None)
+
+    world = universe.world = World(universe)
+    world.add_actor(LevelEditor(universe))
 
     game_loop = InteractiveGameLoop(universe)
     game_loop.run()

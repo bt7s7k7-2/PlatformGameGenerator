@@ -21,7 +21,7 @@ class Universe:
     def queue_task(self, task: Callable[[], None]):
         self._pending_tasks.append(task)
 
-    def __init__(self, map: "MapGenerator"):
+    def __init__(self, map: "MapGenerator | None"):
         self.di = DependencyInjection()
         self.map = map
         self._pending_tasks: List[Callable[[], None]] = []
