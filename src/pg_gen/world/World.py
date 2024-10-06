@@ -19,6 +19,7 @@ class World:
     def add_actor(self, actor: "Actor"):
         actor.world = self
         actor.universe = self.universe
+        actor.on_created()
         if self.active:
             actor.on_added()
 

@@ -1,5 +1,6 @@
 from dataclasses import astuple, dataclass
 from functools import cached_property
+from math import ceil
 
 import pygame
 from pygame import Surface
@@ -34,7 +35,7 @@ class Camera:
     def draw_placeholder(self, position: Point, size: Point, color: Color, opacity=255):
         self.draw_placeholder_raw(self.world_to_screen(position), size * self.zoom, color, opacity)
 
-    def draw_texture_raw(self, position: Point, size: Point, texture: Texture, color: Color = Color.WHITE):
+    def draw_texture_raw(self, position: Point, size: Point, texture: Texture, color: Color = Color.WHITE, repeat=Point.ONE):
         surface = Surface(astuple(texture.size), flags=pygame.SRCALPHA)
 
         surface.blit(texture.surface, (0, 0))
@@ -44,10 +45,18 @@ class Camera:
         if color != Color.WHITE:
             surface.fill(color.to_pygame_color(), special_flags=pygame.BLEND_RGB_MULT)
 
-        self.screen.blit(surface, astuple(position))
+        if repeat == Point.ONE:
+            self.screen.blit(surface, astuple(position))
+            return
 
-    def draw_texture(self, position: Point, size: Point, texture: Texture, color: Color = Color.WHITE):
-        self.draw_texture_raw(self.world_to_screen(position), size * self.zoom, texture, color)
+        for x in range(ceil(repeat.x)):
+            for y in range(ceil(repeat.y)):
+                offset = Point(x, y) * size
+                fragment_size = Point.min(size, size * repeat - offset)
+                self.screen.blit(surface, (position + offset).to_pygame_rect(fragment_size), Point.ZERO.to_pygame_rect(fragment_size))
+
+    def draw_texture(self, position: Point, size: Point, texture: Texture, color: Color = Color.WHITE, repeat=Point.ONE):
+        self.draw_texture_raw(self.world_to_screen(position), size * self.zoom, texture, color, repeat)
 
 
 class CameraClient(Actor):

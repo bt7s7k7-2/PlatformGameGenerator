@@ -97,6 +97,14 @@ class Point:
     def deserialize(data: Dict[str, float]):
         return Point(data["x"], data["y"])
 
+    @staticmethod
+    def min(a: "Point", b: "Point"):
+        return Point(min(a.x, b.x), min(a.y, b.y))
+
+    @staticmethod
+    def max(a: "Point", b: "Point"):
+        return Point(max(a.x, b.x), max(a.y, b.y))
+
     ZERO: ClassVar["Point"]
     ONE: ClassVar["Point"]
     LEFT: ClassVar["Point"]

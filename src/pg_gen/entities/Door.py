@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
-
 from ..game_core.Camera import CameraClient
 from ..game_core.ResourceClient import ResourceClient
 from ..generation.RoomInfo import NO_KEY, RoomInfo
@@ -31,7 +30,7 @@ class Door(ResourceClient, CameraClient):
     state: DoorState = DoorState.CLOSED
     layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
 
-    def on_added(self):
+    def on_created(self):
         if self.room is not None:
             self.state = self.room.persistent_flags[self.flag_index] or DoorState.CLOSED
             if self.state != DoorState.CLOSED:
@@ -52,7 +51,7 @@ class Door(ResourceClient, CameraClient):
             if self.state == DoorState.OPEN_LEFT:
                 position -= Point(1, 0)
 
-            self._camera.draw_texture(position, Point(2, 2), sprite, color)
+            self._camera.draw_texture(position, Point(2, 3), sprite, color)
 
     def on_trigger(self, trigger: Actor):
         if not isinstance(trigger, Player):

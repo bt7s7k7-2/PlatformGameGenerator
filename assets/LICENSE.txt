@@ -1,0 +1,3 @@
+All images in the spritesheet.png and spritesheet.xcf are derived from the DawnLike - 16x16 Universal Rogue-like tileset v1.81
+by DragonDePlatino and DawnBringer which were distributed under the CC-BY 4.0 license. Original files are available
+at <https://opengameart.org/content/dawnlike-16x16-universal-rogue-like-tileset-v181>.
