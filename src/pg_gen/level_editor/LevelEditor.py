@@ -23,6 +23,8 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
     _search_results: List[ActorType] = field(init=False, repr=False, default_factory=lambda: [])
     _managed_actors: List[Actor] = field(init=False, default_factory=lambda: [])
     _managed_actors_types: List[ActorType] = field(init=False, default_factory=lambda: [])
+    _undo_history: List[str] = field(init=False, repr=False, default_factory=lambda: [])
+    _redo_history: List[str] = field(init=False, repr=False, default_factory=lambda: [])
 
     _selected_actor_type: ActorType | None = None
     _selected_actor: Actor | None = None
@@ -161,24 +163,62 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
 
         return aux_data
 
+    def push_undo_stack(self):
+        self._create_history_entry(self._undo_history)
+        self._redo_history.clear()
+
+    def _create_history_entry(self, target: List[str]):
+        selected_index = self._managed_actors.index(self._selected_actor) if self._selected_actor is not None else None
+        state = self.get_save_data({"selected_index": selected_index})
+        target.append(state)
+
+    def _apply_history_entry(self, target: List[str]):
+        if len(target) == 0:
+            return False
+
+        state = target.pop()
+        data = self.apply_save_data(state)
+        selected_index = data["selected_index"]
+        if isinstance(selected_index, int):
+            self._selected_actor = self._managed_actors[selected_index]
+
+        return True
+
+    def undo(self):
+        self._create_history_entry(self._redo_history)
+        if not self._apply_history_entry(self._undo_history):
+            # Undo operation failed, revert change to redo history
+            self._redo_history.pop()
+
+    def redo(self):
+        self._create_history_entry(self._undo_history)
+        if not self._apply_history_entry(self._redo_history):
+            # Redo operation failed, revert change to undo history
+            self._undo_history.pop()
+
     def update(self, delta: float):
         for event in self._input.events:
             self._text_input.update(event, self._input.keys)
 
             if event.type == pygame.KEYDOWN:
                 is_ctrl = self._input.keys[pygame.K_LCTRL]
+                is_shift = self._input.keys[pygame.K_LSHIFT]
 
                 if event.key == pygame.K_DELETE:
                     if self._selected_actor is None:
                         continue
+                    # Deleting actor
+                    self.push_undo_stack()
                     actor_to_delete = self._selected_actor
                     self._selected_actor = None
                     index = self._managed_actors.index(actor_to_delete)
                     self._managed_actors.pop(index)
                     self._managed_actors_types.pop(index)
                     actor_to_delete.remove()
-                elif event.key == pygame.K_s and is_ctrl:
-                    self.apply_save_data(self.get_save_data({}))
+                elif event.key == pygame.K_z and is_ctrl and is_shift:
+                    self.redo()
+                elif event.key == pygame.K_z and is_ctrl:
+                    self.undo()
                 elif event.key == pygame.K_DOWN:
                     if self._selected_actor_type is None:
                         continue
@@ -197,20 +237,29 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
                 if event.button == pygame.BUTTON_RIGHT:
                     if self._selected_actor_type is None:
                         continue
+                    # Spawning actor
+                    self.push_undo_stack()
                     self.spawn_actor(self._selected_actor_type, mouse_position * (1 / CAMERA_SCALE))
                 elif event.button == pygame.BUTTON_LEFT:
                     for position, size, callback_factory in self.get_selection_handles():
                         if is_intersection(mouse_position, Point.ZERO, position, size):
+                            # Clicked on a selection handle, begin its function
+                            self.push_undo_stack()
                             self._drag_callback = callback_factory(mouse_position)
                             break
                     else:
                         mouse_world_position = mouse_position * (1 / CAMERA_SCALE)
                         for actor in self._managed_actors:
                             if is_intersection(mouse_world_position, Point.ZERO, actor.position, actor.size):
+                                # Did click on actor, select
+                                self.push_undo_stack()
                                 self._selected_actor = actor
                                 break
                         else:
-                            self._selected_actor = None
+                            # Did not click on any actors, unselect if any
+                            if self._selected_actor is not None:
+                                self.push_undo_stack()
+                                self._selected_actor = None
             elif event.type == pygame.MOUSEMOTION:
                 if self._drag_callback is None:
                     continue
