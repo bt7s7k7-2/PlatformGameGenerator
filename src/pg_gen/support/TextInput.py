@@ -165,7 +165,7 @@ class TextInput:
                 self.move_cursor(-self.cursor_pos, update_selection=is_shift)
             elif key == pygame.K_END:
                 self.move_cursor(len(self._value) - self.cursor_pos, update_selection=is_shift)
-            else:
+            elif not is_ctrl:
                 char = event.unicode
                 if len(char) == 1:
                     self.write(char)

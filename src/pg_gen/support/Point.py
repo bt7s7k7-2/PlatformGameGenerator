@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from math import floor, sqrt
-from typing import ClassVar
+from typing import ClassVar, Dict
 
 from .Direction import Direction
 
@@ -81,6 +81,13 @@ class Point:
 
     def __repr__(self) -> str:
         return f"Point({self.x:.2f}, {self.y:.2f})"
+
+    def serialize(self):
+        return {"x": self.x, "y": self.y}
+
+    @staticmethod
+    def deserialize(data: Dict[str, float]):
+        return Point(data["x"], data["y"])
 
     ZERO: ClassVar["Point"]
     ONE: ClassVar["Point"]

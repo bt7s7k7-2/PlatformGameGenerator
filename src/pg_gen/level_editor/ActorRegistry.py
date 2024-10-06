@@ -20,11 +20,15 @@ class ActorType:
 
 class ActorRegistry:
 
-    _actor: Dict[str, ActorType] = {}
+    _types: Dict[str, ActorType] = {}
+
+    @staticmethod
+    def find_actor_type(name: str):
+        return ActorRegistry._types[name]
 
     @staticmethod
     def get_actor_types():
-        return ActorRegistry._actor.items()
+        return ActorRegistry._types.items()
 
     @staticmethod
     def register_actor[T: Actor](type: Type[T], /, suffix: str | None = None, default_value: T | None = None):
@@ -32,4 +36,4 @@ class ActorRegistry:
         if suffix != None:
             name += ":" + suffix
 
-        ActorRegistry._actor[name] = ActorType(name, type, default_value)
+        ActorRegistry._types[name] = ActorType(name, type, default_value)
