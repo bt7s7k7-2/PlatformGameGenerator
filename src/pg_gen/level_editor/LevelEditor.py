@@ -5,6 +5,7 @@ import pygame
 from pygame import Surface
 
 from ..entities.GuiElement import GuiElement
+from ..entities.Player import Player
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
 from ..support.Color import Color
@@ -13,8 +14,10 @@ from ..support.Point import Point
 from ..support.support import is_intersection
 from ..support.TextInput import TextInput
 from ..world.Actor import Actor
+from ..world.World import World
 from .ActorRegistry import ActorRegistry, ActorType
 from .LevelSerializer import LevelSerializer
+from .TestPlayController import TestPlayController
 
 
 @dataclass
@@ -209,6 +212,21 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
             # Redo operation failed, revert change to undo history
             self._undo_history.pop()
 
+    def test_play(self):
+        play_world = World(self.universe)
+        x, y = pygame.mouse.get_pos()
+
+        def switch_world():
+            self.universe.set_world(play_world)
+
+            LevelSerializer.deserialize(play_world, LevelSerializer.serialize(self._managed_actors, self._managed_actors_types, {}))
+            player = Player()
+            player.position = Point(x, y) * (1 / CAMERA_SCALE) - player.size * 0.5
+            play_world.add_actor(player)
+            play_world.add_actor(TestPlayController(editor_world=self.world))
+
+        self.universe.queue_task(switch_world)
+
     def update(self, delta: float):
         for event in self._input.events:
             self._text_input.update(event, self._input.keys)
@@ -235,6 +253,8 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
                 elif event.key == pygame.K_z and is_ctrl:
                     self.undo()
                     self.handle_file_changed()
+                elif event.key == pygame.K_RETURN:
+                    self.test_play()
                 elif event.key == pygame.K_DOWN:
                     if self._selected_actor_type is None:
                         continue

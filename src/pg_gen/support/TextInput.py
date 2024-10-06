@@ -167,7 +167,7 @@ class TextInput:
                 self.move_cursor(len(self._value) - self.cursor_pos, update_selection=is_shift)
             elif not is_ctrl:
                 char = event.unicode
-                if len(char) == 1:
+                if len(char) == 1 and char != "\r":
                     self.write(char)
 
     def __init__(self) -> None:
