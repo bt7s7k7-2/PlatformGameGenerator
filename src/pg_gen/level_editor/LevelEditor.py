@@ -19,6 +19,8 @@ from .LevelSerializer import LevelSerializer
 
 @dataclass
 class LevelEditor(GuiElement, ResourceClient, InputClient):
+    file_path: str | None = None
+
     _text_input: TextInput = field(init=False, repr=False, default_factory=lambda: TextInput())
     _search_results: List[ActorType] = field(init=False, repr=False, default_factory=lambda: [])
     _managed_actors: List[Actor] = field(init=False, default_factory=lambda: [])
@@ -167,6 +169,17 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
         self._create_history_entry(self._undo_history)
         self._redo_history.clear()
 
+    def handle_file_changed(self):
+        if self.file_path is not None:
+            with open(self.file_path, "wt") as file:
+                file.write(self.get_save_data(self._aux_data))
+
+    def open_file(self, file_path: str):
+        self.file_path = file_path
+        with open(self.file_path, "rt") as file:
+            raw_data = file.read()
+            self._aux_data = self.apply_save_data(raw_data)
+
     def _create_history_entry(self, target: List[str]):
         selected_index = self._managed_actors.index(self._selected_actor) if self._selected_actor is not None else None
         state = self.get_save_data({"selected_index": selected_index})
@@ -215,10 +228,13 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
                     self._managed_actors.pop(index)
                     self._managed_actors_types.pop(index)
                     actor_to_delete.remove()
+                    self.handle_file_changed()
                 elif event.key == pygame.K_z and is_ctrl and is_shift:
                     self.redo()
+                    self.handle_file_changed()
                 elif event.key == pygame.K_z and is_ctrl:
                     self.undo()
+                    self.handle_file_changed()
                 elif event.key == pygame.K_DOWN:
                     if self._selected_actor_type is None:
                         continue
@@ -240,6 +256,7 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
                     # Spawning actor
                     self.push_undo_stack()
                     self.spawn_actor(self._selected_actor_type, mouse_position * (1 / CAMERA_SCALE))
+                    self.handle_file_changed()
                 elif event.button == pygame.BUTTON_LEFT:
                     for position, size, callback_factory in self.get_selection_handles():
                         if is_intersection(mouse_position, Point.ZERO, position, size):
@@ -268,6 +285,7 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == pygame.BUTTON_LEFT:
                     self._drag_callback = None
+                    self.handle_file_changed()
 
         count = 0
         self._search_results.clear()

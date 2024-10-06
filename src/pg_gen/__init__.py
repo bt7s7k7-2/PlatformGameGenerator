@@ -1,3 +1,5 @@
+import sys
+
 from .entities.Player import Player
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
@@ -33,12 +35,19 @@ def main():
 
 
 def start_editor():
+    file_path: str | None = None
+    if len(sys.argv) > 1:
+        file_path = sys.argv[1]
+
     universe = Universe(map=None)
 
     world = World(universe)
     universe.set_world(world)
 
-    world.add_actor(LevelEditor())
+    level_editor = LevelEditor()
+    world.add_actor(level_editor)
+    if file_path is not None:
+        level_editor.open_file(file_path)
 
     game_loop = InteractiveGameLoop(universe)
     game_loop.run()
