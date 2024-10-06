@@ -1,5 +1,5 @@
 from dataclasses import astuple
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Iterable, List
 
 from pygame import Surface
 
@@ -17,6 +17,9 @@ from ..support.Color import Color
 
 class World:
     background_color = Color.BLACK
+
+    def get_actors(self) -> Iterable["Actor"]:
+        return self._actors
 
     def add_actor(self, actor: "Actor"):
         actor.world = self

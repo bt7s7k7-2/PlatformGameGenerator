@@ -1,3 +1,4 @@
+from math import acos
 from typing import TYPE_CHECKING, Callable, List
 
 if TYPE_CHECKING:
@@ -17,7 +18,17 @@ class Universe:
     paused = False
 
     def set_world(self, world: "World"):
+        if self.world == world:
+            return
+
+        if self._world is not None:
+            for actor in self._world.get_actors():
+                actor.on_removed()
+
         self._world = world
+
+        for actor in world.get_actors():
+            actor.on_added()
 
     def execute_pending_tasks(self):
         while len(self._pending_tasks) > 0:
