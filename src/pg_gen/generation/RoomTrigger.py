@@ -1,12 +1,9 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-import pygame
-from pygame import Surface
-
 from ..entities.Player import Player
+from ..game_core.Camera import CameraClient
 from ..support.Color import Color
-from ..support.constants import CAMERA_SCALE
 from ..support.Direction import Direction
 from ..world.Actor import Actor
 from ..world.CollisionFlags import CollisionFlags
@@ -16,7 +13,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class RoomTrigger(Actor):
+class RoomTrigger(CameraClient):
     collision_flags: CollisionFlags = field(default=CollisionFlags.TRIGGER)
     room_controller: "RoomController" = field(default=None, repr=False)  # type: ignore
     direction: Direction = field(default=Direction.UP)
@@ -27,10 +24,5 @@ class RoomTrigger(Actor):
 
         self.room_controller.switch_rooms(self.direction)
 
-    def draw(self, surface: Surface):
-        pygame.draw.rect(
-            surface,
-            color=Color.GREEN.to_pygame_color(),
-            rect=self.position.to_pygame_rect(self.size, CAMERA_SCALE),
-            width=1,
-        )
+    def draw(self):
+        self._camera.draw_placeholder(self.position, self.size, Color.GREEN)

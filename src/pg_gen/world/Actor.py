@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from pygame import Surface
 
 from pg_gen.world.CollisionFlags import CollisionFlags
 
@@ -22,7 +21,7 @@ class Actor:
     world: "World" = field(repr=False, init=False, default=None)  # type: ignore
     layer: SpriteLayer = SpriteLayer.NORMAL
 
-    def draw(self, surface: Surface): ...
+    def draw(self): ...
     def update(self, delta: float): ...
     def on_added(self): ...
     def on_removed(self): ...

@@ -2,14 +2,14 @@ from dataclasses import astuple, dataclass, field
 from typing import Callable, Dict, List, Tuple
 
 import pygame
-from pygame import Surface
 
 from ..entities.GuiElement import GuiElement
 from ..entities.Player import Player
+from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
 from ..support.Color import Color
-from ..support.constants import CAMERA_SCALE, HIGHLIGHT_1_COLOR, TEXT_BG_COLOR, TEXT_COLOR
+from ..support.constants import HIGHLIGHT_1_COLOR, TEXT_BG_COLOR, TEXT_COLOR
 from ..support.Point import Point
 from ..support.support import is_intersection
 from ..support.TextInput import TextInput
@@ -21,7 +21,7 @@ from .TestPlayController import TestPlayController
 
 
 @dataclass
-class LevelEditor(GuiElement, ResourceClient, InputClient):
+class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
     file_path: str | None = None
 
     _text_input: TextInput = field(init=False, repr=False, default_factory=lambda: TextInput())
@@ -37,7 +37,9 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
     _drag_callback: Callable[[Point], None] | None = None
     _aux_data: Dict = field(default_factory=lambda: {})
 
-    def draw_gui(self, surface: Surface):
+    def draw_gui(self):
+        surface = self._camera.screen
+
         if self._selected_actor is not None:
             for position, size, _ in self.get_selection_handles():
                 pygame.draw.rect(
@@ -99,7 +101,7 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
 
             def on_drag(mouse_pos: Point):
                 delta = mouse_pos - start_pos
-                world_delta = delta * (1 / CAMERA_SCALE)
+                world_delta = delta * (1 / self._camera.zoom)
                 world_delta *= axis
 
                 if not is_negative:
@@ -125,7 +127,7 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
 
             def on_drag(mouse_pos: Point):
                 delta = mouse_pos - start_pos
-                world_delta = delta * (1 / CAMERA_SCALE)
+                world_delta = delta * (1 / self._camera.zoom)
                 new_position = start_world_pos + world_delta
                 new_position = new_position.quantize(0.5)
                 target.position = new_position
@@ -141,8 +143,8 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
 
         handle_size = Point.ONE * 10
         selected = self._selected_actor
-        position = selected.position * CAMERA_SCALE
-        size = selected.size * CAMERA_SCALE
+        position = selected.position * self._camera.zoom
+        size = selected.size * self._camera.zoom
         center_offset = size * 0.5
         center = position + center_offset
 
@@ -221,7 +223,7 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
 
             LevelSerializer.deserialize(play_world, LevelSerializer.serialize(self._managed_actors, self._managed_actors_types, {}))
             player = Player()
-            player.position = Point(x, y) * (1 / CAMERA_SCALE) - player.size * 0.5
+            player.position = Point(x, y) * (1 / self._camera.zoom) - player.size * 0.5
             play_world.add_actor(player)
             play_world.add_actor(TestPlayController(editor_world=self.world))
 
@@ -275,7 +277,7 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
                         continue
                     # Spawning actor
                     self.push_undo_stack()
-                    self.spawn_actor(self._selected_actor_type, mouse_position * (1 / CAMERA_SCALE))
+                    self.spawn_actor(self._selected_actor_type, mouse_position * (1 / self._camera.zoom))
                     self.handle_file_changed()
                 elif event.button == pygame.BUTTON_LEFT:
                     for position, size, callback_factory in self.get_selection_handles():
@@ -285,7 +287,7 @@ class LevelEditor(GuiElement, ResourceClient, InputClient):
                             self._drag_callback = callback_factory(mouse_position)
                             break
                     else:
-                        mouse_world_position = mouse_position * (1 / CAMERA_SCALE)
+                        mouse_world_position = mouse_position * (1 / self._camera.zoom)
                         for actor in self._managed_actors:
                             if is_intersection(mouse_world_position, Point.ZERO, actor.position, actor.size):
                                 # Did click on actor, select

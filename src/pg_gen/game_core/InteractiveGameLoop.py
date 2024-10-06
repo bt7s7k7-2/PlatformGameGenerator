@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 import pygame
 
 from ..support.constants import CAMERA_SCALE, ROOM_HEIGHT, ROOM_WIDTH
+from .Camera import Camera
 from .InputState import InputState
 
 if TYPE_CHECKING:
@@ -16,6 +17,9 @@ class InteractiveGameLoop:
         pygame.init()
 
         surface = pygame.display.set_mode((CAMERA_SCALE * ROOM_WIDTH, CAMERA_SCALE * ROOM_HEIGHT))
+        camera = Camera(screen=surface)
+        self.universe.di.register(Camera, camera)
+
         fps_keeper = pygame.time.Clock()
 
         input = self.universe.di.inject(InputState)
@@ -48,10 +52,12 @@ class InteractiveGameLoop:
             input.down = keys[pygame.K_s]
             input.jump = keys[pygame.K_SPACE]
 
+            surface.fill((0, 0, 0))
+
             world = self.universe.world
             if world is not None:
                 world.update(delta_time)
-                world.draw(surface)
+                world.draw()
 
             self.universe.execute_pending_tasks()
 

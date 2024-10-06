@@ -1,4 +1,3 @@
-from math import acos
 from typing import TYPE_CHECKING, Callable, List
 
 if TYPE_CHECKING:
@@ -22,11 +21,13 @@ class Universe:
             return
 
         if self._world is not None:
+            self._world.active = False
             for actor in self._world.get_actors():
                 actor.on_removed()
 
         self._world = world
 
+        world.active = True
         for actor in world.get_actors():
             actor.on_added()
 

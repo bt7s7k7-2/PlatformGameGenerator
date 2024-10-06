@@ -24,6 +24,14 @@ class Point:
         else:
             return NotImplemented
 
+    def __truediv__(self, other: "Point | float | int"):
+        if isinstance(other, Point):
+            return Point(self.x / other.x, self.y / other.y)
+        elif isinstance(other, (int, float)):
+            return Point(self.x / other, self.y / other)
+        else:
+            return NotImplemented
+
     def magnitude(self):
         return sqrt(self.x**2 + self.y**2)
 

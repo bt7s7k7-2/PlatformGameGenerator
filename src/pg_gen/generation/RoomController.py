@@ -1,13 +1,13 @@
 from dataclasses import astuple, dataclass
 
 import pygame
-from pygame import Surface
 
 from ..entities.Door import Door
 from ..entities.GuiElement import GuiElement
 from ..entities.Key import Key
 from ..entities.Player import Player
 from ..entities.Wall import Wall
+from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
 from ..support.constants import HIGHLIGHT_1_COLOR, HIGHLIGHT_2_COLOR, JUMP_IMPULSE, ROOM_HEIGHT, ROOM_WIDTH, TEXT_BG_COLOR, TEXT_COLOR
@@ -19,7 +19,7 @@ from .RoomTrigger import RoomTrigger
 
 
 @dataclass
-class RoomController(GuiElement, ResourceClient, InputClient):
+class RoomController(GuiElement, ResourceClient, InputClient, CameraClient):
     room: RoomInfo | None = None
     show_map = False
 
@@ -233,7 +233,7 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         world.add_actor(self)
         self.universe.set_world(world)
 
-    def draw_gui(self, surface: Surface):
+    def draw_gui(self):
         if not self.show_map:
             return
 
@@ -248,6 +248,7 @@ class RoomController(GuiElement, ResourceClient, InputClient):
         for room in map.get_rooms():
             point = room.position
             origin = (point - start) * (tile_size * 3)
+            surface = self._camera.screen
 
             if room == self.room:
                 font.render_to(surface, astuple(origin + Point(tile_size, tile_size)), "X", HIGHLIGHT_1_COLOR, TEXT_BG_COLOR)

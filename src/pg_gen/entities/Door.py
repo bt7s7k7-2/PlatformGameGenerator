@@ -1,13 +1,11 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
-import pygame
-from pygame import Surface
 
+from ..game_core.Camera import CameraClient
 from ..game_core.ResourceClient import ResourceClient
 from ..generation.RoomInfo import NO_KEY, RoomInfo
 from ..level_editor.ActorRegistry import ActorRegistry
-from ..support.constants import CAMERA_SCALE
 from ..support.keys import KEY_COLORS
 from ..support.Point import Point
 from ..world.Actor import Actor
@@ -24,7 +22,7 @@ class DoorState(Enum):
 
 
 @dataclass
-class Door(ResourceClient):
+class Door(ResourceClient, CameraClient):
     collision_flags: CollisionFlags = field(default=CollisionFlags.STATIC)
     key_type: int = NO_KEY
     flag_index: int = 0
@@ -39,12 +37,12 @@ class Door(ResourceClient):
             if self.state != DoorState.CLOSED:
                 self.collision_flags = CollisionFlags(0)
 
-    def draw(self, surface: Surface):
+    def draw(self):
         color = KEY_COLORS[self.key_type - 1]
 
         if self.state == DoorState.CLOSED:
             margin = 0.1
-            pygame.draw.rect(surface, color.to_pygame_color(), (self.position + Point(margin, 0)).to_pygame_rect(self.size - Point(margin * 2, 0), CAMERA_SCALE))
+            self._camera.draw_placeholder(self.position + Point(margin, 0), self.size - Point(margin * 2, 0), color)
         else:
             color = color * 0.75
             position = self.position
@@ -54,7 +52,7 @@ class Door(ResourceClient):
             if self.state == DoorState.OPEN_LEFT:
                 position -= Point(1, 0)
 
-            sprite.tinted(color).draw(surface, position, CAMERA_SCALE)
+            self._camera.draw_texture(position, Point(2, 2), sprite, color)
 
     def on_trigger(self, trigger: Actor):
         if not isinstance(trigger, Player):

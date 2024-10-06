@@ -1,7 +1,4 @@
-from dataclasses import astuple
 from typing import TYPE_CHECKING, Iterable, List
-
-from pygame import Surface
 
 from ..support.Point import Point
 from ..support.support import is_intersection, resolve_intersection
@@ -9,14 +6,12 @@ from .CollisionFlags import CollisionFlags
 from .SpriteLayer import SpriteLayer
 
 if TYPE_CHECKING:
-    from .Actor import Actor
     from ..game_core.Universe import Universe
-
-from ..support.Color import Color
+    from .Actor import Actor
 
 
 class World:
-    background_color = Color.BLACK
+    active = False
 
     def get_actors(self) -> Iterable["Actor"]:
         return self._actors
@@ -24,7 +19,8 @@ class World:
     def add_actor(self, actor: "Actor"):
         actor.world = self
         actor.universe = self.universe
-        actor.on_added()
+        if self.active:
+            actor.on_added()
 
         self._actors.append(actor)
 
@@ -52,22 +48,21 @@ class World:
         if CollisionFlags.TRIGGER in actor.collision_flags:
             self._triggers.pop(self._triggers.index(actor))
 
-        actor.on_removed()
+        if self.active:
+            actor.on_removed()
 
-    def draw(self, surface: Surface):
-        surface.fill(astuple(self.background_color))
-
+    def draw(self):
         for actor in self._actors:
             if actor.layer == SpriteLayer.BACKGROUND:
-                actor.draw(surface)
+                actor.draw()
 
         for actor in self._actors:
             if actor.layer == SpriteLayer.NORMAL:
-                actor.draw(surface)
+                actor.draw()
 
         for actor in self._actors:
             if actor.layer == SpriteLayer.GUI:
-                actor.draw(surface)
+                actor.draw()
 
     def update(self, delta: float):
         if self.universe.paused:

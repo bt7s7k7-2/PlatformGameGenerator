@@ -2,10 +2,9 @@ from dataclasses import dataclass, field
 from math import copysign
 from typing import TYPE_CHECKING, Callable, List
 
-import pygame
 import pygame.freetype
-from pygame import Surface
 
+from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..support.support import find_index_by_predicate
 
@@ -13,13 +12,13 @@ if TYPE_CHECKING:
     from ..world.World import World
 
 from ..support.Color import Color
-from ..support.constants import AIR_ACCELERATION, AIR_DRAG, CAMERA_SCALE, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE
+from ..support.constants import AIR_ACCELERATION, AIR_DRAG, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE
 from ..support.Point import Point
 from .InventoryItem import InventoryItem
 
 
 @dataclass
-class Player(InputClient):
+class Player(InputClient, CameraClient):
     size: Point = field(default=Point(1, 2))
 
     _inventory: List[InventoryItem | None] = field(default_factory=lambda: [None] * 5, init=False)
@@ -33,12 +32,8 @@ class Player(InputClient):
     def on_removed(self):
         self.universe.di.unregister(Player, self)
 
-    def draw(self, surface: Surface):
-        pygame.draw.rect(
-            surface,
-            color=Color.YELLOW.to_pygame_color(),
-            rect=self.position.to_pygame_rect(self.size, CAMERA_SCALE),
-        )
+    def draw(self):
+        self._camera.draw_placeholder(self.position, self.size, Color.YELLOW)
 
     def add_inventory_item(self, item: InventoryItem):
         if None not in self._inventory:
