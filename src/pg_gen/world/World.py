@@ -93,7 +93,7 @@ class World:
         test_position = actor.position
 
         for collider in self._colliders:
-            collision = resolve_intersection(test_position, actor.size, collider.position, collider.size)
+            collision = collider.resolve_intersection(test_position, actor.size)
             if collision != Point.ZERO:
                 collider.on_trigger(actor)
                 resolution_vector += collision

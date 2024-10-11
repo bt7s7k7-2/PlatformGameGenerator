@@ -35,6 +35,15 @@ class Point:
     def magnitude(self):
         return sqrt(self.x**2 + self.y**2)
 
+    def dominant_size(self):
+        return max(abs(self.x), abs(self.y))
+
+    def as_mask(self):
+        return Point(
+            1 if self.x != 0 else 0,
+            1 if self.y != 0 else 0,
+        )
+
     def normalize(self):
         mag = self.magnitude()
         if mag == 0:
@@ -110,6 +119,13 @@ class Point:
     @staticmethod
     def max(a: "Point", b: "Point"):
         return Point(max(a.x, b.x), max(a.y, b.y))
+
+    @staticmethod
+    def max_size(a: "Point", b: "Point"):
+        return Point(
+            a.x if abs(a.x) > abs(b.x) else b.x,
+            a.y if abs(a.y) > abs(b.y) else b.y,
+        )
 
     ZERO: ClassVar["Point"]
     ONE: ClassVar["Point"]
