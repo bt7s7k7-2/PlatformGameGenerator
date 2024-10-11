@@ -17,6 +17,7 @@ class ResourceProvider:
         self.door_sprite = spritesheet.slice(Point(0, 0), Point(32, 48))
         self.wall_sprite = spritesheet.slice(Point(32, 16), Point(16, 16))
         self.skull_sprite = spritesheet.slice(Point(35, 35), Point(11, 11))
+        self.player_sprite = spritesheet.slice(Point(48, 0), Point(16, 16))
 
         pass
 

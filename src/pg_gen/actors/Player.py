@@ -2,22 +2,22 @@ from dataclasses import dataclass, field
 from math import copysign
 from typing import TYPE_CHECKING, Callable, List
 
-from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..support.support import find_index_by_predicate
+from .support.SpriteActor import SpriteActor
 
 if TYPE_CHECKING:
     from ..world.World import World
 
-from ..support.Color import Color
 from ..support.constants import AIR_ACCELERATION, AIR_DRAG, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE
 from ..support.Point import Point
 from .support.InventoryItem import InventoryItem
 
 
 @dataclass
-class Player(InputClient, CameraClient):
-    size: Point = field(default=Point(1, 2))
+class Player(InputClient, SpriteActor):
+    size: Point = field(default=Point(1, 1))
+    sprite: str = field(default="player_sprite")
 
     _inventory: List[InventoryItem | None] = field(default_factory=lambda: [None] * 5, init=False)
 
@@ -35,9 +35,6 @@ class Player(InputClient, CameraClient):
 
     def on_removed(self):
         self.universe.di.unregister(Player, self)
-
-    def draw(self):
-        self._camera.draw_placeholder(self.position, self.size, Color.YELLOW)
 
     def add_inventory_item(self, item: InventoryItem):
         if None not in self._inventory:
@@ -75,9 +72,11 @@ class Player(InputClient, CameraClient):
 
             if self._input.left:
                 move_vector += Point.LEFT
+                self.flip = False
 
             if self._input.right:
                 move_vector += Point.RIGHT
+                self.flip = True
 
             self.velocity = move_vector * GROUND_VELOCITY + Point.DOWN * 0.01
 
@@ -93,9 +92,11 @@ class Player(InputClient, CameraClient):
 
             if self._input.left:
                 self.velocity += Point.LEFT * delta * AIR_ACCELERATION
+                self.flip = False
 
             if self._input.right:
                 self.velocity += Point.RIGHT * delta * AIR_ACCELERATION
+                self.flip = True
 
             if abs(self.velocity.x) > GROUND_VELOCITY:
                 self.velocity = Point(copysign(GROUND_VELOCITY, self.velocity.x), self.velocity.y)
