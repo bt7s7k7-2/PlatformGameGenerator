@@ -62,6 +62,12 @@ class Point:
     def quantize(self, grid: float):
         return (self * (1 / grid)).round() * grid
 
+    def to_pygame_coordinates(self):
+        x = floor(self.x + 0.0001)
+        y = floor(self.y + 0.0001)
+
+        return (x, y)
+
     def to_pygame_rect(self, size: "Point", scale: float = 1.0):
         # To floor our value to integer pixel coordinates we add a small constant
         # to counteract floating point imprecision and therefore prevent one-off

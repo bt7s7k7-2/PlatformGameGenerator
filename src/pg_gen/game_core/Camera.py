@@ -52,7 +52,7 @@ class Camera:
             surface = pygame.transform.flip(surface, True, False)
 
         if repeat == Point.ONE:
-            self.screen.blit(surface, astuple(position))
+            self.screen.blit(surface, position.to_pygame_coordinates())
             return
 
         for x in range(ceil(repeat.x)):
