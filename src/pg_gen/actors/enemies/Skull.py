@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 
-from ..level_editor.ActorRegistry import ActorRegistry
-from ..support.Direction import Direction
+from ...level_editor.ActorRegistry import ActorRegistry
+from ...support.Direction import Direction
+from ..support.SpriteActor import SpriteActor
 from .Enemy import Enemy
-from .SpriteActor import SpriteActor
 
 
 @dataclass

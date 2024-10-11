@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
-from ..world.Actor import Actor
-from ..world.SpriteLayer import SpriteLayer
+from ...world.Actor import Actor
+from ...world.SpriteLayer import SpriteLayer
 
 
 @dataclass

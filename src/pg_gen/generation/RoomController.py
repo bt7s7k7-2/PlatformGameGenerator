@@ -2,11 +2,11 @@ from dataclasses import astuple, dataclass
 
 import pygame
 
-from ..entities.Door import Door
-from ..entities.GuiElement import GuiElement
-from ..entities.Key import Key
-from ..entities.Player import Player
-from ..entities.Wall import Wall
+from ..actors.Player import Player
+from ..actors.progression.Door import Door
+from ..actors.progression.Key import Key
+from ..actors.support.GuiElement import GuiElement
+from ..actors.Wall import Wall
 from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient

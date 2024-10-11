@@ -1,4 +1,4 @@
-from ..world.Actor import Actor
+from ...world.Actor import Actor
 
 
 class GuiElement(Actor):

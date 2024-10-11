@@ -1,17 +1,17 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ..game_core.Camera import CameraClient
-from ..game_core.ResourceClient import ResourceClient
-from ..generation.RoomInfo import NO_KEY, RoomInfo
-from ..level_editor.ActorRegistry import ActorRegistry
-from ..support.keys import KEY_COLORS
-from ..support.Point import Point
-from ..world.Actor import Actor
-from ..world.CollisionFlags import CollisionFlags
-from ..world.SpriteLayer import SpriteLayer
+from ...game_core.Camera import CameraClient
+from ...game_core.ResourceClient import ResourceClient
+from ...generation.RoomInfo import NO_KEY, RoomInfo
+from ...level_editor.ActorRegistry import ActorRegistry
+from ...support.keys import KEY_COLORS
+from ...support.Point import Point
+from ...world.Actor import Actor
+from ...world.CollisionFlags import CollisionFlags
+from ...world.SpriteLayer import SpriteLayer
+from ..Player import Player
 from .Key import KeyItem
-from .Player import Player
 
 
 class DoorState(Enum):

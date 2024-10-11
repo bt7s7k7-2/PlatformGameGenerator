@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 from ..support.Color import Color
 from ..support.constants import AIR_ACCELERATION, AIR_DRAG, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE
 from ..support.Point import Point
-from .InventoryItem import InventoryItem
+from .support.InventoryItem import InventoryItem
 
 
 @dataclass

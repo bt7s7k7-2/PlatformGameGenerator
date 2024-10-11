@@ -46,8 +46,8 @@ class ActorRegistry:
     @staticmethod
     def load_actors():
         curr_dir = path.dirname(__file__)
-        entities_folder = path.normpath(path.join(curr_dir, "../entities"))
-        for directory, _, files in walk(entities_folder, onerror=print):
+        actors_folder = path.normpath(path.join(curr_dir, "../actors"))
+        for directory, _, files in walk(actors_folder, onerror=print):
             for file in files:
                 file = path.join(directory, file)
                 if not file.endswith(".py"):

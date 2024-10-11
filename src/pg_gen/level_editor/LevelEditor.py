@@ -3,8 +3,8 @@ from typing import Callable, Dict, List, Tuple
 
 import pygame
 
-from ..entities.GuiElement import GuiElement
-from ..entities.Player import Player
+from ..actors.Player import Player
+from ..actors.support.GuiElement import GuiElement
 from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient

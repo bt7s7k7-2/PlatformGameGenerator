@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
-from ..support.Direction import Direction
-from ..support.Point import Point
-from ..world.Actor import Actor
-from ..world.CollisionFlags import CollisionFlags
-from .Player import Player
+from ...support.Direction import Direction
+from ...support.Point import Point
+from ...world.Actor import Actor
+from ...world.CollisionFlags import CollisionFlags
+from ..Player import Player
 
 
 @dataclass

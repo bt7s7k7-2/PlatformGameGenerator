@@ -1,15 +1,14 @@
 from dataclasses import dataclass, field
 
-
-from ..game_core.Camera import CameraClient
-from ..game_core.ResourceClient import ResourceClient
-from ..generation.RoomInfo import NO_KEY, RoomInfo
-from ..level_editor.ActorRegistry import ActorRegistry
-from ..support.keys import KEY_COLORS, MAX_KEY_TYPE
-from ..world.Actor import Actor
-from ..world.CollisionFlags import CollisionFlags
-from .InventoryItem import InventoryItem
-from .Player import Player
+from ...game_core.Camera import CameraClient
+from ...game_core.ResourceClient import ResourceClient
+from ...generation.RoomInfo import NO_KEY, RoomInfo
+from ...level_editor.ActorRegistry import ActorRegistry
+from ...support.keys import KEY_COLORS, MAX_KEY_TYPE
+from ...world.Actor import Actor
+from ...world.CollisionFlags import CollisionFlags
+from ..Player import Player
+from ..support.InventoryItem import InventoryItem
 
 
 @dataclass

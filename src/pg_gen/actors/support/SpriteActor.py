@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from ..game_core.Camera import CameraClient
-from ..game_core.ResourceClient import ResourceClient
+
+from ...game_core.Camera import CameraClient
+from ...game_core.ResourceClient import ResourceClient
 
 
 @dataclass

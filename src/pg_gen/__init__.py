@@ -1,6 +1,6 @@
 import sys
 
-from .entities.Player import Player
+from .actors.Player import Player
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
 from .generation.MapGenerator import MapGenerator

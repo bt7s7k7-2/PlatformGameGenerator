@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from ..entities.Player import Player
+from ..actors.Player import Player
 from ..game_core.Camera import CameraClient
 from ..support.Color import Color
 from ..support.Direction import Direction

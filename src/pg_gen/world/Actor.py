@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-
 from pg_gen.world.CollisionFlags import CollisionFlags
 
 from ..support.Point import Point
