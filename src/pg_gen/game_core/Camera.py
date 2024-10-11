@@ -35,7 +35,7 @@ class Camera:
     def draw_placeholder(self, position: Point, size: Point, color: Color, opacity=255):
         self.draw_placeholder_raw(self.world_to_screen(position), size * self.zoom, color, opacity)
 
-    def draw_texture_raw(self, position: Point, size: Point, texture: Texture, color: Color = Color.WHITE, repeat=Point.ONE):
+    def draw_texture_raw(self, position: Point, size: Point, texture: Texture, color: Color = Color.WHITE, repeat=Point.ONE, rotate=0.0):
         surface = Surface(astuple(texture.size), flags=pygame.SRCALPHA)
 
         surface.blit(texture.surface, (0, 0))
@@ -44,6 +44,9 @@ class Camera:
 
         if color != Color.WHITE:
             surface.fill(color.to_pygame_color(), special_flags=pygame.BLEND_RGB_MULT)
+
+        if rotate != 0:
+            surface = pygame.transform.rotate(surface, rotate)
 
         if repeat == Point.ONE:
             self.screen.blit(surface, astuple(position))
@@ -55,8 +58,8 @@ class Camera:
                 fragment_size = Point.min(size, size * repeat - offset)
                 self.screen.blit(surface, (position + offset).to_pygame_rect(fragment_size), Point.ZERO.to_pygame_rect(fragment_size))
 
-    def draw_texture(self, position: Point, size: Point, texture: Texture, color: Color = Color.WHITE, repeat=Point.ONE):
-        self.draw_texture_raw(self.world_to_screen(position), size * self.zoom, texture, color, repeat)
+    def draw_texture(self, position: Point, size: Point, texture: Texture, color: Color = Color.WHITE, repeat=Point.ONE, rotate=0.0):
+        self.draw_texture_raw(self.world_to_screen(position), size * self.zoom, texture, color, repeat, rotate)
 
 
 class CameraClient(Actor):

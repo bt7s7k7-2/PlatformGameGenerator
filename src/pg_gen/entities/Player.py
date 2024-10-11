@@ -2,8 +2,6 @@ from dataclasses import dataclass, field
 from math import copysign
 from typing import TYPE_CHECKING, Callable, List
 
-import pygame.freetype
-
 from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..support.support import find_index_by_predicate
@@ -25,8 +23,14 @@ class Player(InputClient, CameraClient):
 
     velocity: Point = Point.ZERO
     _is_grounded: bool = False
+    _spawn_point: Point = Point.ZERO
+
+    def take_damage(self):
+        self.position = self._spawn_point
+        pass
 
     def on_added(self):
+        self._spawn_point = self.position
         self.universe.di.register(Player, self)
 
     def on_removed(self):

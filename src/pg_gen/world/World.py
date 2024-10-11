@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 class World:
     active = False
+    paused = False
 
     def get_actors(self) -> Iterable["Actor"]:
         return self._actors
@@ -66,14 +67,14 @@ class World:
                 actor.draw()
 
     def update(self, delta: float):
-        if self.universe.paused:
+        if self.paused:
             delta = 0
 
         for actor in self._actors:
             actor.update(delta)
 
     def check_triggers(self, actor: "Actor"):
-        if self.universe.paused:
+        if self.paused:
             return
 
         for trigger in self._triggers:
@@ -86,7 +87,7 @@ class World:
     def resolve_collisions(self, actor: "Actor"):
         resolution_vector = Point.ZERO
 
-        if self.universe.paused:
+        if self.paused:
             return Point.ZERO
 
         test_position = actor.position

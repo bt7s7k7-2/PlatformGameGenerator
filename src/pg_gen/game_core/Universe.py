@@ -14,7 +14,6 @@ class Universe:
         return self._world
 
     _world: "World | None" = None
-    paused = False
 
     def set_world(self, world: "World"):
         if self.world == world:

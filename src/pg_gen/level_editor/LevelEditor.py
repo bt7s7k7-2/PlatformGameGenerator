@@ -37,6 +37,9 @@ class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
     _drag_callback: Callable[[Point], None] | None = None
     _aux_data: Dict = field(default_factory=lambda: {})
 
+    def on_added(self):
+        self.world.paused = True
+
     def draw_gui(self):
         surface = self._camera.screen
 
@@ -181,9 +184,13 @@ class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
 
     def open_file(self, file_path: str):
         self.file_path = file_path
-        with open(self.file_path, "rt") as file:
-            raw_data = file.read()
-            self._aux_data = self.apply_save_data(raw_data)
+        try:
+            with open(self.file_path, "rt") as file:
+                raw_data = file.read()
+                self._aux_data = self.apply_save_data(raw_data)
+        except FileNotFoundError:
+            # If the level file is not found we are creating a new level, we can keep the current, empty, state
+            pass
 
     def _create_history_entry(self, target: List[str]):
         selected_index = self._managed_actors.index(self._selected_actor) if self._selected_actor is not None else None
