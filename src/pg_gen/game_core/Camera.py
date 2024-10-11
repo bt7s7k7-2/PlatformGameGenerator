@@ -46,7 +46,10 @@ class Camera:
             surface.fill(color.to_pygame_color(), special_flags=pygame.BLEND_RGB_MULT)
 
         if rotate != 0:
+            old_size = Point(*surface.get_size())
             surface = pygame.transform.rotate(surface, rotate)
+            new_size = Point(*surface.get_size())
+            position -= (new_size - old_size) * 0.5
 
         if flip_x:
             surface = pygame.transform.flip(surface, True, False)
