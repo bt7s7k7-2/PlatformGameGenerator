@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Flag
 from math import copysign
 from typing import TYPE_CHECKING, Callable, List
 
@@ -7,11 +8,18 @@ from ..support.support import find_index_by_predicate
 from .support.SpriteActor import SpriteActor
 
 if TYPE_CHECKING:
+    from .progression.Climbable import Climbable
     from ..world.World import World
 
-from ..support.constants import AIR_ACCELERATION, AIR_DRAG, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE
+from ..support.constants import AIR_ACCELERATION, AIR_DRAG, CLIMB_VELOCITY, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE
 from ..support.Point import Point
 from .support.InventoryItem import InventoryItem
+
+
+class ClimbState(Flag):
+    READY = 1
+    CLIMBING = 2
+    SLIDING = 4
 
 
 @dataclass
@@ -23,7 +31,11 @@ class Player(InputClient, SpriteActor):
 
     velocity: Point = Point.ZERO
     _is_grounded: bool = False
+    _did_jump: bool = False
     _spawn_point: Point = Point.ZERO
+
+    curr_climbable: "Climbable | None" = None
+    climb_state: ClimbState = ClimbState(0)
 
     def take_damage(self):
         self.position = self._spawn_point
@@ -67,7 +79,55 @@ class Player(InputClient, SpriteActor):
                 item.transfer_world(new_world)
 
     def update(self, delta: float):
-        if self._is_grounded:
+        self.world.check_triggers(self)
+
+        should_jump = self._input.jump and not self._did_jump
+        self._did_jump = self._input.jump
+
+        if self.climb_state & ClimbState.CLIMBING:
+            if self.curr_climbable is None:
+                self.climb_state = ClimbState(0)
+            else:
+                if should_jump:
+                    self.climb_state = ClimbState(0)
+                    self.curr_climbable = None
+                    self._is_grounded = False
+                    self.velocity = Point.UP * JUMP_IMPULSE
+
+                    if self._input.left:
+                        self.velocity += Point.LEFT * GROUND_VELOCITY
+
+                    if self._input.right:
+                        self.velocity += Point.RIGHT * GROUND_VELOCITY
+                else:
+
+                    # Only allow climbing up if we are not on a slide only climbable
+                    if self._input.up and not (self.climb_state & ClimbState.SLIDING):
+                        self.position += Point.UP * CLIMB_VELOCITY * delta
+
+                    if self._input.down:
+                        self.position += Point.DOWN * CLIMB_VELOCITY * delta
+
+                    if self._input.left:
+                        self.flip = False
+
+                    if self._input.right:
+                        self.flip = True
+
+                    self.curr_climbable = None
+                    # If we are climbing, do skip further input and physics processing
+                    return
+
+        if self.curr_climbable is not None and self.climb_state == ClimbState(0) and should_jump:
+            self.climb_state = ClimbState.CLIMBING
+            self._is_grounded = False
+            if self.curr_climbable.slide_only:
+                self.climb_state = ClimbState.SLIDING
+
+            # Force X position to be center of the climbable
+            self.position = self.position.down() + self.curr_climbable.position.right()
+            return
+        elif self._is_grounded:
             move_vector = Point.ZERO
 
             if self._input.left:
@@ -110,5 +170,4 @@ class Player(InputClient, SpriteActor):
             self.velocity = self.velocity * Point.RIGHT
 
         self._is_grounded = collision_resolution.y < 0
-
-        self.world.check_triggers(self)
+        self.curr_climbable = None
