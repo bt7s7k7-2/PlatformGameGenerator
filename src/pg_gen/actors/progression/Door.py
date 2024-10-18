@@ -26,7 +26,7 @@ class Door(ResourceClient, CameraClient):
     key_type: int = NO_KEY
     flag_index: int = 0
     room: "RoomInfo | None" = field(default=None)
-    size: Point = field(default=Point(1, 3))
+    size: Point = field(default=Point(1, 2))
     state: DoorState = DoorState.CLOSED
     layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
 
@@ -51,7 +51,7 @@ class Door(ResourceClient, CameraClient):
             if self.state == DoorState.OPEN_LEFT:
                 position -= Point(1, 0)
 
-            self._camera.draw_texture(position, Point(2, 3), sprite, color)
+            self._camera.draw_texture(position, Point(2, 2), sprite, color)
 
     def on_trigger(self, trigger: Actor):
         if not isinstance(trigger, Player):
