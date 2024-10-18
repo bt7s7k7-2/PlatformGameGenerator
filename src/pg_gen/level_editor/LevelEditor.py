@@ -9,7 +9,7 @@ from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
 from ..support.Color import Color
-from ..support.constants import HIGHLIGHT_1_COLOR, TEXT_BG_COLOR, TEXT_COLOR
+from ..support.constants import HIGHLIGHT_1_COLOR, ROOM_HEIGHT, ROOM_WIDTH, TEXT_BG_COLOR, TEXT_COLOR
 from ..support.Point import Point
 from ..support.support import is_intersection
 from ..support.TextInput import TextInput
@@ -42,6 +42,18 @@ class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
 
     def draw_gui(self):
         surface = self._camera.screen
+
+        vertical_guide_size = Point(1, ROOM_HEIGHT * self._camera.zoom)
+        vertical_guide_center = self._camera.world_to_screen(Point(ROOM_WIDTH / 2, 0))
+        one_tile = self._camera.zoom
+        self._camera.draw_placeholder_raw(vertical_guide_center - Point(one_tile, 0), vertical_guide_size, Color.WHITE, 127)
+        self._camera.draw_placeholder_raw(vertical_guide_center + Point(one_tile, 0), vertical_guide_size, Color.WHITE, 127)
+
+        horizontal_guide_size = Point(ROOM_WIDTH * self._camera.zoom, 1)
+        horizontal_guide_start = self._camera.world_to_screen(Point(0, 2))
+
+        self._camera.draw_placeholder_raw(horizontal_guide_start, horizontal_guide_size, Color.WHITE, 127)
+        self._camera.draw_placeholder_raw(horizontal_guide_start + Point(0, one_tile * 2), horizontal_guide_size, Color.WHITE, 127)
 
         if self._selected_actor is not None:
             for position, size, _ in self.get_selection_handles():
