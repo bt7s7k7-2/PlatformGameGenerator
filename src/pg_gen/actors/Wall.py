@@ -5,7 +5,6 @@ from ..game_core.Camera import CameraClient
 from ..game_core.ResourceClient import ResourceClient
 from ..level_editor.ActorRegistry import ActorRegistry
 from ..support.Point import Point
-from ..support.support import resolve_intersection
 from ..world.CollisionFlags import CollisionFlags
 
 
@@ -26,7 +25,8 @@ class WallSlope(CameraClient, ResourceClient):
     invert: bool = False
     reverse: bool = False
 
-    def _get_rects(self):
+    @override
+    def get_colliders(self):
         start = self.position
         extend = (self.size).dominant_size() * 2
 
@@ -48,15 +48,8 @@ class WallSlope(CameraClient, ResourceClient):
             yield position, size
 
     @override
-    def resolve_intersection(self, position: Point, size: Point) -> Point:
-        result = Point.ZERO
-        for rect_position, rect_size in self._get_rects():
-            result = Point.max_size(result, resolve_intersection(position, size, rect_position, rect_size))
-        return result
-
-    @override
     def draw(self):
-        for position, size in self._get_rects():
+        for position, size in self.get_colliders():
             self._camera.draw_texture(position, Point.ONE, self._resource_provider.wall_sprite, repeat=size)
 
 

@@ -29,8 +29,8 @@ class Actor:
 
     def on_trigger(self, trigger: "Actor"): ...
 
-    def resolve_intersection(self, position: Point, size: Point) -> Point:
-        return resolve_intersection(position, size, self.position, self.size)
+    def get_colliders(self):
+        yield self.position, self.size
 
     def transfer_world(self, new_world: "World"):
         if self.world is not None:

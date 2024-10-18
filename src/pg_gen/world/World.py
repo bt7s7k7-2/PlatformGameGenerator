@@ -78,11 +78,12 @@ class World:
             return
 
         for trigger in self._triggers:
-            if not is_intersection(actor.position, actor.size, trigger.position, trigger.size):
-                continue
+            for collider_position, collider_size in trigger.get_colliders():
+                if not is_intersection(actor.position, actor.size, collider_position, collider_size):
+                    continue
 
-            trigger.on_trigger(actor)
-            actor.on_trigger(trigger)
+                trigger.on_trigger(actor)
+                actor.on_trigger(trigger)
 
     def resolve_collisions(self, actor: "Actor"):
         resolution_vector = Point.ZERO
@@ -93,18 +94,20 @@ class World:
         test_position = actor.position
 
         for collider in self._colliders:
-            collision = collider.resolve_intersection(test_position, actor.size)
-            if collision != Point.ZERO:
-                collider.on_trigger(actor)
-                resolution_vector += collision
-                test_position += collision
+            for collider_position, collider_size in collider.get_colliders():
+                collision = resolve_intersection(test_position, actor.size, collider_position, collider_size)
+                if collision != Point.ZERO:
+                    collider.on_trigger(actor)
+                    resolution_vector += collision
+                    test_position += collision
 
         return resolution_vector
 
     def check_rect(self, position: Point, size: Point):
         for collider in self._colliders:
-            if is_intersection(position, size, collider.position, collider.size):
-                return True
+            for collider_position, collider_size in collider.get_colliders():
+                if is_intersection(position, size, collider_position, collider_size):
+                    return True
 
         return False
 
