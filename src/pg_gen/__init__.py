@@ -1,4 +1,6 @@
+import json
 import sys
+from os import path, walk
 
 import pygame
 
@@ -7,6 +9,7 @@ from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
 from .generation.MapGenerator import MapGenerator
 from .generation.RoomController import RoomController
+from .generation.RoomPrefabRegistry import RoomPrefabRegistry
 from .level_editor.ActorRegistry import ActorRegistry
 from .level_editor.LevelEditor import LevelEditor
 from .support.constants import ROOM_HEIGHT, ROOM_WIDTH
@@ -18,10 +21,14 @@ def main():
     pygame.init()
     ActorRegistry.load_actors()
 
+    room_registry = RoomPrefabRegistry()
+    room_registry.load("./assets/rooms")
+
     map_generator = MapGenerator(
         max_width=4,
         max_height=4,
         sprawl_chance=0.5,
+        room_prefabs=room_registry,
     )
     universe = Universe(map_generator)
 
@@ -60,3 +67,17 @@ def start_editor():
 
     game_loop = InteractiveGameLoop(universe)
     game_loop.run()
+
+
+def format_room_files():
+    RoomPrefabRegistry().load("./assets/rooms")
+    for directory, _, files in walk("./assets/rooms", onerror=print):
+        for room_path in files:
+            if not room_path.endswith(".json"):
+                continue
+            room_path = path.join(directory, room_path)
+            file_content = ""
+            with open(room_path, "rt") as file:
+                file_content = file.read()
+            with open(room_path, "wt") as file:
+                file.write(json.dumps(json.loads(file_content), indent=4, sort_keys=True))

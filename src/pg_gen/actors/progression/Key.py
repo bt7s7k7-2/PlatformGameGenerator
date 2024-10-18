@@ -33,10 +33,6 @@ class Key(ResourceClient, CameraClient):
                 self.room.provides_key = NO_KEY
 
 
-for key_type in range(MAX_KEY_TYPE):
-    ActorRegistry.register_actor(Key, suffix=str(key_type + 1), default_value=Key(key_type=key_type + 1))
-
-
 @dataclass
 class KeyItem(InventoryItem, ResourceClient, CameraClient):
     key_type: int = NO_KEY

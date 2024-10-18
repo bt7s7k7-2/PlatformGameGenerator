@@ -3,10 +3,7 @@ from dataclasses import astuple, dataclass
 import pygame
 
 from ..actors.Player import Player
-from ..actors.progression.Door import Door
-from ..actors.progression.Key import Key
 from ..actors.support.GuiElement import GuiElement
-from ..actors.Wall import Wall
 from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
@@ -14,8 +11,7 @@ from ..support.constants import HIGHLIGHT_1_COLOR, HIGHLIGHT_2_COLOR, JUMP_IMPUL
 from ..support.Direction import Direction
 from ..support.Point import Point
 from ..world.World import World
-from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
-from .RoomTrigger import RoomTrigger
+from .RoomInfo import NO_KEY, RoomInfo
 
 
 @dataclass
@@ -59,152 +55,8 @@ class RoomController(GuiElement, ResourceClient, InputClient, CameraClient):
         assert self.room is not None
         world = World(self.universe)
 
-        entrance_size = 3
-        gap_size = 4
-        corridor_length = 2
-        world.add_actors(
-            Wall(
-                position=Point.ZERO,
-                size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
-            ),
-            Wall(
-                position=Point(ROOM_WIDTH / 2 + entrance_size / 2, 0),
-                size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
-            ),
-            Wall(
-                position=Point(0, 1 + entrance_size),
-                size=Point(corridor_length, ROOM_HEIGHT - 1 - entrance_size),
-            ),
-            Wall(
-                position=Point(ROOM_WIDTH - corridor_length, 1 + entrance_size),
-                size=Point(corridor_length, ROOM_HEIGHT - 1 - entrance_size),
-            ),
-            Wall(
-                position=Point(0, ROOM_HEIGHT - 1),
-                size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
-            ),
-            Wall(
-                position=Point(ROOM_WIDTH / 2 + entrance_size / 2, ROOM_HEIGHT - 1),
-                size=Point(ROOM_WIDTH / 2 - entrance_size / 2, 1),
-            ),
-            Wall(
-                position=Point(corridor_length + gap_size, entrance_size + 1),
-                size=Point(ROOM_WIDTH - corridor_length * 2 - gap_size * 2, 1),
-            ),
-            Wall(
-                position=Point(2, 1 + entrance_size + ROOM_HEIGHT / 3),
-                size=Point(corridor_length, 1),
-            ),
-            Wall(
-                position=Point(ROOM_WIDTH - corridor_length - 2, 1 + entrance_size + ROOM_HEIGHT / 3),
-                size=Point(corridor_length, 1),
-            ),
-        )
-
-        if self.room.get_connection(Direction.LEFT) == NOT_CONNECTED:
-            world.add_actor(
-                Wall(
-                    position=Point(0, 1),
-                    size=Point(1, entrance_size),
-                )
-            )
-        else:
-            world.add_actor(
-                RoomTrigger(
-                    position=Point(-1.5, 1),
-                    size=Point(1, entrance_size),
-                    room_controller=self,
-                    direction=Direction.LEFT,
-                )
-            )
-
-        if self.room.get_connection(Direction.RIGHT) == NOT_CONNECTED:
-            world.add_actor(
-                Wall(
-                    position=Point(ROOM_WIDTH - 1, 1),
-                    size=Point(1, entrance_size),
-                )
-            )
-        else:
-            world.add_actor(
-                RoomTrigger(
-                    position=Point(ROOM_WIDTH + 0.5, 1),
-                    size=Point(1, entrance_size),
-                    room_controller=self,
-                    direction=Direction.RIGHT,
-                )
-            )
-
-        if self.room.get_connection(Direction.UP) == NOT_CONNECTED:
-            world.add_actor(
-                Wall(
-                    position=Point(ROOM_WIDTH / 2 - entrance_size / 2, 0),
-                    size=Point(entrance_size, 1),
-                )
-            )
-        else:
-            world.add_actor(
-                RoomTrigger(
-                    position=Point(ROOM_WIDTH / 2 - entrance_size / 2, -1.5),
-                    size=Point(entrance_size, 1),
-                    room_controller=self,
-                    direction=Direction.UP,
-                )
-            )
-
-        if self.room.get_connection(Direction.DOWN) == NOT_CONNECTED:
-            world.add_actor(
-                Wall(
-                    position=Point(ROOM_WIDTH / 2 - entrance_size / 2, ROOM_HEIGHT - 1),
-                    size=Point(entrance_size, 1),
-                )
-            )
-        else:
-            world.add_actor(
-                RoomTrigger(
-                    position=Point(ROOM_WIDTH / 2 - entrance_size / 2, ROOM_HEIGHT + 0.5),
-                    size=Point(entrance_size, 1),
-                    room_controller=self,
-                    direction=Direction.DOWN,
-                )
-            )
-
-        if self.room.provides_key != NO_KEY:
-            world.add_actor(Key(key_type=self.room.provides_key, position=Point(ROOM_WIDTH / 2 - 0.5, entrance_size - 1), room=self.room))
-
-        next_flag = 0
-
-        def get_next_flag():
-            assert self.room is not None
-            nonlocal next_flag
-
-            flag = next_flag
-            next_flag += 1
-
-            if len(self.room.persistent_flags) <= flag:
-                self.room.persistent_flags.append(None)
-
-            return flag
-
-        if self.room.get_connection(Direction.LEFT) > NO_KEY:
-            world.add_actor(
-                Door(
-                    position=Point(1, 1),
-                    room=self.room,
-                    key_type=self.room.get_connection(Direction.LEFT),
-                    flag_index=get_next_flag(),
-                )
-            )
-
-        if self.room.get_connection(Direction.RIGHT) > NO_KEY:
-            world.add_actor(
-                Door(
-                    position=Point(ROOM_WIDTH - 2, 1),
-                    room=self.room,
-                    key_type=self.room.get_connection(Direction.RIGHT),
-                    flag_index=get_next_flag(),
-                )
-            )
+        assert self.room.prefab is not None
+        self.room.prefab.instantiate(self.room, self, world)
 
         player = self.universe.di.try_inject(Player)
         if player is not None:
@@ -216,7 +68,7 @@ class RoomController(GuiElement, ResourceClient, InputClient, CameraClient):
                         ROOM_WIDTH / 2 - ((player.position.x + player.size.x / 2) - ROOM_WIDTH / 2) - player.size.x / 2,
                         player.position.y,
                     )
-                    - Point.from_direction(entrance) * 0.1
+                    - Point.from_direction(entrance) * 0.5
                 )
             elif entrance == Direction.UP or entrance == Direction.DOWN:
                 player.position = (
@@ -242,6 +94,7 @@ class RoomController(GuiElement, ResourceClient, InputClient, CameraClient):
             return
 
         start = map.get_start()
+        end = Point(0, 0)
         tile_size = 12
         font = self._resource_provider.font
 
@@ -260,3 +113,9 @@ class RoomController(GuiElement, ResourceClient, InputClient, CameraClient):
             font.render_to(surface, astuple(origin + Point(0, tile_size)), str(room.get_connection(Direction.LEFT)), TEXT_COLOR, TEXT_BG_COLOR)
             font.render_to(surface, astuple(origin + Point(tile_size, tile_size * 2)), str(room.get_connection(Direction.DOWN)), TEXT_COLOR, TEXT_BG_COLOR)
             font.render_to(surface, astuple(origin + Point(tile_size * 2, tile_size)), str(room.get_connection(Direction.RIGHT)), TEXT_COLOR, TEXT_BG_COLOR)
+
+            end = Point.max(origin, end)
+
+        assert self.room is not None
+        assert self.room.prefab is not None
+        font.render_to(surface, astuple(Point(0, end.y + tile_size * 3.5)), f"Room: {self.room.prefab.name}", TEXT_COLOR, TEXT_BG_COLOR)

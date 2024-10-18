@@ -6,6 +6,7 @@ from ..support.Direction import Direction
 from ..support.keys import KEY_COLORS, MAX_KEY_TYPE
 from ..support.Point import Point
 from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
+from .RoomPrefabRegistry import RoomPrefabRegistry
 
 
 class ProgressionMarker:
@@ -45,6 +46,7 @@ class ProgressionMarker:
 
 @dataclass(kw_only=True)
 class MapGenerator:
+    room_prefabs: RoomPrefabRegistry
     max_rooms: int = 10
     max_width: int | None = None
     max_height: int | None = None
@@ -111,7 +113,7 @@ class MapGenerator:
             assert position not in self._rooms
             self._rooms[position] = room
 
-            print(f"Added room at {position}, current size is not {len(self._rooms)} at {self._max_x - self._min_x + 1} x {self._max_y - self._min_y + 1}")
+            print(f"Added room at {position}, current size is now {len(self._rooms)} at {self._max_x - self._min_x + 1} x {self._max_y - self._min_y + 1}")
 
             return room
 
@@ -197,3 +199,13 @@ class MapGenerator:
                 # Random chance to switch to a different branch
                 if random_source.random() < self.sprawl_chance:
                     break
+
+        for room in self._rooms.values():
+            debug: list[str] = []
+            prefabs = self.room_prefabs.find_rooms("default", requirements=room, debug_info=debug)
+            if len(prefabs) == 0:
+                print(f"Failed to find prefab for room {room}")
+                print("\n".join(debug))
+                room.prefab = self.room_prefabs.rooms_by_group["fallback"][0]
+                continue
+            room.prefab = random_source.choice(prefabs)

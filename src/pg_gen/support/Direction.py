@@ -13,3 +13,10 @@ class Direction(IntEnum):
 
     def invert(self):
         return Direction((self + 2) % 4)
+
+    def flipX(self, flip=True):
+        if not flip:
+            return self
+        if self == Direction.RIGHT or self == Direction.LEFT:
+            return self.invert()
+        return self

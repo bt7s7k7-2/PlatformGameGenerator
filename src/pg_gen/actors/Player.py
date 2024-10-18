@@ -77,6 +77,7 @@ class Player(InputClient, SpriteActor):
         for item in self._inventory:
             if item is not None:
                 item.transfer_world(new_world)
+        self.curr_climbable = None
 
     def update(self, delta: float):
         self.world.check_triggers(self)
@@ -111,6 +112,9 @@ class Player(InputClient, SpriteActor):
 
                         if self._input.down:
                             self.position += Point.DOWN * CLIMB_VELOCITY * delta
+                            max_y = self.curr_climbable.position.y + self.curr_climbable.size.y - 1
+                            if self.position.y > max_y:
+                                self.position = Point(self.position.x, max_y)
 
                     if self._input.left:
                         self.flip = False

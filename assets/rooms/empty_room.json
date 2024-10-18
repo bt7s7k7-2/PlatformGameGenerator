@@ -1,4 +1,9 @@
 {
+    "$config": {
+        "groups": [
+            "dev"
+        ]
+    },
     "actors": [
         {
             "pos": {

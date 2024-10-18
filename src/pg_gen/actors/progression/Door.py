@@ -4,7 +4,6 @@ from enum import Enum
 from ...game_core.Camera import CameraClient
 from ...game_core.ResourceClient import ResourceClient
 from ...generation.RoomInfo import NO_KEY, RoomInfo
-from ...level_editor.ActorRegistry import ActorRegistry
 from ...support.keys import KEY_COLORS
 from ...support.Point import Point
 from ...world.Actor import Actor
@@ -70,6 +69,3 @@ class Door(ResourceClient, CameraClient):
             world.remove_actor(self)
             self.collision_flags = CollisionFlags(0)
             world.add_actor(self)
-
-
-ActorRegistry.register_actor(Door)

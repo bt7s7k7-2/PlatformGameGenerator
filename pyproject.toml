@@ -15,6 +15,7 @@ build-backend = "hatchling.build"
 start = "pg_gen:main"
 start-gym = "gymnasium_int:main"
 start-editor = "pg_gen:start_editor"
+format-rooms = "pg_gen:format_room_files"
 
 [tool.rye]
 managed = true
