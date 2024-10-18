@@ -23,6 +23,7 @@ class ActorType:
 class ActorRegistry:
 
     _types: Dict[str, ActorType] = {}
+    _types_array: list[tuple[str, ActorType]] = []
 
     @staticmethod
     def find_actor_type(name: str):
@@ -30,7 +31,7 @@ class ActorRegistry:
 
     @staticmethod
     def get_actor_types():
-        return ActorRegistry._types.items()
+        return ActorRegistry._types_array
 
     @staticmethod
     def register_actor[T: Actor](type: Type[T], /, suffix: str | None = None, name_override: str | None = None, default_value: T | None = None):
@@ -55,3 +56,5 @@ class ActorRegistry:
                 relative_path = path.relpath(file, curr_dir)
                 module_import = relative_path.replace("../", "..").replace("/", ".")[:-3]
                 import_module(module_import, __package__)
+
+        ActorRegistry._types_array = sorted([(name, value) for name, value in ActorRegistry._types.items()], key=lambda x: x[0])
