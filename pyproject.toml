@@ -3,7 +3,7 @@ name = "pg-gen"
 version = "0.1.0"
 description = "Add your description here"
 authors = [{ name = "Branislav Trstenský", email = "bt7s7k7@hotmail.sk" }]
-dependencies = ["pygame>=2.6.0"]
+dependencies = ["pygame>=2.6.0", "gymnasium>=1.0.0"]
 readme = "README.md"
 requires-python = ">= 3.8"
 
@@ -13,6 +13,7 @@ build-backend = "hatchling.build"
 
 [project.scripts]
 start = "pg_gen:main"
+start-gym = "gymnasium_int:main"
 start-editor = "pg_gen:start_editor"
 
 [tool.rye]

@@ -10,5 +10,15 @@
 #   universal: false
 
 -e file:.
+cloudpickle==3.1.0
+    # via gymnasium
+farama-notifications==0.0.4
+    # via gymnasium
+gymnasium==1.0.0
+    # via pg-gen
+numpy==2.1.2
+    # via gymnasium
 pygame==2.6.0
     # via pg-gen
+typing-extensions==4.12.2
+    # via gymnasium

@@ -1,5 +1,7 @@
 import sys
 
+import pygame
+
 from .actors.Player import Player
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
@@ -13,6 +15,7 @@ from .world.World import World
 
 
 def main():
+    pygame.init()
     ActorRegistry.load_actors()
 
     map_generator = MapGenerator(
@@ -38,6 +41,7 @@ def main():
 
 
 def start_editor():
+    pygame.init()
     ActorRegistry.load_actors()
 
     file_path: str | None = None
