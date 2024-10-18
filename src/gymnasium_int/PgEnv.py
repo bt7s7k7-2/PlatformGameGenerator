@@ -62,7 +62,7 @@ class PgEnv(Env):
         world.add_actor(Player(position=Point(2, 2)))
         self.universe.set_world(world)
 
-        with open("./assets/rooms/empty_room.json", "r") as file:
+        with open("./assets/rooms/empty_room.json", "rt") as file:
             LevelSerializer.deserialize(world, file.read())
 
         observation = self._get_obs()
