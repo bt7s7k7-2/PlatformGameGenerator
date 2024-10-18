@@ -6,11 +6,13 @@ from ..game_core.ResourceClient import ResourceClient
 from ..level_editor.ActorRegistry import ActorRegistry
 from ..support.Point import Point
 from ..world.CollisionFlags import CollisionFlags
+from ..world.SpriteLayer import SpriteLayer
 
 
 @dataclass
 class Wall(CameraClient, ResourceClient):
     collision_flags: CollisionFlags = field(default=CollisionFlags.STATIC)
+    layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
 
     @override
     def draw(self):
@@ -20,6 +22,7 @@ class Wall(CameraClient, ResourceClient):
 @dataclass
 class WallSlope(CameraClient, ResourceClient):
     collision_flags: CollisionFlags = field(default=CollisionFlags.STATIC)
+    layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
 
     horizontal: bool = False
     invert: bool = False

@@ -1,8 +1,9 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ...game_core.Camera import CameraClient
 from ...game_core.ResourceClient import ResourceClient
 from ...support.Color import Color
+from ...world.SpriteLayer import SpriteLayer
 
 
 @dataclass
@@ -11,6 +12,7 @@ class SpriteActor(ResourceClient, CameraClient):
     flip = False
     sprite: str | None = None
     debug_draw_colliders: bool = False
+    layer: SpriteLayer = field(default=SpriteLayer.NORMAL)
 
     def draw(self):
         if self.sprite is None:
