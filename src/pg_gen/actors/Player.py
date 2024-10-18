@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .progression.Climbable import Climbable
     from ..world.World import World
 
-from ..support.constants import AIR_ACCELERATION, AIR_DRAG, CLIMB_VELOCITY, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE
+from ..support.constants import AIR_ACCELERATION, AIR_DRAG, CLIMB_VELOCITY, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE, SLIDE_VELOCITY
 from ..support.Point import Point
 from .support.InventoryItem import InventoryItem
 
@@ -102,11 +102,15 @@ class Player(InputClient, SpriteActor):
                 else:
 
                     # Only allow climbing up if we are not on a slide only climbable
-                    if self._input.up and not (self.climb_state & ClimbState.SLIDING):
-                        self.position += Point.UP * CLIMB_VELOCITY * delta
+                    if self.climb_state & ClimbState.SLIDING:
+                        if self._input.down:
+                            self.position += Point.DOWN * SLIDE_VELOCITY * delta
+                    else:
+                        if self._input.up:
+                            self.position += Point.UP * CLIMB_VELOCITY * delta
 
-                    if self._input.down:
-                        self.position += Point.DOWN * CLIMB_VELOCITY * delta
+                        if self._input.down:
+                            self.position += Point.DOWN * CLIMB_VELOCITY * delta
 
                     if self._input.left:
                         self.flip = False
@@ -122,7 +126,7 @@ class Player(InputClient, SpriteActor):
             self.climb_state = ClimbState.CLIMBING
             self._is_grounded = False
             if self.curr_climbable.slide_only:
-                self.climb_state = ClimbState.SLIDING
+                self.climb_state |= ClimbState.SLIDING
 
             # Force X position to be center of the climbable
             self.position = self.position.down() + self.curr_climbable.position.right()

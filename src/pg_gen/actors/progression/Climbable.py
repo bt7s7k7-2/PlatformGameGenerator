@@ -3,6 +3,7 @@ from typing import override
 
 from ...game_core.Camera import CameraClient
 from ...game_core.ResourceClient import ResourceClient
+from ...level_editor.ActorRegistry import ActorRegistry
 from ...support.Point import Point
 from ...world.Actor import Actor
 from ...world.CollisionFlags import CollisionFlags
@@ -23,3 +24,7 @@ class Climbable(CameraClient, ResourceClient):
         if isinstance(trigger, Player):
             trigger.curr_climbable = self
         return super().on_trigger(trigger)
+
+
+ActorRegistry.register_actor(Climbable, name_override="Ladder", default_value=Climbable(sprite="ladder_sprite"))
+ActorRegistry.register_actor(Climbable, name_override="Pole", default_value=Climbable(sprite="pole_sprite", slide_only=True))
