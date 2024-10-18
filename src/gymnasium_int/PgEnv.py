@@ -10,16 +10,20 @@ from pg_gen.game_core.GameLoop import GameLoop
 from pg_gen.game_core.InputState import InputState
 from pg_gen.game_core.InteractiveGameLoop import InteractiveGameLoop
 from pg_gen.game_core.Universe import Universe
+from pg_gen.level_editor.LevelSerializer import LevelSerializer
 from pg_gen.support.constants import CAMERA_SCALE, ROOM_HEIGHT, ROOM_WIDTH
+from pg_gen.support.Point import Point
 from pg_gen.world.World import World
 
 RenderMode = Literal["human"] | Literal["rgb_array"]
 
 
 class PgEnv(Env):
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 25}
 
-    non_interactive_time_per_iteration = 0.1
+    @property
+    def time_per_frame(self):
+        return 1 / self.metadata["render_fps"]
 
     def __init__(self, render_mode: RenderMode = "rgb_array"):
         self.window_size = 512  # The size of the PyGame window
@@ -55,8 +59,11 @@ class PgEnv(Env):
 
         self.universe = Universe(None)
         world = World(self.universe)
-        world.add_actor(Player())
+        world.add_actor(Player(position=Point(2, 2)))
         self.universe.set_world(world)
+
+        with open("./assets/rooms/empty_room.json", "r") as file:
+            LevelSerializer.deserialize(world, file.read())
 
         observation = self._get_obs()
         info = self._get_info()
@@ -70,6 +77,7 @@ class PgEnv(Env):
         assert self.universe is not None
 
         input_state = self.universe.di.inject(InputState)
+        input_state.clear()
         for index, name in enumerate(self._action_to_direction):
             action_value = action[index]
             input_state.__setattr__(name, True if action_value else False)
@@ -96,16 +104,20 @@ class PgEnv(Env):
             if self.game_loop is None:
                 self.game_loop = InteractiveGameLoop(self.universe)
                 self.game_loop.allow_termination = False
+                self.game_loop.disable_input_clearing = True
 
             assert isinstance(self.game_loop, InteractiveGameLoop)
-            self.terminated = self.game_loop.run_frame()
+            self.terminated = self.game_loop.handle_input()
+            self.game_loop.update_and_render(self.time_per_frame)
+            pygame.display.update()
+            self.game_loop.fps_keeper.tick(self.metadata["render_fps"])
         elif self.render_mode == "rgb_array":
             if self.game_loop is None:
                 pygame.init()
                 surface = pygame.display.set_mode((CAMERA_SCALE * ROOM_WIDTH, CAMERA_SCALE * ROOM_HEIGHT))
                 self.game_loop = GameLoop(surface, self.universe)
 
-            self.game_loop.update_and_render(self.non_interactive_time_per_iteration)
+            self.game_loop.update_and_render(self.time_per_frame)
 
             return np.transpose(
                 pygame.surfarray.pixels3d(self.game_loop.surface),

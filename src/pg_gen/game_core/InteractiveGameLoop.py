@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 class InteractiveGameLoop(GameLoop):
 
     allow_termination = True
+    disable_input_clearing = False
 
     def run(self):
         while True:
@@ -22,7 +23,8 @@ class InteractiveGameLoop(GameLoop):
                 return
 
     def handle_input(self):
-        self.input.events.clear()
+        if not self.disable_input_clearing:
+            self.input.clear()
 
         for event in pygame.event.get():
             self.input.events.append(event)
@@ -36,11 +38,11 @@ class InteractiveGameLoop(GameLoop):
 
         self.input.keys = keys
 
-        self.input.up = keys[pygame.K_w]
-        self.input.left = keys[pygame.K_a]
-        self.input.right = keys[pygame.K_d]
-        self.input.down = keys[pygame.K_s]
-        self.input.jump = keys[pygame.K_SPACE]
+        self.input.up |= keys[pygame.K_w]
+        self.input.left |= keys[pygame.K_a]
+        self.input.right |= keys[pygame.K_d]
+        self.input.down |= keys[pygame.K_s]
+        self.input.jump |= keys[pygame.K_SPACE]
         return False
 
     def update_time(self):
