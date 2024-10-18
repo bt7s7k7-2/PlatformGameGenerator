@@ -16,9 +16,15 @@ class Enemy(Actor):
     def update(self, delta: float):
         direction_vector = Point.from_direction(self.direction)
         collision_check_size = Point.ONE * 0.1
-        collision_check_point = self.position + self.size * 0.5 + direction_vector * self.size * 0.5 - collision_check_size * 0.5
-        will_collide = self.world.check_rect(collision_check_point, collision_check_size)
-        if will_collide:
+
+        def check(vector: Point):
+            collision_check_point = self.position + self.size * 0.5 + vector * self.size * 0.5 - collision_check_size * 0.5
+            return self.world.check_rect(collision_check_point, collision_check_size)
+
+        will_collide = check(direction_vector)
+        will_fall = not check(direction_vector * 0.5 + Point.DOWN)
+
+        if will_collide or will_fall:
             self.direction = self.direction.invert()
             direction_vector = Point.from_direction(self.direction)
 
