@@ -27,6 +27,9 @@ class Actor:
     def on_added(self): ...
     def on_removed(self): ...
 
+    def flip_x(self):
+        pass
+
     def on_trigger(self, trigger: "Actor"): ...
 
     def get_colliders(self):

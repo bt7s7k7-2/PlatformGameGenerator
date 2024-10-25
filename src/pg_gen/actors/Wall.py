@@ -29,6 +29,13 @@ class WallSlope(CameraClient, ResourceClient):
     reverse: bool = False
 
     @override
+    def flip_x(self):
+        if self.horizontal:
+            self.invert = not self.invert
+        else:
+            self.reverse = not self.reverse
+
+    @override
     def get_colliders(self):
         start = self.position
         extend = (self.size).dominant_size() * 2

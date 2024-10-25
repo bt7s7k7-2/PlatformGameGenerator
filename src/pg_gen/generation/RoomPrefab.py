@@ -97,6 +97,7 @@ class RoomPrefab:
                 room_center = room_width * 0.5
                 center = Point(room_center - (center.x - room_center), center.y)
                 actor.position = center - actor.size * 0.5
+                actor.flip_x()
 
             if isinstance(actor, KeyPlaceholder):
                 door_type = room.provides_key
