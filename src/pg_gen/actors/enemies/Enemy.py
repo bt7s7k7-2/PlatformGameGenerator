@@ -36,6 +36,7 @@ class Enemy(Actor):
             direction_vector = Point.from_direction(self.direction)
 
         self.position += direction_vector * self.speed * delta
+        super().update(delta)
 
     def on_trigger(self, trigger: Actor):
         if isinstance(trigger, Player):

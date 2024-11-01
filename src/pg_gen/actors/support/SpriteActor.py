@@ -13,13 +13,25 @@ class SpriteActor(ResourceClient, CameraClient):
     sprite: str | None = None
     debug_draw_colliders: bool = False
     layer: SpriteLayer = field(default=SpriteLayer.NORMAL)
+    animation_speed: float = 0.0
+    animation_timer: float = 0.0
+
+    def update(self, delta: float):
+        if self.animation_speed != 0:
+            self.animation_timer += delta * self.animation_speed
+        return super().update(delta)
 
     def draw(self):
         if self.sprite is None:
             return
 
         sprite = self._resource_provider.__getattribute__(self.sprite)
-        self._camera.draw_texture(self.position, self.size, sprite, rotate=self.rotation, flip_x=self.flip)
+        if isinstance(sprite, list):
+            if self.animation_timer >= len(sprite):
+                self.animation_timer = self.animation_timer % 1
+            self._camera.draw_texture(self.position, self.size, sprite[int(self.animation_timer)], rotate=self.rotation, flip_x=self.flip)
+        else:
+            self._camera.draw_texture(self.position, self.size, sprite, rotate=self.rotation, flip_x=self.flip)
 
         if self.debug_draw_colliders:
             for position, size in self.get_colliders():

@@ -9,7 +9,12 @@ from .Enemy import Enemy
 
 
 @dataclass
-class RollingEnemy(Enemy, SpriteActor):
+class SimpleEnemy(Enemy, SpriteActor):
+    pass
+
+
+@dataclass
+class RollingEnemy(SimpleEnemy):
     def update(self, delta: float):
         rotation_speed = self.speed * 100
         self.rotation += delta * rotation_speed if self.direction == Direction.LEFT else -delta * rotation_speed
@@ -17,7 +22,7 @@ class RollingEnemy(Enemy, SpriteActor):
 
 
 @dataclass
-class FloatingEnemy(Enemy, SpriteActor):
+class FloatingEnemy(SimpleEnemy):
     time = 0.0
     can_fall: bool = field(default=False)
 
@@ -33,3 +38,4 @@ class FloatingEnemy(Enemy, SpriteActor):
 
 ActorRegistry.register_actor(RollingEnemy, name_override="Skull:roll", default_value=RollingEnemy(sprite="skull_sprite", collider_size=0.25))
 ActorRegistry.register_actor(FloatingEnemy, name_override="Bobber", default_value=FloatingEnemy(sprite="bobber_sprite", collider_size=0.25, speed=3))
+ActorRegistry.register_actor(SimpleEnemy, name_override="Blocker", default_value=SimpleEnemy(sprite="blocker", collider_size=0.25, speed=0, animation_speed=2))

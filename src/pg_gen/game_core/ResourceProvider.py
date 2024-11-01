@@ -25,4 +25,6 @@ class ResourceProvider:
         self.fire = [spritesheet.slice(Point(x * 16, 48), Point(16, 16)) for x in range(4)]
         self.fire = [*reversed(self.fire)]
 
+        self.blocker = [spritesheet.slice(Point(64, x * 16), Point(16, 16)) for x in range(2)]
+
     __singleton_service__ = True
