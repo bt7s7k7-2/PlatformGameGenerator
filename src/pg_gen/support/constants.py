@@ -12,7 +12,7 @@ ROOM_HEIGHT = 11
 AIR_DRAG = 25
 
 TEXT_COLOR = Color.WHITE.to_pygame_color()
-HIGHLIGHT_1_COLOR = (Color.GREEN * 0.75).to_pygame_color()
-HIGHLIGHT_2_COLOR = (Color.RED * 0.75).to_pygame_color()
-TEXT_BG_COLOR = Color.BLACK.to_pygame_color(opacity=191)
+HIGHLIGHT_1_COLOR = Color.GREEN.to_pygame_color()
+HIGHLIGHT_2_COLOR = Color.RED.to_pygame_color()
+TEXT_BG_COLOR = Color.BLACK.to_pygame_color(opacity=127)
 TEXT_SELECTION_COLOR = Color.BLUE.mix(Color.CYAN, 0.5).to_pygame_color(opacity=191)

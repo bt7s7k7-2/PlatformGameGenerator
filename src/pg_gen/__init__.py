@@ -26,10 +26,11 @@ def main():
     room_registry.load("./assets/rooms")
 
     map_generator = MapGenerator(
-        max_width=4,
-        max_height=4,
+        max_width=50,
+        max_height=50,
         sprawl_chance=0.5,
         room_prefabs=room_registry,
+        max_rooms=500,
     )
     universe = Universe(map_generator)
 

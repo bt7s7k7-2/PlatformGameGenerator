@@ -45,4 +45,4 @@ def find_index_by_predicate[T](elements: Iterable[T], predicate: Callable[[T], b
 
 
 def lerp(a: float, b: float, t: float):
-    return b * t + a * (t - 1)
+    return b * t + a * (1 - t)

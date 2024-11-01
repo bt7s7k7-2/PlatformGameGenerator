@@ -18,22 +18,29 @@ class Camera:
     zoom: float = CAMERA_SCALE
     offset: Point = Point.ZERO
 
+    @cached_property
+    def screen_size(self):
+        return Point(*self.screen.get_size())
+
     def world_to_screen(self, point: Point):
         return (point - self.offset) * self.zoom
 
     def screen_to_world(self, point: Point):
         return point * (1 / self.zoom) + self.offset
 
-    def draw_placeholder_raw(self, position: Point, size: Point, color: Color, opacity=255):
+    def draw_placeholder_raw(self, position: Point, size: Point, color: Color, opacity=255, width=0):
         if opacity < 255:
             surface = Surface(astuple(size), flags=pygame.SRCALPHA)
-            surface.fill(color.to_pygame_color(opacity))
+            if width != 0:
+                pygame.draw.rect(surface, color.to_pygame_color(opacity), Point.ZERO.to_pygame_rect(size), width)
+            else:
+                surface.fill(color.to_pygame_color(opacity))
             self.screen.blit(surface, position.to_pygame_rect(size), Point.ZERO.to_pygame_rect(size))
         else:
-            pygame.draw.rect(self.screen, color.to_pygame_color(), position.to_pygame_rect(size))
+            pygame.draw.rect(self.screen, color.to_pygame_color(), position.to_pygame_rect(size), width)
 
-    def draw_placeholder(self, position: Point, size: Point, color: Color, opacity=255):
-        self.draw_placeholder_raw(self.world_to_screen(position), size * self.zoom, color, opacity)
+    def draw_placeholder(self, position: Point, size: Point, color: Color, opacity=255, width=0):
+        self.draw_placeholder_raw(self.world_to_screen(position), size * self.zoom, color, opacity, width)
 
     def draw_texture_raw(self, position: Point, size: Point, texture: Texture, color: Color = Color.WHITE, repeat=Point.ONE, rotate=0.0, flip_x=False):
         surface = Surface(astuple(texture.size), flags=pygame.SRCALPHA)
