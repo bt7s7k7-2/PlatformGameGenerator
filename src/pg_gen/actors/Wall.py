@@ -4,6 +4,7 @@ from typing import override
 from ..game_core.Camera import CameraClient
 from ..game_core.ResourceClient import ResourceClient
 from ..level_editor.ActorRegistry import ActorRegistry
+from ..support.Color import Color
 from ..support.Point import Point
 from ..world.CollisionFlags import CollisionFlags
 from ..world.SpriteLayer import SpriteLayer
@@ -13,10 +14,11 @@ from ..world.SpriteLayer import SpriteLayer
 class Wall(CameraClient, ResourceClient):
     collision_flags: CollisionFlags = field(default=CollisionFlags.STATIC)
     layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
+    tint: Color = Color.WHITE
 
     @override
     def draw(self):
-        self._camera.draw_texture(self.position, Point.ONE, self._resource_provider.wall_sprite, repeat=self.size)
+        self._camera.draw_texture(self.position, Point.ONE, self._resource_provider.wall_sprite, repeat=self.size, color=self.tint)
 
 
 @dataclass
