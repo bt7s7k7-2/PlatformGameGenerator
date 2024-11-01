@@ -8,6 +8,7 @@ from .Texture import Texture
 class ResourceProvider:
     def __init__(self) -> None:
         self.font = pygame.freetype.SysFont("Arial", 12)
+        self.display_font = pygame.freetype.Font("./assets/Micro5/Micro5-Regular.ttf", 120)
 
         spritesheet = Texture(
             pygame.image.load("./assets/spritesheet.png").convert_alpha(),

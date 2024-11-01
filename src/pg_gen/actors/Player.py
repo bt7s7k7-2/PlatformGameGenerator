@@ -3,15 +3,19 @@ from enum import Flag
 from math import copysign
 from typing import TYPE_CHECKING, Callable, List
 
+import pygame
+
 from ..game_core.InputClient import InputClient
+from ..support.Color import Color
 from ..support.support import find_index_by_predicate
+from .support.GuiElement import GuiElement
 from .support.SpriteActor import SpriteActor
 
 if TYPE_CHECKING:
     from .progression.Climbable import Climbable
     from ..world.World import World
 
-from ..support.constants import AIR_ACCELERATION, AIR_DRAG, CLIMB_VELOCITY, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE, SLIDE_VELOCITY
+from ..support.constants import AIR_ACCELERATION, AIR_DRAG, CLIMB_VELOCITY, GRAVITY, GROUND_VELOCITY, JUMP_IMPULSE, SLIDE_VELOCITY, TEXT_COLOR
 from ..support.Point import Point
 from .support.InventoryItem import InventoryItem
 
@@ -23,7 +27,7 @@ class ClimbState(Flag):
 
 
 @dataclass
-class Player(InputClient, SpriteActor):
+class Player(InputClient, GuiElement, SpriteActor):
     size: Point = field(default=Point(1, 1))
     sprite: str = field(default="player_sprite")
 
@@ -36,6 +40,7 @@ class Player(InputClient, SpriteActor):
 
     curr_climbable: "Climbable | None" = None
     climb_state: ClimbState = ClimbState(0)
+    score = 0
 
     def take_damage(self):
         self.position = self._spawn_point
@@ -48,6 +53,20 @@ class Player(InputClient, SpriteActor):
     def on_removed(self):
         self.universe.di.unregister(Player, self)
 
+    def draw_gui(self):
+        text = str(self.score).zfill(6)
+        position = self._camera.world_to_screen(Point(11, 0.25))
+        text_buffer, _ = self._resource_provider.display_font.render(text=text, fgcolor=TEXT_COLOR)
+        text_size = Point(*text_buffer.get_size())
+        gradient_splits = 5
+        for y in range(gradient_splits):
+            color = Color.RED.mix(Color.YELLOW, 0.25 + (y / gradient_splits) * 0.5)
+            text_buffer.fill(color.to_pygame_color(), (text_size.down() * y / gradient_splits).to_pygame_rect(text_size * Point(1, 1 / gradient_splits)), pygame.BLEND_RGB_MULT)
+
+        self._camera.screen.blit(text_buffer, position.to_pygame_coordinates())
+
+        return super().draw_gui()
+
     def add_inventory_item(self, item: InventoryItem):
         if None not in self._inventory:
             # No free slot in inventory
@@ -57,6 +76,7 @@ class Player(InputClient, SpriteActor):
         item.position = Point(free_slot, 0)
         self._inventory[free_slot] = item
         self.world.add_actor(item)
+        self.score += 10
 
         return True
 

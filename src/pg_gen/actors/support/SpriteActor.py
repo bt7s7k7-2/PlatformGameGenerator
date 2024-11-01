@@ -36,3 +36,5 @@ class SpriteActor(ResourceClient, CameraClient):
         if self.debug_draw_colliders:
             for position, size in self.get_colliders():
                 self._camera.draw_placeholder(position, size, Color.GREEN)
+
+        return super().draw()
