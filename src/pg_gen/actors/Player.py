@@ -37,17 +37,22 @@ class Player(InputClient, GuiElement, SpriteActor):
     _is_grounded: bool = False
     _did_jump: bool = False
     _spawn_point: Point = Point.ZERO
+    _spawn_state: ClimbState = ClimbState(0)
 
     curr_climbable: "Climbable | None" = None
     climb_state: ClimbState = ClimbState(0)
     score = 0
 
-    def take_damage(self):
+    def respawn(self):
         self.position = self._spawn_point
-        pass
+        self.climb_state = self._spawn_state
+
+    def take_damage(self):
+        self.universe.queue_task(self.respawn)
 
     def on_added(self):
         self._spawn_point = self.position
+        self._spawn_state = self.climb_state
         self.universe.di.register(Player, self)
 
     def on_removed(self):
@@ -100,6 +105,9 @@ class Player(InputClient, GuiElement, SpriteActor):
         self.curr_climbable = None
 
     def update(self, delta: float):
+        if self.world.paused:
+            return
+
         self.world.check_triggers(self)
 
         should_jump = self._input.jump and not self._did_jump
