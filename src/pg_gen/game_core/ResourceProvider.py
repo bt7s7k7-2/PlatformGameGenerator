@@ -22,6 +22,7 @@ class ResourceProvider:
         self.skull_sprite = spritesheet.slice(Point(32, 32), Point(16, 16))
         self.player_sprite = spritesheet.slice(Point(48, 0), Point(16, 16))
         self.bobber_sprite = spritesheet.slice(Point(0, 32), Point(16, 16))
+        self.gem_sprite = spritesheet.slice(Point(16, 32), Point(16, 16))
 
         self.fire = [spritesheet.slice(Point(x * 16, 48), Point(16, 16)) for x in range(4)]
         self.fire = [*reversed(self.fire)]
