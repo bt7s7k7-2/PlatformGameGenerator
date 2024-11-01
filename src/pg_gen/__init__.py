@@ -5,6 +5,7 @@ from os import path, walk
 import pygame
 
 from .actors.Player import Player
+from .debug.MapView import MapView
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
 from .generation.MapGenerator import MapGenerator
@@ -42,6 +43,8 @@ def main():
     room_controller = RoomController(room=map_generator.get_room(Point.ZERO))
     world.add_actor(room_controller)
     room_controller.initialize_room()
+
+    room_controller.world.add_actor(MapView())
 
     game_loop = InteractiveGameLoop(universe)
     game_loop.run()

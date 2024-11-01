@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Callable, List
 
 if TYPE_CHECKING:
+    from ..world.ServiceActor import ServiceActor
     from ..generation.MapGenerator import MapGenerator
     from ..world.World import World
 
@@ -30,12 +31,18 @@ class Universe:
         for actor in world.get_actors():
             actor.on_added()
 
+        for actor in self._service_actors:
+            actor.transfer_world(world)
+
     def execute_pending_tasks(self):
         while len(self._pending_tasks) > 0:
             tasks = self._pending_tasks
             self._pending_tasks = []
             for task in tasks:
                 task()
+
+    def register_service_actor(self, actor: "ServiceActor"):
+        self._service_actors.append(actor)
 
     def queue_task(self, task: Callable[[], None]):
         self._pending_tasks.append(task)
@@ -44,4 +51,5 @@ class Universe:
         self.di = DependencyInjection()
         self.map = map
         self._pending_tasks: List[Callable[[], None]] = []
+        self._service_actors: List["ServiceActor"] = []
         pass

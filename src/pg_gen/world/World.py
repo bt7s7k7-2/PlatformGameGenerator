@@ -18,9 +18,11 @@ class World:
         return self._actors
 
     def add_actor(self, actor: "Actor"):
+        is_new = actor.universe is None
         actor.world = self
         actor.universe = self.universe
-        actor.on_created()
+        if is_new:
+            actor.on_created()
         if self.active:
             actor.on_added()
 
