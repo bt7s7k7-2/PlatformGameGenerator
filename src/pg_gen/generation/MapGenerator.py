@@ -202,7 +202,7 @@ class MapGenerator:
 
         for room in self._rooms.values():
             debug: list[str] = []
-            prefabs = self.room_prefabs.find_rooms("default", requirements=room, debug_info=debug)
+            prefabs = self.room_prefabs.find_rooms("spawn" if room == root_room else "default", requirements=room, debug_info=debug)
             if len(prefabs) == 0:
                 print(f"Failed to find prefab for room {room}")
                 print("\n".join(debug))

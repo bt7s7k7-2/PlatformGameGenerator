@@ -1,13 +1,13 @@
 {
     "$config": {
+        "allow_flip": true,
         "groups": [
             "default"
         ],
+        "key": true,
         "left": "any",
         "right": "any",
-        "up": "door",
-        "key": true,
-        "allow_flip": true
+        "up": "door"
     },
     "actors": [
         {
