@@ -15,6 +15,7 @@ class SpriteActor(ResourceClient, CameraClient):
     layer: SpriteLayer = field(default=SpriteLayer.NORMAL)
     animation_speed: float = 0.0
     animation_timer: float = 0.0
+    tint: Color = Color.WHITE
 
     def update(self, delta: float):
         if self.animation_speed != 0:
@@ -29,9 +30,9 @@ class SpriteActor(ResourceClient, CameraClient):
         if isinstance(sprite, list):
             if self.animation_timer >= len(sprite):
                 self.animation_timer = self.animation_timer % 1
-            self._camera.draw_texture(self.position, self.size, sprite[int(self.animation_timer)], rotate=self.rotation, flip_x=self.flip)
+            self._camera.draw_texture(self.position, self.size, sprite[int(self.animation_timer)], rotate=self.rotation, flip_x=self.flip, color=self.tint)
         else:
-            self._camera.draw_texture(self.position, self.size, sprite, rotate=self.rotation, flip_x=self.flip)
+            self._camera.draw_texture(self.position, self.size, sprite, rotate=self.rotation, flip_x=self.flip, color=self.tint)
 
         if self.debug_draw_colliders:
             for position, size in self.get_colliders():

@@ -2,11 +2,11 @@ from copy import copy
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ..actors.support.PersistentObject import PersistentObject
-
 from ..actors.Placeholders import DoorPlaceholder, KeyPlaceholder, WallPlaceholder
+from ..actors.PredicatePlaceholder import PredicatePlaceholder
 from ..actors.progression.Door import Door
 from ..actors.progression.Key import Key
+from ..actors.support.PersistentObject import PersistentObject
 from ..actors.Wall import Wall
 from ..level_editor.LevelSerializer import LevelSerializer
 from ..support.constants import ROOM_WIDTH
@@ -100,6 +100,15 @@ class RoomPrefab:
                 center = Point(room_center - (center.x - room_center), center.y)
                 actor.position = center - actor.size * 0.5
                 actor.flip_x()
+
+            if isinstance(actor, PredicatePlaceholder):
+                actor.init_persistent_object(room, get_next_flag())
+                replacement = actor.evaluate_predicate()
+                if replacement is not None:
+                    if isinstance(replacement, PersistentObject):
+                        replacement.init_persistent_object(room, get_next_flag())
+                    world.add_actor(replacement)
+                return False
 
             if isinstance(actor, PersistentObject):
                 actor.init_persistent_object(room, get_next_flag())
