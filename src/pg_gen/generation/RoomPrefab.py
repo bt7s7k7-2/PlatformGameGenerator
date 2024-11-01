@@ -2,6 +2,8 @@ from copy import copy
 from dataclasses import dataclass, field
 from enum import Enum
 
+from ..actors.support.PersistentObject import PersistentObject
+
 from ..actors.Placeholders import DoorPlaceholder, KeyPlaceholder, WallPlaceholder
 from ..actors.progression.Door import Door
 from ..actors.progression.Key import Key
@@ -99,12 +101,15 @@ class RoomPrefab:
                 actor.position = center - actor.size * 0.5
                 actor.flip_x()
 
+            if isinstance(actor, PersistentObject):
+                actor.init_persistent_object(room, get_next_flag())
+                return
+
             if isinstance(actor, KeyPlaceholder):
                 door_type = room.provides_key
                 if door_type != NO_KEY:
                     world.add_actor(Key(position=actor.position, key_type=door_type, room=room))
-                actor.remove()
-                return
+                return False
 
             if isinstance(actor, DoorPlaceholder):
                 door_type = room.get_connection(actor.direction.flipX(flip))
@@ -117,15 +122,13 @@ class RoomPrefab:
                             flag_index=get_next_flag(),
                         )
                     )
-                actor.remove()
-                return
+                return False
 
             if isinstance(actor, WallPlaceholder):
                 door_type = room.get_connection(actor.direction.flipX(flip))
                 if door_type == NOT_CONNECTED:
                     world.add_actor(Wall(position=actor.position, size=actor.size))
-                actor.remove()
-                return
+                return False
 
         LevelSerializer.deserialize(world, self.data, handle_actor)
 

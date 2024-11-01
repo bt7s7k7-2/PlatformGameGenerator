@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING, Callable, Dict, List
+from typing import TYPE_CHECKING, Callable, Dict, List, Literal
 
 from ..support.Point import Point
 from ..world.Actor import Actor
@@ -26,7 +26,7 @@ class LevelSerializer:
         return json.dumps(data, indent=4, sort_keys=True)
 
     @staticmethod
-    def deserialize(world: "World", raw_data: str, spawn_callback: Callable[[Actor, ActorType], None] | None = None):
+    def deserialize(world: "World", raw_data: str, spawn_callback: Callable[[Actor, ActorType], Literal[False] | None] | None = None):
         data = json.loads(raw_data)
         actors = data["actors"]
         del data["actors"]
@@ -40,9 +40,10 @@ class LevelSerializer:
             actor.position = position
             actor.size = size
 
-            world.add_actor(actor)
-
             if spawn_callback is not None:
-                spawn_callback(actor, type)
+                if spawn_callback(actor, type) == False:
+                    continue
+
+            world.add_actor(actor)
 
         return data

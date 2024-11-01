@@ -1,15 +1,17 @@
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any
 
 from ...game_core.Camera import CameraClient
 from ...game_core.ResourceClient import ResourceClient
-from ...generation.RoomInfo import NO_KEY, RoomInfo
+from ...generation.RoomInfo import NO_KEY
 from ...support.keys import KEY_COLORS
 from ...support.Point import Point
 from ...world.Actor import Actor
 from ...world.CollisionFlags import CollisionFlags
 from ...world.SpriteLayer import SpriteLayer
 from ..Player import Player
+from ..support.PersistentObject import PersistentObject
 from .Key import KeyItem
 
 
@@ -20,20 +22,20 @@ class DoorState(Enum):
 
 
 @dataclass
-class Door(ResourceClient, CameraClient):
+class Door(ResourceClient, CameraClient, PersistentObject[DoorState]):
     collision_flags: CollisionFlags = field(default=CollisionFlags.STATIC)
     key_type: int = NO_KEY
-    flag_index: int = 0
-    room: "RoomInfo | None" = field(default=None)
     size: Point = field(default=Point(1, 2))
-    state: DoorState = DoorState.CLOSED
     layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
+    state: DoorState = DoorState.CLOSED
+
+    def _get_default_persistent_value(self) -> Any:
+        return DoorState.CLOSED
 
     def on_created(self):
-        if self.room is not None:
-            self.state = self.room.persistent_flags[self.flag_index] or DoorState.CLOSED
-            if self.state != DoorState.CLOSED:
-                self.collision_flags = CollisionFlags(0)
+        self.state = self.persistent_value
+        if self.state != DoorState.CLOSED:
+            self.collision_flags = CollisionFlags(0)
 
     def draw(self):
         color = KEY_COLORS[self.key_type - 1]
@@ -61,8 +63,7 @@ class Door(ResourceClient, CameraClient):
             opened_from_left = self.position.x > trigger.position.x
 
             self.state = DoorState.OPEN_RIGHT if opened_from_left else DoorState.OPEN_LEFT
-            if self.room is not None:
-                self.room.persistent_flags[self.flag_index] = self.state
+            self.persistent_value = self.state
 
             # Remove and insert ourselves from the world so our collision flags get updated
             world = self.world
