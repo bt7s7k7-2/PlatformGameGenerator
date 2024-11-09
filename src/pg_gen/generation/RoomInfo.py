@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any, List, Literal
+
+from ..support.ObjectManifest import ObjectManifest
 
 from ..support.Direction import Direction
 from ..support.Point import Point
@@ -20,6 +22,19 @@ class RoomInfo:
     provides_key: int = NO_KEY
     persistent_flags: List[Any] = field(default_factory=lambda: [], init=False)
     _connections: List[int] = field(default_factory=lambda: [NOT_CONNECTED] * 4, init=False)
+
+    @staticmethod
+    def get_manifest() -> ObjectManifest:
+        key_type = Literal[0, 1]
+        connection_type = Literal[-1, 1, 0]
+
+        return [
+            (("up", [RoomInfo.get_connection, Direction.UP], [RoomInfo.set_connection, Direction.UP]), connection_type),
+            (("left", [RoomInfo.get_connection, Direction.LEFT], [RoomInfo.set_connection, Direction.LEFT]), connection_type),
+            (("down", [RoomInfo.get_connection, Direction.DOWN], [RoomInfo.set_connection, Direction.DOWN]), connection_type),
+            (("right", [RoomInfo.get_connection, Direction.RIGHT], [RoomInfo.set_connection, Direction.RIGHT]), connection_type),
+            ("provides_key", key_type),
+        ]
 
     def get_connection(self, direction: Direction):
         return self._connections[direction]

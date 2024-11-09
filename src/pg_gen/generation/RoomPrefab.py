@@ -72,10 +72,6 @@ class RoomPrefab:
 
     key: bool = False
 
-    left_prefab: str | None = None
-    right_prefab: str | None = None
-    down_prefab: str | None = None
-    up_prefab: str | None = None
     allow_flip = False
 
     def flip(self):
@@ -90,7 +86,7 @@ class RoomPrefab:
 
         return flipped
 
-    def instantiate(self, room: RoomInfo, controller: RoomController, world: World):
+    def instantiate(self, room: RoomInfo, controller: RoomController | None, world: World):
         next_flag = 0
         flip = self._is_flipped
 
@@ -154,6 +150,9 @@ class RoomPrefab:
                 return False
 
         LevelSerializer.deserialize(world, self.data, handle_actor)
+
+        if controller is None:
+            return
 
         for direction, position, size in [
             (Direction.LEFT, Point(-1.5, 2), Point(1, 2)),

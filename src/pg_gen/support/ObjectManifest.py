@@ -1,15 +1,16 @@
 from dataclasses import dataclass
 from enum import Enum
 from functools import partial
-from typing import Any, Callable, override
+from inspect import isclass
+from typing import Any, Callable, Literal, get_origin, override
 
-ObjectManifest = list[tuple[str | tuple[str, list, list], type]]
+ObjectManifest = list[tuple[str | tuple[str, list, list], Any]]
 
 
 @dataclass()
 class AttributeHandle:
     name: str
-    type: type
+    type: Any
     getter: Callable[[], Any]
     setter: Callable[[Any], Any]
 
@@ -40,6 +41,9 @@ class ObjectManifestParser:
     def handle_enum(self, enum_values: dict[str, Enum], attribute: AttributeHandle):
         self.handle_unknown(attribute)
 
+    def handle_atom(self, values: tuple[Any, ...], attribute: AttributeHandle):
+        self.handle_unknown(attribute)
+
     def handle_unknown(self, attribute: AttributeHandle): ...
 
     def parse(self, manifest: list[AttributeHandle]):
@@ -58,7 +62,11 @@ class ObjectManifestParser:
                 self.handle_list(attribute)
                 continue
 
-            if issubclass(type, Enum):
+            if get_origin(type) is Literal:
+                self.handle_atom(type.__args__, attribute)
+                continue
+
+            if isclass(type) and issubclass(type, Enum):
                 elements = type._member_map_
                 self.handle_enum(elements, attribute)
                 continue

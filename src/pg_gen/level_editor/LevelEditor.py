@@ -4,7 +4,6 @@ from typing import Callable, Dict, List, Tuple
 
 import pygame
 
-from ..actors.Player import Player
 from ..actors.support.GuiRenderer import GuiRenderer
 from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
@@ -265,18 +264,13 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
 
     def test_play(self):
         play_world = World(self.universe)
-        x, y = pygame.mouse.get_pos()
+        spawn_position = Point(*pygame.mouse.get_pos()) * (1 / self._camera.zoom) - Point(0.5, 0.5)
+        if self._prefab is None:
+            self._prefab = RoomPrefab(name="", data="")
 
-        def switch_world():
-            self.universe.set_world(play_world)
-
-            LevelSerializer.deserialize(play_world, LevelSerializer.serialize(self._managed_actors, self._managed_actors_types, {}))
-            player = Player()
-            player.position = Point(x, y) * (1 / self._camera.zoom) - player.size * 0.5
-            play_world.add_actor(player)
-            play_world.add_actor(TestPlayController(editor_world=self.world))
-
-        self.universe.queue_task(switch_world)
+        self._prefab.data = self.get_save_data({})
+        test_controller = TestPlayController(self.universe, editor_world=self.world, room_prefab=self._prefab, spawn_position=spawn_position)
+        test_controller.rebuild()
 
     def update(self, delta: float):
         for event in self._input.events:

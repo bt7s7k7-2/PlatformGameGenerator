@@ -2,6 +2,7 @@ import json
 from os import path, walk
 
 from ..support.Direction import Direction
+from ..support.ObjectManifest import ObjectManifestDeserializer
 from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
 from .RoomPrefab import RoomPrefab, RoomPrefabEntrance
 
@@ -66,33 +67,15 @@ class RoomPrefabRegistry:
                 room = RoomPrefab(name, file_content)
                 self.rooms_by_name[name] = room
                 config = raw_data["$config"]
-                allow_flip = False
-                groups = config.get("groups")
-                if groups is not None:
-                    room.groups = groups
+
+                ObjectManifestDeserializer.deserialize(config, room, RoomPrefab.get_manifest())
 
                 for group in room.groups:
                     self.rooms_by_group.setdefault(group, []).append(room)
 
-                room.set_connection(Direction.LEFT, RoomPrefabEntrance.from_string(config.get("left", None)))
-                room.set_connection(Direction.RIGHT, RoomPrefabEntrance.from_string(config.get("right", None)))
-                room.set_connection(Direction.UP, RoomPrefabEntrance.from_string(config.get("up", None)))
-                room.set_connection(Direction.DOWN, RoomPrefabEntrance.from_string(config.get("down", None)))
-
-                room.left_prefab = config.get("left_prefab", None)
-                room.right_prefab = config.get("right_prefab", None)
-                room.up_prefab = config.get("up_prefab", None)
-                room.down_prefab = config.get("down_prefab", None)
-
-                if config.get("allow_flip", False):
-                    allow_flip = True
-
-                if config.get("key", False):
-                    room.key = True
-
                 print(f"Loaded room {room}")
 
-                if allow_flip:
+                if room.allow_flip:
                     flipped = room.flip()
                     self.rooms_by_name[flipped.name] = flipped
                     for group in flipped.groups:

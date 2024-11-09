@@ -53,6 +53,14 @@ class ObjectInput[T](ObjectManifestParser, GuiContainer):
 
     @override
     def handle_enum(self, elements: dict[str, Enum], attribute: AttributeHandle):
+        self._handle_enum(list(elements.items()), attribute)
+
+    @override
+    def handle_atom(self, values: tuple[Any, ...], attribute: AttributeHandle):
+        self._handle_enum(list((str(value), value) for value in values), attribute)
+        pass
+
+    def _handle_enum(self, elements: list[tuple[str, Any]], attribute: AttributeHandle):
         buttons: list[ButtonElement] = []
         host = self._build_host(attribute)
 
@@ -64,7 +72,7 @@ class ObjectInput[T](ObjectManifestParser, GuiContainer):
                     continue
                 other_button.checked = False
 
-        for name, value in elements.items():
+        for name, value in elements:
             button = ButtonElement(font=self.font, text=name)
             button.on_click = partial(on_click, button, value)
             button.checked = attribute.getter() == value
@@ -73,7 +81,7 @@ class ObjectInput[T](ObjectManifestParser, GuiContainer):
 
     @override
     def handle_unknown(self, attribute: AttributeHandle):
-        self._build_host(attribute).children.append(TextElement(font=self.font, color=HIGHLIGHT_2_COLOR, text="?" + type.__name__))
+        self._build_host(attribute).children.append(TextElement(font=self.font, color=HIGHLIGHT_2_COLOR, text="?" + attribute.type.__name__))
 
     def _build_host(self, attribute: AttributeHandle):
         host = GuiContainer(
