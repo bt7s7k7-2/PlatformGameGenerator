@@ -2,7 +2,7 @@ from dataclasses import astuple
 
 import pygame
 
-from ..actors.support.GuiElement import GuiElement
+from ..actors.support.GuiRenderer import GuiRenderer
 from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
@@ -17,7 +17,7 @@ from ..world.ServiceActor import ServiceActor
 _LINE_COLOR = Color.CYAN.mix(Color.BLUE, 0.5)
 
 
-class MapView(CameraClient, InputClient, ResourceClient, GuiElement, ServiceActor):
+class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceActor):
     room_controller: RoomController | None = None
     has_paused = False
 

@@ -11,6 +11,7 @@ from ..actors.Wall import Wall
 from ..level_editor.LevelSerializer import LevelSerializer
 from ..support.constants import ROOM_WIDTH
 from ..support.Direction import Direction
+from ..support.ObjectManifest import ObjectManifest
 from ..support.Point import Point
 from ..world.Actor import Actor
 from ..world.World import World
@@ -57,12 +58,25 @@ class RoomPrefab:
     def set_connection(self, direction: Direction, value: RoomPrefabEntrance):
         self._connections[direction] = value
 
+    @staticmethod
+    def get_manifest() -> ObjectManifest:
+        return [
+            (("up", [RoomPrefab.get_connection, Direction.UP], [RoomPrefab.set_connection, Direction.UP]), RoomPrefabEntrance),
+            (("left", [RoomPrefab.get_connection, Direction.LEFT], [RoomPrefab.set_connection, Direction.LEFT]), RoomPrefabEntrance),
+            (("down", [RoomPrefab.get_connection, Direction.DOWN], [RoomPrefab.set_connection, Direction.DOWN]), RoomPrefabEntrance),
+            (("right", [RoomPrefab.get_connection, Direction.RIGHT], [RoomPrefab.set_connection, Direction.RIGHT]), RoomPrefabEntrance),
+            ("key", bool),
+            ("allow_flip", bool),
+            ("groups", list[str]),
+        ]
+
     key: bool = False
 
     left_prefab: str | None = None
     right_prefab: str | None = None
     down_prefab: str | None = None
     up_prefab: str | None = None
+    allow_flip = False
 
     def flip(self):
         assert not self._is_flipped

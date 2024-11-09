@@ -1,7 +1,10 @@
+from dataclasses import dataclass
 from ...world.Actor import Actor
 
 
-class GuiElement(Actor):
+@dataclass
+class GuiRenderer(Actor):
+
     def draw_gui(self): ...
 
     def draw(self):

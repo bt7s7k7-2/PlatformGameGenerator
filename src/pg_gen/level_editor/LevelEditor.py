@@ -1,18 +1,25 @@
-from dataclasses import astuple, dataclass, field
+from dataclasses import dataclass, field
+from functools import cached_property
 from typing import Callable, Dict, List, Tuple
 
 import pygame
 
 from ..actors.Player import Player
-from ..actors.support.GuiElement import GuiElement
+from ..actors.support.GuiRenderer import GuiRenderer
 from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
+from ..generation.RoomPrefab import RoomPrefab
+from ..gui.ButtonElement import ButtonElement
+from ..gui.GuiElement import GuiContainer
+from ..gui.ObjectInput import ObjectInput
+from ..gui.SearchInput import SearchInput
+from ..gui.TextInput import TextInput
 from ..support.Color import Color
-from ..support.constants import HIGHLIGHT_1_COLOR, ROOM_HEIGHT, ROOM_WIDTH, TEXT_BG_COLOR, TEXT_COLOR
-from ..support.Point import Point
+from ..support.constants import ROOM_HEIGHT, ROOM_WIDTH
+from ..support.ObjectManifest import ObjectManifestDeserializer, ObjectManifestSerializer
+from ..support.Point import Axis, Point
 from ..support.support import is_intersection
-from ..support.TextInput import TextInput
 from ..world.Actor import Actor
 from ..world.World import World
 from .ActorRegistry import ActorRegistry, ActorType
@@ -21,11 +28,9 @@ from .TestPlayController import TestPlayController
 
 
 @dataclass
-class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
+class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
     file_path: str | None = None
 
-    _text_input: TextInput = field(init=False, repr=False, default_factory=lambda: TextInput())
-    _search_results: List[ActorType] = field(init=False, repr=False, default_factory=lambda: [])
     _managed_actors: List[Actor] = field(init=False, default_factory=lambda: [])
     _managed_actors_types: List[ActorType] = field(init=False, default_factory=lambda: [])
     _undo_history: List[str] = field(init=False, repr=False, default_factory=lambda: [])
@@ -36,9 +41,43 @@ class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
     _design_mode: bool = True
     _drag_callback: Callable[[Point], None] | None = None
     _aux_data: Dict = field(default_factory=lambda: {})
+    _prefab: RoomPrefab | None = None
 
     def on_added(self):
         self.world.paused = True
+
+    @cached_property
+    def _gui(self):
+        def update(value: bool):
+            if value:
+                self._gui.children[1] = self._get_manifest_gui()
+            else:
+                self._gui.children[1] = self._get_search_gui()
+
+        return GuiContainer(
+            offset=Point(10, 10),
+            bg_opacity=192,
+            axis=Axis.COLUMN,
+            children=[
+                ButtonElement(font=self._resource_provider.font, text="Config", stateful=True, on_changed=update),
+                self._get_search_gui(),
+            ],
+        )
+
+    def _get_manifest_gui(self):
+        if self._prefab is None:
+            self._prefab = RoomPrefab(name="", data="")
+        return ObjectInput(offset=Point(10, 10), value=self._prefab, manifest=RoomPrefab.get_manifest(), font=self._resource_provider.font, on_changed=self.handle_file_changed)
+
+    def _get_search_gui(self):
+        return SearchInput(
+            search=TextInput(font=self._resource_provider.font, selected=True, always_selected=True),
+            axis=Axis.COLUMN,
+            search_function=ActorRegistry.get_actor_types,
+            get_label=lambda v: v[0],
+            on_changed=lambda v: setattr(self, "_selected_actor_type", v[1] if v is not None else None),
+            max_results=5,
+        )
 
     def draw_gui(self):
         surface = self._camera.screen
@@ -71,21 +110,7 @@ class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
                     width=1,
                 )
 
-        start = Point(10, 10)
-        line_offset = Point(0, 12)
-        self._text_input.draw(self._resource_provider.font, surface, start)
-        start += line_offset
-
-        for type in self._search_results:
-            self._resource_provider.font.render_to(
-                surface,
-                dest=astuple(start),
-                text=type.name,
-                fgcolor=HIGHLIGHT_1_COLOR if type == self._selected_actor_type else TEXT_COLOR,
-                bgcolor=TEXT_BG_COLOR,
-            )
-
-            start += line_offset
+        self._gui.update_and_render(self._camera, self._input)
 
     def spawn_actor(self, actor_type: ActorType, position: Point):
         actor = actor_type.create_instance()
@@ -192,6 +217,8 @@ class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
     def handle_file_changed(self):
         if self.file_path is not None:
             with open(self.file_path, "wt") as file:
+                if self._prefab is not None:
+                    self._aux_data = {"$config": ObjectManifestSerializer.serialize(self._prefab, RoomPrefab.get_manifest())}
                 file.write(self.get_save_data(self._aux_data))
 
     def open_file(self, file_path: str):
@@ -200,6 +227,9 @@ class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
             with open(self.file_path, "rt") as file:
                 raw_data = file.read()
                 self._aux_data = self.apply_save_data(raw_data)
+                if "$config" in self._aux_data:
+                    self._prefab = ObjectManifestDeserializer.deserialize(self._aux_data["$config"], RoomPrefab(name="", data=""), RoomPrefab.get_manifest())
+                    pass
         except FileNotFoundError:
             # If the level file is not found we are creating a new level, we can keep the current, empty, state
             pass
@@ -250,8 +280,6 @@ class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
 
     def update(self, delta: float):
         for event in self._input.events:
-            self._text_input.update(event, self._input.keys)
-
             if event.type == pygame.KEYDOWN:
                 is_ctrl = self._input.keys[pygame.K_LCTRL]
                 is_shift = self._input.keys[pygame.K_LSHIFT]
@@ -276,18 +304,6 @@ class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
                     self.handle_file_changed()
                 elif event.key == pygame.K_RETURN:
                     self.test_play()
-                elif event.key == pygame.K_DOWN:
-                    if self._selected_actor_type is None:
-                        continue
-                    index = self._search_results.index(self._selected_actor_type)
-                    if index + 1 < len(self._search_results):
-                        self._selected_actor_type = self._search_results[index + 1]
-                elif event.key == pygame.K_UP:
-                    if self._selected_actor_type is None:
-                        continue
-                    index = self._search_results.index(self._selected_actor_type)
-                    if index - 1 >= 0:
-                        self._selected_actor_type = self._search_results[index - 1]
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 mouse_position = Point(x, y)
@@ -327,22 +343,6 @@ class LevelEditor(GuiElement, ResourceClient, InputClient, CameraClient):
                 if event.button == pygame.BUTTON_LEFT:
                     self._drag_callback = None
                     self.handle_file_changed()
-
-        count = 0
-        self._search_results.clear()
-
-        for name, actor_type in ActorRegistry.get_actor_types():
-            if count > 5:
-                break
-
-            if self._text_input.value.lower() not in name.lower():
-                continue
-
-            count += 1
-            self._search_results.append(actor_type)
-
-        if self._selected_actor_type not in self._search_results:
-            self._selected_actor_type = self._search_results[0] if len(self._search_results) > 0 else None
 
         if self._selected_actor is not None and self._selected_actor.world is None:
             self._selected_actor = None

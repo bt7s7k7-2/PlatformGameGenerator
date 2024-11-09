@@ -8,7 +8,7 @@ import pygame
 from ..game_core.InputClient import InputClient
 from ..support.Color import Color
 from ..support.support import find_index_by_predicate
-from .support.GuiElement import GuiElement
+from .support.GuiRenderer import GuiRenderer
 from .support.SpriteActor import SpriteActor
 
 if TYPE_CHECKING:
@@ -27,7 +27,7 @@ class ClimbState(Flag):
 
 
 @dataclass
-class Player(InputClient, GuiElement, SpriteActor):
+class Player(InputClient, GuiRenderer, SpriteActor):
     size: Point = field(default=Point(1, 1))
     sprite: str = field(default="player_sprite")
 

@@ -1,8 +1,22 @@
 from dataclasses import dataclass
-from math import floor, sqrt
+from enum import Enum
+from math import floor, isnan, nan, sqrt
 from typing import ClassVar, Dict
 
 from .Direction import Direction
+
+
+class Axis(Enum):
+    COLUMN = 0
+    ROW = 1
+
+    @property
+    def vector(self):
+        return Point.DOWN if self == Axis.COLUMN else Axis.ROW
+
+    @property
+    def cross(self):
+        return Axis.ROW if self == Axis.COLUMN else Axis.COLUMN
 
 
 @dataclass(frozen=True)
@@ -108,6 +122,15 @@ class Point:
     def serialize(self):
         return {"x": self.x, "y": self.y}
 
+    def merge(self, other: "Point"):
+        return Point(
+            self.x if isnan(other.x) else other.x,
+            self.y if isnan(other.y) else other.y,
+        )
+
+    def __getitem__(self, axis: Axis):
+        return self.right() if axis == Axis.ROW else self.down()
+
     @staticmethod
     def deserialize(data: Dict[str, float]):
         return Point(data["x"], data["y"])
@@ -133,6 +156,7 @@ class Point:
     RIGHT: ClassVar["Point"]
     UP: ClassVar["Point"]
     DOWN: ClassVar["Point"]
+    NAN: ClassVar["Point"]
 
 
 Point.ZERO = Point(0, 0)
@@ -141,3 +165,4 @@ Point.LEFT = Point(-1, 0)
 Point.RIGHT = Point(1, 0)
 Point.UP = Point(0, -1)
 Point.DOWN = Point(0, 1)
+Point.NAN = Point(nan, nan)

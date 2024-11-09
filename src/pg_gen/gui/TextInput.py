@@ -1,25 +1,43 @@
-from dataclasses import astuple
+from dataclasses import astuple, dataclass, field
 from itertools import chain
 from string import ascii_letters, digits
-from typing import List
+from typing import Callable, override
 
 import pygame
 import pygame.freetype
 
-from .constants import TEXT_BG_COLOR, TEXT_COLOR, TEXT_SELECTION_COLOR
-from .Point import Point
+from pg_gen.game_core.Camera import Camera
+from pg_gen.gui.GuiElement import GuiEvent
+
+from ..support.constants import TEXT_BG_COLOR, TEXT_COLOR, TEXT_SELECTION_COLOR
+from ..support.Point import Point
+from .GuiElement import EVENT_KEY, SelectableElement
 
 _word_characters = set(chain(ascii_letters, digits, ["_"]))
 
 
-class TextInput:
+@dataclass(kw_only=True)
+class TextInput(SelectableElement):
     cursor_pos = 0
     selection_start = 0
     selection_length = 0
+    on_changed: Callable[[str], None] | None = None
+    font: pygame.freetype.Font
+    placeholder: str | None = None
+
+    _value: list[str] = field(default_factory=lambda: [])
 
     @property
     def value(self):
         return "".join(self._value)
+
+    @value.setter
+    def value(self, value: str):
+        self._value.clear()
+        self._value.extend(value)
+        self.cursor_pos = len(value)
+        self.selection_start = 0
+        self.selection_length = 0
 
     def move_by_word(self, offset: int, update_selection: bool):
         target_is_word = False
@@ -75,6 +93,9 @@ class TextInput:
             self.selection_length -= 1
 
     def draw_cursor(self, surface: pygame.Surface, position: Point):
+        if not self.selected:
+            return
+
         surface.fill(TEXT_COLOR, position.to_pygame_rect(Point(1, 12)))
 
     def draw(self, font: pygame.freetype.Font, surface: pygame.Surface, position: Point, start=0):
@@ -135,10 +156,18 @@ class TextInput:
         self._value.insert(self.cursor_pos, char)
         self.cursor_pos += 1
 
-    def update(self, event: pygame.event.Event, key_state: pygame.key.ScancodeWrapper):
-        if event.type == pygame.KEYDOWN:
-            key = event.key
+    @override
+    def update_size(self):
+        self.computed_size = Point(10, self.font.size)  # type: ignore
+        super().update_size()
 
+    @override
+    def handle_event(self, event: GuiEvent):
+        if event.kind == EVENT_KEY and self.selected:
+            key = event.value.key
+
+            assert event.input is not None
+            key_state = event.input.keys
             is_ctrl = key_state[pygame.K_LCTRL]
             is_shift = key_state[pygame.K_LSHIFT]
 
@@ -165,11 +194,21 @@ class TextInput:
                 self.move_cursor(-self.cursor_pos, update_selection=is_shift)
             elif key == pygame.K_END:
                 self.move_cursor(len(self._value) - self.cursor_pos, update_selection=is_shift)
+            elif key == pygame.K_ESCAPE:
+                self.selection_length = 0
             elif not is_ctrl:
-                char = event.unicode
+                char = event.value.unicode
                 if len(char) == 1 and char != "\r":
                     self.write(char)
 
-    def __init__(self) -> None:
-        self._value: List[str] = []
-        pass
+            if self.on_changed is not None:
+                self.on_changed(self.value)
+
+        return super().handle_event(event)
+
+    @override
+    def render(self, camera: Camera):
+        super().render(camera)
+        if self.placeholder is not None and len(self._value) == 0:
+            self.font.render_to(camera.screen, astuple(self.offset), self.placeholder, (127, 127, 127), TEXT_BG_COLOR)
+        self.draw(self.font, camera.screen, self.offset)
