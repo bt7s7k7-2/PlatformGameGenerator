@@ -1,7 +1,7 @@
 from dataclasses import astuple, dataclass, field
 from itertools import chain
 from string import ascii_letters, digits
-from typing import Callable, override
+from typing import Any, Callable, override
 
 import pygame
 import pygame.freetype
@@ -24,6 +24,7 @@ class TextInput(SelectableElement):
     on_changed: Callable[[str], None] | None = None
     font: pygame.freetype.Font
     placeholder: str | None = None
+    color: Any = TEXT_COLOR
 
     _value: list[str] = field(default_factory=lambda: [])
 
@@ -102,7 +103,7 @@ class TextInput(SelectableElement):
         target_is_selected = self.is_point_in_selection(start)
 
         bgcolor = TEXT_SELECTION_COLOR if target_is_selected else TEXT_BG_COLOR
-        color = TEXT_COLOR
+        color = self.color
 
         if start == 0 and self.cursor_pos == 0:
             self.draw_cursor(surface, position)

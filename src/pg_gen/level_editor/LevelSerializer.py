@@ -1,6 +1,8 @@
 import json
 from typing import TYPE_CHECKING, Callable, Dict, List, Literal
 
+from ..actors.support.ConfigurableObject import ConfigurableObject
+
 from ..support.Point import Point
 from ..world.Actor import Actor
 from .ActorRegistry import ActorRegistry, ActorType
@@ -16,7 +18,7 @@ class LevelSerializer:
             {
                 "pos": actor.position.serialize(),
                 "size": actor.size.serialize(),
-                "type": types[i].name,
+                "type": types[i].name + "," + actor.config if isinstance(actor, ConfigurableObject) else types[i].name,
             }
             for i, actor in enumerate(actors)
         ]
@@ -34,9 +36,18 @@ class LevelSerializer:
         for actor_data in actors:
             position = Point.deserialize(actor_data["pos"])
             size = Point.deserialize(actor_data["size"])
-            type = ActorRegistry.find_actor_type(actor_data["type"])
 
+            type_name: str = actor_data["type"]
+            config = None
+            if "," in type_name:
+                type_name, _, config = type_name.partition(",")
+
+            type = ActorRegistry.find_actor_type(type_name)
             actor = type.create_instance()
+
+            if config is not None and isinstance(actor, ConfigurableObject):
+                actor.apply_config(config)
+
             actor.position = position
             actor.size = size
 

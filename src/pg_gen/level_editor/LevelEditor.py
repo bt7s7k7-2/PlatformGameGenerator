@@ -4,6 +4,7 @@ from typing import Callable, Dict, List, Tuple
 
 import pygame
 
+from ..actors.support.ConfigurableObject import ConfigurableObject
 from ..actors.support.GuiRenderer import GuiRenderer
 from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
@@ -15,7 +16,7 @@ from ..gui.ObjectInput import ObjectInput
 from ..gui.SearchInput import SearchInput
 from ..gui.TextInput import TextInput
 from ..support.Color import Color
-from ..support.constants import ROOM_HEIGHT, ROOM_WIDTH
+from ..support.constants import HIGHLIGHT_2_COLOR, ROOM_HEIGHT, ROOM_WIDTH, TEXT_BG_COLOR, TEXT_COLOR
 from ..support.ObjectManifest import ObjectManifestDeserializer, ObjectManifestSerializer
 from ..support.Point import Axis, Point
 from ..support.support import is_intersection
@@ -41,6 +42,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
     _drag_callback: Callable[[Point], None] | None = None
     _aux_data: Dict = field(default_factory=lambda: {})
     _prefab: RoomPrefab | None = None
+    _object_config_gui: TextInput | None = None
 
     def on_added(self):
         self.world.paused = True
@@ -109,7 +111,38 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
                     width=1,
                 )
 
-        self._gui.update_and_render(self._camera, self._input)
+            if isinstance(self._selected_actor, ConfigurableObject):
+                if self._object_config_gui is None:
+                    self._object_config_gui = TextInput(selected=True, always_selected=True, font=self._resource_provider.font, placeholder="Config", on_changed=self._update_configurable)
+                    self._object_config_gui.value = self._selected_actor.config
+
+                self._object_config_gui.offset = self._camera.world_to_screen(self._selected_actor.position)
+
+                if self._object_config_gui.value != self._selected_actor.config:
+                    self._object_config_gui.value = self._selected_actor.config
+            else:
+                self._object_config_gui = None
+        else:
+            self._object_config_gui = None
+
+        for actor in self._managed_actors:
+            if actor != self._selected_actor and isinstance(actor, ConfigurableObject):
+                self._resource_provider.font.render_to(self._camera.screen, self._camera.world_to_screen(actor.position).to_pygame_coordinates(), actor.config, TEXT_COLOR, TEXT_BG_COLOR)
+
+        if self._object_config_gui is not None:
+            self._object_config_gui.update_and_render(self._camera, self._input)
+        else:
+            self._gui.update_and_render(self._camera, self._input)
+
+    def _update_configurable(self, config: str):
+        assert isinstance(self._selected_actor, ConfigurableObject)
+        assert self._object_config_gui is not None
+        valid = self._selected_actor.apply_config(config)
+
+        if valid:
+            self._object_config_gui.color = TEXT_COLOR
+        else:
+            self._object_config_gui.color = HIGHLIGHT_2_COLOR
 
     def spawn_actor(self, actor_type: ActorType, position: Point):
         actor = actor_type.create_instance()
