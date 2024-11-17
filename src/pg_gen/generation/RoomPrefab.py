@@ -1,11 +1,9 @@
 from copy import copy
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Literal
 
-from ..actors.Placeholders import DoorPlaceholder, KeyPlaceholder, WallPlaceholder
-from ..actors.PredicatePlaceholder import PredicatePlaceholder
-from ..actors.progression.Door import Door
-from ..actors.progression.Key import Key
+from ..actors.Placeholders import Placeholder, WallPlaceholder
 from ..actors.support.PersistentObject import PersistentObject
 from ..actors.Wall import Wall
 from ..level_editor.LevelSerializer import LevelSerializer
@@ -16,7 +14,7 @@ from ..support.Point import Point
 from ..world.Actor import Actor
 from ..world.World import World
 from .RoomController import RoomController
-from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
+from .RoomInfo import NOT_CONNECTED, RoomInfo
 from .RoomTrigger import RoomTrigger
 
 
@@ -111,42 +109,19 @@ class RoomPrefab:
                 actor.position = center - actor.size * 0.5
                 actor.flip_x()
 
-            if isinstance(actor, PredicatePlaceholder):
-                actor.init_persistent_object(room, get_next_flag())
-                replacement = actor.evaluate_predicate()
-                if replacement is not None:
-                    if isinstance(replacement, PersistentObject):
-                        replacement.init_persistent_object(room, get_next_flag())
-                    world.add_actor(replacement)
-                return False
+            return handle_placeholder(actor)
 
+        def handle_placeholder(actor: Actor) -> Literal[False] | None:
             if isinstance(actor, PersistentObject):
                 actor.init_persistent_object(room, get_next_flag())
-                return
 
-            if isinstance(actor, KeyPlaceholder):
-                door_type = room.provides_key
-                if door_type != NO_KEY:
-                    world.add_actor(Key(position=actor.position, key_type=door_type, room=room))
-                return False
-
-            if isinstance(actor, DoorPlaceholder):
-                door_type = room.get_connection(actor.direction.flipX(flip))
-                if door_type > NO_KEY:
-                    world.add_actor(
-                        Door(
-                            position=actor.position,
-                            key_type=door_type,
-                            room=room,
-                            flag_index=get_next_flag(),
-                        )
-                    )
-                return False
-
-            if isinstance(actor, WallPlaceholder):
-                door_type = room.get_connection(actor.direction.flipX(flip))
-                if door_type == NOT_CONNECTED:
-                    world.add_actor(Wall(position=actor.position, size=actor.size))
+            if isinstance(actor, Placeholder):
+                replacement = actor.evaluate_placeholder(room)
+                if isinstance(replacement, bool):
+                    return replacement
+                replacement.universe = world.universe
+                world.add_actor(replacement)
+                handle_placeholder(replacement)
                 return False
 
         LevelSerializer.deserialize(world, self.data, handle_actor)

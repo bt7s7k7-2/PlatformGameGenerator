@@ -1,15 +1,19 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from random import Random
-from typing import Any, override
+from typing import TYPE_CHECKING, Any, override
 
 from ..game_core.Camera import CameraClient
 from ..game_core.ResourceClient import ResourceClient
 from ..level_editor.ActorRegistry import ActorRegistry, ActorType
 from ..support.Color import Color
 from ..world.Actor import Actor
+from .Placeholders import Placeholder
 from .support.ConfigurableObject import ConfigurableObject
 from .support.PersistentObject import PersistentObject
+
+if TYPE_CHECKING:
+    from ..generation.RoomInfo import RoomInfo
 
 
 class PredicateType(Enum):
@@ -31,7 +35,7 @@ class PredicatePlaceholderConfig:
 
 
 @dataclass(kw_only=True)
-class PredicatePlaceholder(PersistentObject[PredicatePlaceholderState], ResourceClient, CameraClient, ConfigurableObject):
+class PredicatePlaceholder(PersistentObject[PredicatePlaceholderState], ResourceClient, CameraClient, ConfigurableObject, Placeholder):
     _actor_instance: Actor | None = field(default=None, init=False)
 
     def _get_default_persistent_value(self) -> Any:
@@ -73,13 +77,14 @@ class PredicatePlaceholder(PersistentObject[PredicatePlaceholderState], Resource
             return None
         return config
 
-    def evaluate_predicate(self):
+    @override
+    def evaluate_placeholder(self, room: "RoomInfo"):
         state = self.persistent_value
         assert self.room is not None
 
         config = self.parse_config()
         if config is None:
-            return None
+            return False
 
         if state == PredicatePlaceholderState.DEFAULT:
             if config.type == PredicateType.NONE:
@@ -98,7 +103,7 @@ class PredicatePlaceholder(PersistentObject[PredicatePlaceholderState], Resource
             actor.size = self.size
             return actor
 
-        return None
+        return False
 
     def draw(self):
         config = self.parse_config()
