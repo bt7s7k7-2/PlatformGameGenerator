@@ -1,14 +1,14 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from random import Random
-from typing import Any
+from typing import Any, override
 
 from ..game_core.Camera import CameraClient
 from ..game_core.ResourceClient import ResourceClient
-from ..level_editor.ActorRegistry import ActorRegistry
+from ..level_editor.ActorRegistry import ActorRegistry, ActorType
 from ..support.Color import Color
-from ..support.constants import TEXT_BG_COLOR, TEXT_COLOR
 from ..world.Actor import Actor
+from .support.ConfigurableObject import ConfigurableObject
 from .support.PersistentObject import PersistentObject
 
 
@@ -23,33 +23,77 @@ class PredicatePlaceholderState(Enum):
     ACTIVE = 2
 
 
+@dataclass
+class PredicatePlaceholderConfig:
+    actor: ActorType
+    type: PredicateType = PredicateType.NONE
+    chance: float = 1.0
+
+
 @dataclass(kw_only=True)
-class PredicatePlaceholder(PersistentObject[PredicatePlaceholderState], ResourceClient, CameraClient, Actor):
-    actor: str
+class PredicatePlaceholder(PersistentObject[PredicatePlaceholderState], ResourceClient, CameraClient, ConfigurableObject):
     _actor_instance: Actor | None = field(default=None, init=False)
-    predicate_type: PredicateType
-    predicate_value: float
 
     def _get_default_persistent_value(self) -> Any:
         return PredicatePlaceholderState.DEFAULT
+
+    @override
+    def apply_config(self, config: str) -> bool:
+        super().apply_config(config)
+
+        if self.parse_config() is None:
+            return False
+
+        return True
+
+    def parse_config(self):
+        arguments = self.config.split(",")
+        if len(arguments) < 1:
+            return None
+
+        actor = ActorRegistry.try_find_actor_type(arguments.pop(0))
+        if actor is None:
+            return None
+
+        config = PredicatePlaceholderConfig(actor)
+        while len(arguments) > 0:
+            argument = arguments.pop(0)
+            if len(argument) == 0:
+                continue
+
+            if argument[-1] == "%":
+                try:
+                    config.chance = int(argument[0:-1]) / 100
+                except ValueError:
+                    return None
+
+                config.type = PredicateType.CHANCE
+                continue
+
+            return None
+        return config
 
     def evaluate_predicate(self):
         state = self.persistent_value
         assert self.room is not None
 
+        config = self.parse_config()
+        if config is None:
+            return None
+
         if state == PredicatePlaceholderState.DEFAULT:
-            if self.predicate_type == PredicateType.NONE:
+            if config.type == PredicateType.NONE:
                 state = PredicatePlaceholderState.ACTIVE
-            elif self.predicate_type == PredicateType.CHANCE:
+            elif config.type == PredicateType.CHANCE:
                 if self.room is None:
-                    state = PredicatePlaceholderState.ACTIVE if Random().random() < self.predicate_value else PredicatePlaceholderState.INACTIVE
+                    state = PredicatePlaceholderState.ACTIVE if Random().random() < config.chance else PredicatePlaceholderState.INACTIVE
                 else:
-                    state = PredicatePlaceholderState.ACTIVE if Random(self.room.seed + self.flag_index).random() < self.predicate_value else PredicatePlaceholderState.INACTIVE
+                    state = PredicatePlaceholderState.ACTIVE if Random(self.room.seed + self.flag_index).random() < config.chance else PredicatePlaceholderState.INACTIVE
 
         self.persistent_value = state
 
         if state == PredicatePlaceholderState.ACTIVE:
-            actor = ActorRegistry.find_actor_type(self.actor).create_instance()
+            actor = config.actor.create_instance()
             actor.position = self.position
             actor.size = self.size
             return actor
@@ -57,7 +101,16 @@ class PredicatePlaceholder(PersistentObject[PredicatePlaceholderState], Resource
         return None
 
     def draw(self):
-        self._actor_instance = self._actor_instance or ActorRegistry.find_actor_type(self.actor).create_instance()
+        config = self.parse_config()
+        if config is None:
+            if self._actor_instance is not None:
+                instance = self._actor_instance
+                self._actor_instance = None
+                self.universe.queue_task(lambda: instance.remove())
+
+            return super().draw()
+
+        self._actor_instance = self._actor_instance or config.actor.create_instance()
         self._actor_instance.position = self.position
         self._actor_instance.universe = self.universe
         self._actor_instance.world = self.world
@@ -66,93 +119,7 @@ class PredicatePlaceholder(PersistentObject[PredicatePlaceholderState], Resource
             self._actor_instance.tint = Color.YELLOW  # type: ignore
         self._actor_instance.draw()
 
-        self._resource_provider.font.render_to(
-            self._camera.screen,
-            self._camera.world_to_screen(self.position).to_pygame_coordinates(),
-            f"{self.predicate_type.name[:2]} {self.predicate_value}",
-            TEXT_COLOR,
-            TEXT_BG_COLOR,
-        )
-
         return super().draw()
 
 
-ActorRegistry.register_actor(
-    PredicatePlaceholder,
-    name_override="Gem:50%",
-    default_value=PredicatePlaceholder(
-        actor="Gem",
-        predicate_type=PredicateType.CHANCE,
-        predicate_value=0.5,
-    ),
-)
-
-ActorRegistry.register_actor(
-    PredicatePlaceholder,
-    name_override="Gem:25%",
-    default_value=PredicatePlaceholder(
-        actor="Gem",
-        predicate_type=PredicateType.CHANCE,
-        predicate_value=0.25,
-    ),
-)
-
-ActorRegistry.register_actor(
-    PredicatePlaceholder,
-    name_override="Skull:50%",
-    default_value=PredicatePlaceholder(
-        actor="Skull:roll",
-        predicate_type=PredicateType.CHANCE,
-        predicate_value=0.5,
-    ),
-)
-
-ActorRegistry.register_actor(
-    PredicatePlaceholder,
-    name_override="Blocker:50%",
-    default_value=PredicatePlaceholder(
-        actor="Blocker",
-        predicate_type=PredicateType.CHANCE,
-        predicate_value=0.5,
-    ),
-)
-
-ActorRegistry.register_actor(
-    PredicatePlaceholder,
-    name_override="Bobber:50%",
-    default_value=PredicatePlaceholder(
-        actor="Bobber",
-        predicate_type=PredicateType.CHANCE,
-        predicate_value=0.5,
-    ),
-)
-
-ActorRegistry.register_actor(
-    PredicatePlaceholder,
-    name_override="Wall:75%",
-    default_value=PredicatePlaceholder(
-        actor="Wall",
-        predicate_type=PredicateType.CHANCE,
-        predicate_value=0.75,
-    ),
-)
-
-ActorRegistry.register_actor(
-    PredicatePlaceholder,
-    name_override="Wall:50%",
-    default_value=PredicatePlaceholder(
-        actor="Wall",
-        predicate_type=PredicateType.CHANCE,
-        predicate_value=0.5,
-    ),
-)
-
-ActorRegistry.register_actor(
-    PredicatePlaceholder,
-    name_override="Wall:25%",
-    default_value=PredicatePlaceholder(
-        actor="Wall",
-        predicate_type=PredicateType.CHANCE,
-        predicate_value=0.25,
-    ),
-)
+ActorRegistry.register_actor(PredicatePlaceholder, name_override="Placeholder")

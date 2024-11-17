@@ -30,6 +30,10 @@ class ActorRegistry:
         return ActorRegistry._types[name]
 
     @staticmethod
+    def try_find_actor_type(name: str):
+        return ActorRegistry._types.get(name, None)
+
+    @staticmethod
     def get_actor_types():
         return ActorRegistry._types_array
 

@@ -82,7 +82,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         }
     ]
 }

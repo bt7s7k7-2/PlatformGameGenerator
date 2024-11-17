@@ -195,7 +195,7 @@
                 "x": 2.0,
                 "y": 2.5
             },
-            "type": "Wall:75%"
+            "type": "Placeholder,Wall,75%"
         },
         {
             "pos": {
@@ -228,7 +228,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -239,7 +239,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -250,7 +250,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -338,7 +338,7 @@
                 "x": 1.0,
                 "y": 2.0
             },
-            "type": "Wall:75%"
+            "type": "Placeholder,Wall,75%"
         },
         {
             "pos": {
@@ -349,7 +349,7 @@
                 "x": 1.0,
                 "y": 2.0
             },
-            "type": "Wall:75%"
+            "type": "Placeholder,Wall,75%"
         },
         {
             "pos": {
@@ -437,7 +437,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Skull:50%"
+            "type": "Placeholder,Skull,50%"
         },
         {
             "pos": {
@@ -470,7 +470,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -481,7 +481,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -492,7 +492,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -503,7 +503,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -514,7 +514,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -525,7 +525,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -536,7 +536,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         }
     ]
 }

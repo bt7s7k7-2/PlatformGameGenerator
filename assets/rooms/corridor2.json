@@ -149,7 +149,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Bobber:50%"
+            "type": "Placeholder,Bobber,50%"
         },
         {
             "pos": {
@@ -160,7 +160,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Skull:50%"
+            "type": "Placeholder,Skull,50%"
         },
         {
             "pos": {
@@ -171,7 +171,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -182,7 +182,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         },
         {
             "pos": {
@@ -193,7 +193,7 @@
                 "x": 1,
                 "y": 1
             },
-            "type": "Gem:25%"
+            "type": "Placeholder,Gem,25%"
         }
     ]
 }
