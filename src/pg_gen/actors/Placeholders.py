@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal, override
 
-from pg_gen.generation.RoomInfo import RoomInfo
-
 from ..game_core.Camera import Camera, CameraClient
 from ..game_core.ResourceClient import ResourceClient
 from ..generation.RoomInfo import NO_KEY, NOT_CONNECTED
@@ -18,7 +16,7 @@ from .progression.Key import Key
 from .Wall import Wall
 
 if TYPE_CHECKING:
-    from ..generation.RoomInfo import RoomInfo
+    from ..generation.RoomInstantiationContext import RoomInstantiationContext
 
 
 def _draw_direction(camera: Camera, position: Point, size: Point, direction: Direction):
@@ -29,14 +27,6 @@ def _draw_direction(camera: Camera, position: Point, size: Point, direction: Dir
 
 
 class Placeholder(Actor):
-    def evaluate_placeholder(self, room: "RoomInfo") -> Actor | Literal[False]: ...
-
-
-@dataclass
-class DoorPlaceholder(CameraClient, Placeholder):
-    size: Point = field(default=Point(1, 2))
-    direction: Direction = Direction.LEFT
-
     _flip: bool = False
 
     @override
@@ -44,14 +34,22 @@ class DoorPlaceholder(CameraClient, Placeholder):
         self._flip = not self._flip
         return super().flip_x()
 
+    def evaluate_placeholder(self, context: "RoomInstantiationContext") -> Actor | Literal[False]: ...
+
+
+@dataclass
+class DoorPlaceholder(CameraClient, Placeholder):
+    size: Point = field(default=Point(1, 2))
+    direction: Direction = Direction.LEFT
+
     @override
-    def evaluate_placeholder(self, room: "RoomInfo") -> Actor | bool:
-        door_type = room.get_connection(self.direction.flipX(self._flip))
+    def evaluate_placeholder(self, context: "RoomInstantiationContext") -> Actor | bool:
+        door_type = context.room.get_connection(self.direction.flipX(self._flip))
         if door_type > NO_KEY:
             return Door(
                 position=self.position,
                 key_type=door_type,
-                room=room,
+                room=context.room,
             )
 
         return False
@@ -76,10 +74,10 @@ class KeyPlaceholder(CameraClient, ResourceClient, Placeholder):
         return super().draw()
 
     @override
-    def evaluate_placeholder(self, room: "RoomInfo") -> Actor | bool:
-        door_type = room.provides_key
+    def evaluate_placeholder(self, context: "RoomInstantiationContext") -> Actor | bool:
+        door_type = context.room.provides_key
         if door_type != NO_KEY:
-            return Key(position=self.position, key_type=door_type, room=room)
+            return Key(position=self.position, key_type=door_type, room=context.room)
         return False
 
 
@@ -92,16 +90,9 @@ class WallPlaceholder(CameraClient, ResourceClient, Placeholder):
     collision_flags: CollisionFlags = field(default=CollisionFlags.STATIC)
     layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
 
-    _flip: bool = False
-
     @override
-    def flip_x(self):
-        self._flip = not self._flip
-        return super().flip_x()
-
-    @override
-    def evaluate_placeholder(self, room: "RoomInfo") -> Actor | bool:
-        door_type = room.get_connection(self.direction.flipX(self._flip))
+    def evaluate_placeholder(self, context: "RoomInstantiationContext") -> Actor | bool:
+        door_type = context.room.get_connection(self.direction.flipX(self._flip))
         if door_type == NOT_CONNECTED:
             return Wall(position=self.position, size=self.size)
         return False

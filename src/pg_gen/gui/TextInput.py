@@ -151,6 +151,11 @@ class TextInput(SelectableElement):
             del self._value[self.cursor_pos : self.cursor_pos + 1]
 
     def write(self, char: str):
+        if len(char) > 1:
+            for c in char:
+                self.write(c)
+            return
+
         if self.selection_length > 0:
             self.delete(0)
 
@@ -197,6 +202,14 @@ class TextInput(SelectableElement):
                 self.move_cursor(len(self._value) - self.cursor_pos, update_selection=is_shift)
             elif key == pygame.K_ESCAPE:
                 self.selection_length = 0
+            elif key == pygame.K_v and is_ctrl:
+                if not pygame.scrap.get_init():
+                    pygame.scrap.init()
+                for type in pygame.scrap.get_types():
+                    if type.startswith("text/plain"):
+                        value = pygame.scrap.get(type).decode("utf-8")  # type: ignore
+                        self.write(value)
+                        break
             elif not is_ctrl:
                 char = event.value.unicode
                 if len(char) == 1 and char != "\r":

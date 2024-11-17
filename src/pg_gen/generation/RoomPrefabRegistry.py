@@ -8,11 +8,16 @@ from .RoomPrefab import RoomPrefab, RoomPrefabEntrance
 
 
 class RoomPrefabRegistry:
-    def find_rooms(self, group: str, requirements: RoomInfo, debug_info: list[str] | None = None):
+    @classmethod
+    def find_rooms(cls, group: str, requirements: RoomInfo | None, debug_info: list[str] | None = None):
         result: list[RoomPrefab] = []
-        group_rooms = self.rooms_by_group[group]
+        group_rooms = cls.rooms_by_group[group]
 
         for room in group_rooms:
+            if requirements is None:
+                result.append(room)
+                continue
+
             if debug_info is not None:
                 debug_info.append(f"  Testing room {room.name}")
             if requirements.provides_key != NO_KEY and not room.key:
@@ -49,7 +54,11 @@ class RoomPrefabRegistry:
 
         return result
 
-    def load(self, room_folder: str):
+    @classmethod
+    def load(cls, room_folder: str):
+        cls.rooms_by_group.clear()
+        cls.rooms_by_name.clear()
+
         for directory, _, files in walk(room_folder, onerror=print):
             for room_path in files:
                 if not room_path.endswith(".json"):
@@ -65,23 +74,22 @@ class RoomPrefabRegistry:
 
                 raw_data: dict = json.loads(file_content)
                 room = RoomPrefab(name, file_content)
-                self.rooms_by_name[name] = room
+                cls.rooms_by_name[name] = room
                 config = raw_data["$config"]
 
                 ObjectManifestDeserializer.deserialize(config, room, RoomPrefab.get_manifest())
 
                 for group in room.groups:
-                    self.rooms_by_group.setdefault(group, []).append(room)
+                    cls.rooms_by_group.setdefault(group, []).append(room)
 
                 print(f"Loaded room {room}")
 
                 if room.allow_flip:
                     flipped = room.flip()
-                    self.rooms_by_name[flipped.name] = flipped
+                    cls.rooms_by_name[flipped.name] = flipped
                     for group in flipped.groups:
-                        self.rooms_by_group.setdefault(group, []).append(flipped)
+                        cls.rooms_by_group.setdefault(group, []).append(flipped)
                     print(f"Loaded room {flipped}")
 
-    def __init__(self) -> None:
-        self.rooms_by_name: dict[str, RoomPrefab] = {}
-        self.rooms_by_group: dict[str, list[RoomPrefab]] = {}
+    rooms_by_name: dict[str, RoomPrefab] = {}
+    rooms_by_group: dict[str, list[RoomPrefab]] = {}

@@ -13,7 +13,7 @@ from .support.ConfigurableObject import ConfigurableObject
 from .support.PersistentObject import PersistentObject
 
 if TYPE_CHECKING:
-    from ..generation.RoomInfo import RoomInfo
+    from ..generation.RoomInstantiationContext import RoomInstantiationContext
 
 
 class PredicateType(Enum):
@@ -78,7 +78,7 @@ class PredicatePlaceholder(PersistentObject[PredicatePlaceholderState], Resource
         return config
 
     @override
-    def evaluate_placeholder(self, room: "RoomInfo"):
+    def evaluate_placeholder(self, context: "RoomInstantiationContext"):
         state = self.persistent_value
         assert self.room is not None
 

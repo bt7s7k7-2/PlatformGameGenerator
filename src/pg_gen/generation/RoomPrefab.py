@@ -1,20 +1,15 @@
 from copy import copy
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Literal
 
-from ..actors.Placeholders import Placeholder, WallPlaceholder
-from ..actors.support.PersistentObject import PersistentObject
-from ..actors.Wall import Wall
 from ..level_editor.LevelSerializer import LevelSerializer
-from ..support.constants import ROOM_WIDTH
 from ..support.Direction import Direction
 from ..support.ObjectManifest import ObjectManifest
 from ..support.Point import Point
-from ..world.Actor import Actor
 from ..world.World import World
 from .RoomController import RoomController
 from .RoomInfo import NOT_CONNECTED, RoomInfo
+from .RoomInstantiationContext import RoomInstantiationContext
 from .RoomTrigger import RoomTrigger
 
 
@@ -40,7 +35,7 @@ class RoomPrefabEntrance(Enum):
         raise RuntimeError("Invalid entrance type")
 
 
-@dataclass()
+@dataclass
 class RoomPrefab:
     name: str
     data: str = field(repr=False)
@@ -84,47 +79,9 @@ class RoomPrefab:
 
         return flipped
 
-    def instantiate(self, room: RoomInfo, controller: RoomController | None, world: World):
-        next_flag = 0
-        flip = self._is_flipped
-
-        def get_next_flag():
-            assert room is not None
-            nonlocal next_flag
-
-            flag = next_flag
-            next_flag += 1
-
-            if len(room.persistent_flags) <= flag:
-                room.persistent_flags.append(None)
-
-            return flag
-
-        def handle_actor(actor: Actor, _):
-            if flip:
-                center = actor.position + actor.size * 0.5
-                room_width = ROOM_WIDTH
-                room_center = room_width * 0.5
-                center = Point(room_center - (center.x - room_center), center.y)
-                actor.position = center - actor.size * 0.5
-                actor.flip_x()
-
-            return handle_placeholder(actor)
-
-        def handle_placeholder(actor: Actor) -> Literal[False] | None:
-            if isinstance(actor, PersistentObject):
-                actor.init_persistent_object(room, get_next_flag())
-
-            if isinstance(actor, Placeholder):
-                replacement = actor.evaluate_placeholder(room)
-                if isinstance(replacement, bool):
-                    return replacement
-                replacement.universe = world.universe
-                world.add_actor(replacement)
-                handle_placeholder(replacement)
-                return False
-
-        LevelSerializer.deserialize(world, self.data, handle_actor)
+    def instantiate_root(self, room: RoomInfo, controller: RoomController | None, world: World):
+        context = RoomInstantiationContext(flip=self._is_flipped, room=room, world=world)
+        self.instantiate_using(context)
 
         if controller is None:
             return
@@ -144,3 +101,12 @@ class RoomPrefab:
                         direction=direction,
                     )
                 )
+
+    def instantiate_using(self, context: RoomInstantiationContext):
+        prev_value = context.flip
+        # We XOR our flip value with the context flip value so we flip correctly in
+        # flipped context, for example if we are in a flipped context and our flip
+        # value is false we will be flipped.
+        context.flip = prev_value != self._is_flipped
+        LevelSerializer.deserialize(context.world, self.data, context.handle_actor)
+        context.flip = prev_value

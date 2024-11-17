@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from functools import cached_property
 from random import random
+from traceback import print_exc
 from typing import ClassVar
 
 import pygame
@@ -12,9 +13,11 @@ from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
 from ..generation.RoomInfo import RoomInfo
 from ..generation.RoomPrefab import RoomPrefab
+from ..generation.RoomPrefabRegistry import RoomPrefabRegistry
 from ..gui.ButtonElement import ButtonElement
 from ..gui.GuiElement import GuiContainer
 from ..gui.ObjectInput import ObjectInput
+from ..support.constants import ROOM_FOLDER
 from ..support.Point import Axis, Point
 from ..world.World import World
 from .LevelSerializer import LevelSerializer
@@ -25,7 +28,6 @@ class TestPlayController(InputClient, GuiRenderer, ResourceClient, CameraClient)
     editor_world: "World"
     room_prefab: RoomPrefab
     spawn_position: Point
-    use_info: bool = False
 
     use_info: ClassVar[bool] = False
     room_info: ClassVar[RoomInfo] = RoomInfo(0, Point.ZERO, 0)
@@ -34,19 +36,26 @@ class TestPlayController(InputClient, GuiRenderer, ResourceClient, CameraClient)
         play_world = World(self.universe)
 
         def switch_world():
-            self.universe.set_world(play_world)
+            try:
+                self.universe.set_world(play_world)
 
-            if TestPlayController.use_info:
-                del TestPlayController.room_info.persistent_flags[:]
-                TestPlayController.room_info.seed = random()
-                self.room_prefab.instantiate(TestPlayController.room_info, None, play_world)
-            else:
-                LevelSerializer.deserialize(play_world, self.room_prefab.data)
+                if TestPlayController.use_info:
+                    RoomPrefabRegistry.load(ROOM_FOLDER)
+                    del TestPlayController.room_info.persistent_flags[:]
+                    TestPlayController.room_info.seed = random()
+                    self.room_prefab.instantiate_root(TestPlayController.room_info, None, play_world)
+                else:
+                    LevelSerializer.deserialize(play_world, self.room_prefab.data)
 
-            player = Player()
-            player.position = self.spawn_position
-            play_world.add_actor(player)
-            play_world.add_actor(self)
+                player = Player()
+                player.position = self.spawn_position
+                play_world.add_actor(player)
+                play_world.add_actor(self)
+            except Exception:
+                if self.world is None:
+                    raise
+                print_exc()
+                self.universe.set_world(self.world)
 
         self.universe.queue_task(switch_world)
 

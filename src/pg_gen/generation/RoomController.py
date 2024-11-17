@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 from ..actors.Player import Player
 from ..support.constants import JUMP_IMPULSE, ROOM_HEIGHT, ROOM_WIDTH
 from ..support.Direction import Direction
@@ -32,7 +31,7 @@ class RoomController(Actor):
         world = World(self.universe)
 
         assert self.room.prefab is not None
-        self.room.prefab.instantiate(self.room, self, world)
+        self.room.prefab.instantiate_root(self.room, self, world)
 
         player = self.universe.di.try_inject(Player)
         if player is not None:

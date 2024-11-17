@@ -1,5 +1,8 @@
+import json
 from dataclasses import dataclass, field
+from enum import Enum
 from functools import cached_property
+from traceback import print_exc
 from typing import Callable, Dict, List, Tuple
 
 import pygame
@@ -9,6 +12,7 @@ from ..actors.support.GuiRenderer import GuiRenderer
 from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
+from ..generation.RoomInfo import RoomInfo
 from ..generation.RoomPrefab import RoomPrefab
 from ..gui.ButtonElement import ButtonElement
 from ..gui.GuiElement import GuiContainer
@@ -17,7 +21,7 @@ from ..gui.SearchInput import SearchInput
 from ..gui.TextInput import TextInput
 from ..support.Color import Color
 from ..support.constants import HIGHLIGHT_2_COLOR, ROOM_HEIGHT, ROOM_WIDTH, TEXT_BG_COLOR, TEXT_COLOR
-from ..support.ObjectManifest import ObjectManifestDeserializer, ObjectManifestSerializer
+from ..support.ObjectManifest import ObjectManifest, ObjectManifestDeserializer, ObjectManifestSerializer
 from ..support.Point import Axis, Point
 from ..support.support import is_intersection
 from ..world.Actor import Actor
@@ -27,9 +31,20 @@ from .LevelSerializer import LevelSerializer
 from .TestPlayController import TestPlayController
 
 
+class LevelEditorType(Enum):
+    NORMAL = 0
+    SOCKET = 1
+
+
+_manifest: ObjectManifest = [
+    ("type", LevelEditorType),
+]
+
+
 @dataclass
 class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
     file_path: str | None = None
+    type: LevelEditorType = LevelEditorType.NORMAL
 
     _managed_actors: List[Actor] = field(init=False, default_factory=lambda: [])
     _managed_actors_types: List[ActorType] = field(init=False, default_factory=lambda: [])
@@ -44,8 +59,53 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
     _prefab: RoomPrefab | None = None
     _object_config_gui: TextInput | None = None
 
+    _editor_config: dict = field(default_factory=lambda: {})
+    _config_init = False
+
+    def __post_init__(self):
+        try:
+            with open("./editor_config.json", "rt") as file:
+                config = json.load(file)
+                self._editor_config = config
+        except Exception:
+            print_exc()
+            pass
+
+    def save_config(self):
+        ObjectManifestSerializer.serialize(self, _manifest, self.get_config())
+
+        with open("./editor_config.json", "wt") as file:
+            json.dump(self._editor_config, file)
+
+    def get_config(self) -> dict:
+        return self._editor_config.setdefault(self.file_path, {})
+
     def on_added(self):
         self.world.paused = True
+        if self._config_init:
+            room = ObjectManifestSerializer.serialize(TestPlayController.room_info, RoomInfo.get_manifest())
+            room["use_info"] = TestPlayController.use_info
+            self.get_config()["room"] = room
+            self.save_config()
+        else:
+            config = self.get_config()
+
+            try:
+                room = config["room"]
+                ObjectManifestDeserializer.deserialize(room, TestPlayController.room_info, RoomInfo.get_manifest())
+                TestPlayController.use_info = room["use_info"]
+            except Exception:
+                print_exc()
+                pass
+
+            try:
+                ObjectManifestDeserializer.deserialize(config, self, _manifest)
+            except Exception:
+                print_exc()
+            else:
+                self._apply_type()
+
+            self._config_init = True
 
     @cached_property
     def _gui(self):
@@ -68,7 +128,20 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
     def _get_manifest_gui(self):
         if self._prefab is None:
             self._prefab = RoomPrefab(name="", data="")
-        return ObjectInput(offset=Point(10, 10), value=self._prefab, manifest=RoomPrefab.get_manifest(), font=self._resource_provider.font, on_changed=self.handle_file_changed)
+        return GuiContainer(
+            axis=Axis.COLUMN,
+            offset=Point(10, 10),
+            children=[
+                ObjectInput(value=self, manifest=_manifest, font=self._resource_provider.font, on_changed=lambda: self._apply_type() or self.save_config()),
+                ObjectInput(value=self._prefab, manifest=RoomPrefab.get_manifest(), font=self._resource_provider.font, on_changed=self.handle_file_changed),
+            ],
+        )
+
+    def _apply_type(self):
+        if self.type == LevelEditorType.NORMAL:
+            self._camera.offset = Point.ZERO
+        else:
+            self._camera.offset = Point(-1, -1)
 
     def _get_search_gui(self):
         return SearchInput(
@@ -84,16 +157,27 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
         surface = self._camera.screen
 
         vertical_guide_size = Point(1, ROOM_HEIGHT * self._camera.zoom)
-        vertical_guide_center = self._camera.world_to_screen(Point(ROOM_WIDTH / 2, 0))
-        one_tile = self._camera.zoom
-        self._camera.draw_placeholder_raw(vertical_guide_center - Point(one_tile, 0), vertical_guide_size, Color.WHITE, 127)
-        self._camera.draw_placeholder_raw(vertical_guide_center + Point(one_tile, 0), vertical_guide_size, Color.WHITE, 127)
-
         horizontal_guide_size = Point(ROOM_WIDTH * self._camera.zoom, 1)
-        horizontal_guide_start = self._camera.world_to_screen(Point(0, 2))
+        one_tile = self._camera.zoom
 
-        self._camera.draw_placeholder_raw(horizontal_guide_start, horizontal_guide_size, Color.WHITE, 127)
-        self._camera.draw_placeholder_raw(horizontal_guide_start + Point(0, one_tile * 2), horizontal_guide_size, Color.WHITE, 127)
+        if self.type == LevelEditorType.NORMAL:
+            vertical_guide_center = self._camera.world_to_screen(Point(ROOM_WIDTH / 2, 0))
+            self._camera.draw_placeholder_raw(vertical_guide_center - Point(one_tile, 0), vertical_guide_size, Color.WHITE, 127)
+            self._camera.draw_placeholder_raw(vertical_guide_center + Point(one_tile, 0), vertical_guide_size, Color.WHITE, 127)
+
+            horizontal_guide_start = self._camera.world_to_screen(Point(0, 2))
+
+            self._camera.draw_placeholder_raw(horizontal_guide_start, horizontal_guide_size, Color.WHITE, 127)
+            self._camera.draw_placeholder_raw(horizontal_guide_start + Point(0, one_tile * 2), horizontal_guide_size, Color.WHITE, 127)
+        elif self.type == LevelEditorType.SOCKET:
+            x_min, x_max = 1, ROOM_WIDTH - 1
+            y_min, y_max = 1, ROOM_HEIGHT - 1
+
+            for x in [x_min, (x_min + x_max) // 2, x_max]:
+                self._camera.draw_placeholder_raw(Point(one_tile * x, 0), vertical_guide_size, Color.WHITE, 127)
+
+            for y in [y_min, y_max]:
+                self._camera.draw_placeholder_raw(Point(0, y * one_tile), horizontal_guide_size, Color.WHITE, 127)
 
         if self._selected_actor is not None:
             for position, size, _ in self.get_selection_handles():
@@ -215,7 +299,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
 
         handle_size = Point.ONE * 10
         selected = self._selected_actor
-        position = selected.position * self._camera.zoom
+        position = self._camera.world_to_screen(selected.position)
         size = selected.size * self._camera.zoom
         center_offset = size * 0.5
         center = position + center_offset
@@ -249,8 +333,9 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
     def handle_file_changed(self):
         if self.file_path is not None:
             with open(self.file_path, "wt") as file:
-                if self._prefab is not None:
-                    self._aux_data = {"$config": ObjectManifestSerializer.serialize(self._prefab, RoomPrefab.get_manifest())}
+                if self._prefab is None:
+                    self._prefab = RoomPrefab(name="", data="")
+                self._aux_data = {"$config": ObjectManifestSerializer.serialize(self._prefab, RoomPrefab.get_manifest())}
                 file.write(self.get_save_data(self._aux_data))
 
     def open_file(self, file_path: str):
@@ -331,6 +416,29 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
                     self.handle_file_changed()
                 elif event.key == pygame.K_RETURN:
                     self.test_play()
+                elif event.key == pygame.K_PAGEUP or event.key == pygame.K_PAGEDOWN:
+                    print(event.key)
+                    if self._selected_actor is None:
+                        continue
+
+                    index = self._managed_actors.index(self._selected_actor)
+                    self.push_undo_stack()
+                    self._managed_actors.pop(index)
+                    self._selected_actor.remove()
+                    type = self._managed_actors_types.pop(index)
+
+                    in_front = event.key == pygame.K_PAGEUP
+
+                    if in_front:
+                        self._managed_actors.insert(0, self._selected_actor)
+                        self._managed_actors_types.insert(0, type)
+                    else:
+                        self._managed_actors.append(self._selected_actor)
+                        self._managed_actors_types.append(type)
+
+                    self.world.add_actor(self._selected_actor, in_front=in_front)
+                    self.handle_file_changed()
+
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 mouse_position = Point(x, y)
@@ -339,7 +447,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
                         continue
                     # Spawning actor
                     self.push_undo_stack()
-                    self.spawn_actor(self._selected_actor_type, mouse_position * (1 / self._camera.zoom))
+                    self.spawn_actor(self._selected_actor_type, self._camera.screen_to_world(mouse_position))
                     self.handle_file_changed()
                 elif event.button == pygame.BUTTON_LEFT:
                     for position, size, callback_factory in self.get_selection_handles():
@@ -349,7 +457,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
                             self._drag_callback = callback_factory(mouse_position)
                             break
                     else:
-                        mouse_world_position = mouse_position * (1 / self._camera.zoom)
+                        mouse_world_position = self._camera.screen_to_world(mouse_position)
                         for actor in self._managed_actors:
                             if is_intersection(mouse_world_position, Point.ZERO, actor.position, actor.size):
                                 # Did click on actor, select

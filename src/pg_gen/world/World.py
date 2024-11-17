@@ -17,7 +17,7 @@ class World:
     def get_actors(self) -> Iterable["Actor"]:
         return self._actors
 
-    def add_actor(self, actor: "Actor"):
+    def add_actor(self, actor: "Actor", in_front=False):
         is_new = actor.universe is None
         actor.world = self
         actor.universe = self.universe
@@ -26,13 +26,22 @@ class World:
         if self.active:
             actor.on_added()
 
-        self._actors.append(actor)
+        if in_front:
+            self._actors.insert(0, actor)
+        else:
+            self._actors.append(actor)
 
         if CollisionFlags.STATIC in actor.collision_flags:
-            self._colliders.append(actor)
+            if in_front:
+                self._colliders.insert(0, actor)
+            else:
+                self._colliders.append(actor)
 
         if CollisionFlags.TRIGGER in actor.collision_flags:
-            self._triggers.append(actor)
+            if in_front:
+                self._triggers.insert(0, actor)
+            else:
+                self._triggers.append(actor)
 
     def add_actors(self, *actors: "Actor"):
         for actor in actors:

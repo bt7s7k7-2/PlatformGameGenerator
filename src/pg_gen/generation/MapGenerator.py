@@ -46,7 +46,6 @@ class ProgressionMarker:
 
 @dataclass(kw_only=True)
 class MapGenerator:
-    room_prefabs: RoomPrefabRegistry
     max_rooms: int = 10
     max_width: int | None = None
     max_height: int | None = None
@@ -202,10 +201,10 @@ class MapGenerator:
 
         for room in self._rooms.values():
             debug: list[str] = []
-            prefabs = self.room_prefabs.find_rooms("spawn" if room == root_room else "default", requirements=room, debug_info=debug)
+            prefabs = RoomPrefabRegistry.find_rooms("spawn" if room == root_room else "default", requirements=room, debug_info=debug)
             if len(prefabs) == 0:
                 print(f"Failed to find prefab for room {room}")
                 print("\n".join(debug))
-                room.prefab = self.room_prefabs.rooms_by_group["fallback"][0]
+                room.prefab = RoomPrefabRegistry.rooms_by_group["fallback"][0]
                 continue
             room.prefab = random_source.choice(prefabs)

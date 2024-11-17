@@ -75,12 +75,12 @@ class ObjectManifestParser:
 
 
 class ObjectManifestSerializer[T](ObjectManifestParser):
-    def __init__(self) -> None:
-        self.result: dict[str, Any] = {}
+    def __init__(self, result: dict[str, Any] = {}) -> None:
+        self.result = result
 
     @staticmethod
-    def serialize(value: Any, manifest: ObjectManifest):
-        serializer = ObjectManifestSerializer()
+    def serialize(value: Any, manifest: ObjectManifest, result: dict[str, Any] = {}):
+        serializer = ObjectManifestSerializer(result)
         serializer.parse(AttributeHandle.from_manifest(value, manifest))
         return serializer.result
 
@@ -113,6 +113,16 @@ class ObjectManifestDeserializer[T](ObjectManifestParser):
                 return
 
         if type(value) is attribute.type:
+            attribute.setter(value)
+            return
+
+        raise TypeError(f"Property '{attribute.name}' is not of type '{attribute.type.__name__}'")
+
+    @override
+    def handle_atom(self, values: tuple[Any, ...], attribute: AttributeHandle):
+        value = self.source.get(attribute.name, None)
+
+        if value in values:
             attribute.setter(value)
             return
 
