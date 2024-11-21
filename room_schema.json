@@ -32,6 +32,10 @@
                     "description": "Can the room be flipped?",
                     "type": "boolean"
                 },
+                "only_once": {
+                    "description": "Can the room be instantiated only once in a socket?",
+                    "type": "boolean"
+                },
                 "left": {
                     "$ref": "#/$defs/entrance"
                 },
