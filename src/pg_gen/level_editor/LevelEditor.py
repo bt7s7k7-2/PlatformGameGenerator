@@ -380,6 +380,21 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
             # Redo operation failed, revert change to undo history
             self._undo_history.pop()
 
+    def duplicate(self):
+        actor = self._selected_actor
+        if actor is None:
+            return
+        index = self._managed_actors.index(actor)
+        type = self._managed_actors_types[index]
+        copy = type.create_instance()
+        copy.position = actor.position
+        copy.size = actor.size
+        if isinstance(actor, ConfigurableObject):
+            assert isinstance(copy, ConfigurableObject)
+            copy.apply_config(actor.config)
+        self.add_managed_actor(copy, type)
+        self._selected_actor = copy
+
     def test_play(self):
         play_world = World(self.universe)
         spawn_position = Point(*pygame.mouse.get_pos()) * (1 / self._camera.zoom) - Point(0.5, 0.5)
@@ -407,6 +422,9 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
                     self._managed_actors.pop(index)
                     self._managed_actors_types.pop(index)
                     actor_to_delete.remove()
+                    self.handle_file_changed()
+                elif event.key == pygame.K_d and is_ctrl:
+                    self.duplicate()
                     self.handle_file_changed()
                 elif event.key == pygame.K_z and is_ctrl and is_shift:
                     self.redo()
