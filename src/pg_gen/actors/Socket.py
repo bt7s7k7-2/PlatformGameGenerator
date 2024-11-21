@@ -49,7 +49,7 @@ class Socket(PersistentObject[RoomPrefab | None], CameraClient, ConfigurableObje
         room = self.persistent_value
 
         if room is None:
-            rooms = RoomPrefabRegistry.find_rooms(self.config + self.size_string, requirements=None)
+            rooms = RoomPrefabRegistry.find_rooms(self.config, requirements=None, context=context)
             room = Random(context.room.seed + self.flag_index).choice(rooms)
             self.persistent_value = room
 

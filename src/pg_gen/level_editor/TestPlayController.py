@@ -53,7 +53,11 @@ class TestPlayController(InputClient, GuiRenderer, ResourceClient, CameraClient)
                 play_world.add_actor(self)
             except Exception:
                 if self.world is None:
-                    raise
+                    LevelSerializer.deserialize(play_world, self.room_prefab.data)
+                    player = Player()
+                    player.position = self.spawn_position
+                    play_world.add_actor(player)
+                    play_world.add_actor(self)
                 print_exc()
                 self.universe.set_world(self.world)
 

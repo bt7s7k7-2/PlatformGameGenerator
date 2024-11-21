@@ -3,24 +3,25 @@
         "allow_flip": true,
         "down": "closed",
         "groups": [
-            "test"
+            "tri_connection"
         ],
         "key": false,
         "left": "closed",
+        "only_once": true,
         "right": "closed",
         "up": "closed"
     },
     "actors": [
         {
             "pos": {
-                "x": 0.0,
-                "y": 2.0
+                "x": 3.0,
+                "y": 0.0
             },
             "size": {
-                "x": 16.0,
-                "y": 0.5
+                "x": 1.0,
+                "y": 2.5
             },
-            "type": "Wall"
+            "type": "Ladder"
         }
     ]
 }

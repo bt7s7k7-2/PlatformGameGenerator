@@ -4,16 +4,20 @@ from os import path, walk
 from ..support.Direction import Direction
 from ..support.ObjectManifest import ObjectManifestDeserializer
 from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
+from .RoomInstantiationContext import RoomInstantiationContext
 from .RoomPrefab import RoomPrefab, RoomPrefabEntrance
 
 
 class RoomPrefabRegistry:
     @classmethod
-    def find_rooms(cls, group: str, requirements: RoomInfo | None, debug_info: list[str] | None = None):
+    def find_rooms(cls, group: str, requirements: RoomInfo | None, context: RoomInstantiationContext | None, debug_info: list[str] | None = None):
         result: list[RoomPrefab] = []
         group_rooms = cls.rooms_by_group[group]
 
         for room in group_rooms:
+            if context is not None and room.only_once and room.name in context.only_once_rooms:
+                continue
+
             if requirements is None:
                 result.append(room)
                 continue

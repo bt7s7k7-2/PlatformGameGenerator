@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 from ..actors.Placeholders import Placeholder
@@ -19,6 +19,7 @@ class RoomInstantiationContext:
     world: World
     offset: Point = Point.ZERO
     next_flag = 0
+    only_once_rooms: set[str] = field(default_factory=lambda: set())
 
     def get_next_flag(self):
         assert self.room is not None

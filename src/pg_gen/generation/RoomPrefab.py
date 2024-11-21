@@ -60,12 +60,14 @@ class RoomPrefab:
             (("right", [RoomPrefab.get_connection, Direction.RIGHT], [RoomPrefab.set_connection, Direction.RIGHT]), RoomPrefabEntrance),
             ("key", bool),
             ("allow_flip", bool),
+            ("only_once", bool),
             ("groups", list[str]),
         ]
 
     key: bool = False
 
     allow_flip = False
+    only_once = False
 
     def flip(self):
         assert not self._is_flipped
@@ -103,6 +105,9 @@ class RoomPrefab:
                 )
 
     def instantiate_using(self, context: RoomInstantiationContext):
+        if self.only_once:
+            assert self.name not in context.only_once_rooms
+            context.only_once_rooms.add(self.name)
         prev_value = context.flip
         # We XOR our flip value with the context flip value so we flip correctly in
         # flipped context, for example if we are in a flipped context and our flip
