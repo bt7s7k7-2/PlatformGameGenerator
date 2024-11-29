@@ -1,6 +1,6 @@
 {
     "$config": {
-        "allow_flip": false,
+        "allow_flip": true,
         "down": "closed",
         "groups": [
             "tri_fill"
@@ -11,5 +11,149 @@
         "right": "closed",
         "up": "closed"
     },
-    "actors": []
+    "actors": [
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 2.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 5.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 10.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 11.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 13.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 14.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 12.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 3.0,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@enemy1"
+        },
+        {
+            "pos": {
+                "x": 3.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 4.0,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@blocker"
+        },
+        {
+            "pos": {
+                "x": 4.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 12.0,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@enemy2"
+        }
+    ]
 }

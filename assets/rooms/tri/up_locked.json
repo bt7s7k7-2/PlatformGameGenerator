@@ -121,6 +121,94 @@
                 "y": 2.5
             },
             "type": "Ladder"
+        },
+        {
+            "pos": {
+                "x": 6.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 9.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 11.5,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 14.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 3.5,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 2.5,
+                "y": 3.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@enemy2"
+        },
+        {
+            "pos": {
+                "x": 12.5,
+                "y": 3.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@enemy2"
         }
     ]
 }

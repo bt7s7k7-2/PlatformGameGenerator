@@ -1,0 +1,27 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "reward_brush"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.5
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,Gem,$reward"
+        }
+    ]
+}

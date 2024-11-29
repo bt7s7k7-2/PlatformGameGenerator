@@ -1,0 +1,27 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "enemy1"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 0,
+                "y": 0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,Skull:roll,Bobber^0.5,?75%,$enemy"
+        }
+    ]
+}

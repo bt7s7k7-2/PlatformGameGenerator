@@ -21,6 +21,10 @@ class RoomParameterCollection:
     def set_parameter(self, parameter: RoomParameter, value: float):
         self._parameters[parameter.value] = value
 
+    def copy_parameters(self, source: "RoomParameterCollection"):
+        for i, value in enumerate(source._parameters):
+            self._parameters[i] = value
+
     @staticmethod
     def get_manifest() -> ObjectManifest:
         return [((name.lower(), [RoomParameterCollection.get_parameter, value], [RoomParameterCollection.set_parameter, value]), float) for name, value in RoomParameter._member_map_.items()]

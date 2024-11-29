@@ -4,6 +4,8 @@ from importlib import import_module
 from os import path, walk
 from typing import Dict, Type
 
+from ..support.Point import Point
+
 from ..world.Actor import Actor
 
 
@@ -12,6 +14,7 @@ class ActorType:
     name: str
     type: Type[Actor]
     default_value: Actor | None
+    offset: Point = Point.ZERO
 
     def create_instance(self):
         if self.default_value is not None:

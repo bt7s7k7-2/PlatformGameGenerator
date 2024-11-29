@@ -84,6 +84,7 @@ class RoomPrefab:
     def instantiate_root(self, room: RoomInfo, controller: RoomController | None, world: World):
         context = RoomInstantiationContext(flip=self._is_flipped, room=room, world=world)
         context.copy_connections(room)
+        context.copy_parameters(room)
         self.instantiate_using(context)
 
         if controller is None:

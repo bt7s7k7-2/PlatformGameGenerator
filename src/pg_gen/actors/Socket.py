@@ -1,3 +1,4 @@
+from copy import copy
 from dataclasses import dataclass, field
 from random import Random
 from typing import TYPE_CHECKING, Any, Literal, override
@@ -36,9 +37,14 @@ class _SocketCommand:
 @dataclass
 class _ActorCommand(_SocketCommand):
     actor: ActorType
+    offset: Point
 
     @override
     def get_value(self) -> SocketCommandResult:
+        if self.offset != Point.ZERO:
+            actor = copy(self.actor)
+            actor.offset = self.offset
+            return actor
         return self.actor
 
 
@@ -93,7 +99,7 @@ class _ParameterCommand(_SocketCommand):
 
         passes = False
         if self.comparison is None:
-            passes = random.random() < parameter
+            passes = 1 if parameter == 1 else random.random() < parameter
         elif self.comparison == "<":
             passes = parameter < self.threshold
         elif self.comparison == "=":
@@ -213,10 +219,22 @@ class Socket(PersistentObject[SocketState], ResourceClient, CameraClient, Config
                     stack.append(_ParameterCommand(parameter, comparison, threshold, target, fallback))
                 continue
 
+            offset = Point.ZERO
+
+            if "^" in argument:
+                index = argument.index("^")
+                vertical_offset_string = argument[index + 1 :]
+                argument = argument[0:index]
+                try:
+                    offset += Point(0, -float(vertical_offset_string))
+                except ValueError:
+                    return None
+
             actor = ActorRegistry.try_find_actor_type(argument)
+
             if actor is None:
                 return None
-            stack.append(_ActorCommand(actor))
+            stack.append(_ActorCommand(actor, offset))
 
         if len(stack) != 1:
             return None
@@ -238,7 +256,7 @@ class Socket(PersistentObject[SocketState], ResourceClient, CameraClient, Config
 
         if isinstance(state, ActorType):
             actor = state.create_instance()
-            actor.position = self.position
+            actor.position = self.position + state.offset
             actor.size = self.size
             return actor
         elif isinstance(state, str):

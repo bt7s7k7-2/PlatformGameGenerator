@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import override
 
+from ...support.constants import ROOM_WIDTH
 from ...support.Direction import Direction
 from ...support.Point import Point
 from ...world.Actor import Actor
@@ -26,6 +27,10 @@ class Enemy(Actor):
 
         def check(vector: Point):
             collision_check_point = self.position + self.size * 0.5 + vector * self.size * 0.5 - collision_check_size * 0.5
+
+            if collision_check_point.x < 1 or collision_check_point.x > ROOM_WIDTH - 1:
+                return True
+
             return self.world.check_rect(collision_check_point, collision_check_size)
 
         will_collide = check(direction_vector)
