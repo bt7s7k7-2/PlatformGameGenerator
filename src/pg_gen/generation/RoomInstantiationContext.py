@@ -1,3 +1,4 @@
+from copy import copy
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
@@ -7,25 +8,34 @@ from ..support.constants import ROOM_WIDTH
 from ..support.Point import Point
 from ..world.Actor import Actor
 from ..world.World import World
+from .RoomInfo import RoomConnectionCollection
+from .RoomParameter import RoomParameterCollection
 
 if TYPE_CHECKING:
     from .RoomInfo import RoomInfo
 
 
 @dataclass
-class RoomInstantiationContext:
+class RoomInstantiationContext(RoomParameterCollection, RoomConnectionCollection):
     flip: bool
     room: "RoomInfo"
     world: World
     offset: Point = Point.ZERO
-    next_flag = 0
     only_once_rooms: set[str] = field(default_factory=lambda: set())
+
+    _parent: "RoomInstantiationContext | None" = field(default=None, kw_only=True)
+    _next_flag = 0
+
+    def get_next_flag_id(self):
+        if self._parent is not None:
+            return self._parent.get_next_flag_id()
+        self._next_flag += 1
+        return self._next_flag - 1
 
     def get_next_flag(self):
         assert self.room is not None
 
-        flag = self.next_flag
-        self.next_flag += 1
+        flag = self.get_next_flag_id()
 
         if len(self.room.persistent_flags) <= flag:
             self.room.persistent_flags.append(None)
@@ -58,3 +68,10 @@ class RoomInstantiationContext:
             self.world.add_actor(replacement)
             self.handle_placeholder(replacement)
             return False
+
+    def create_child(self, offset: Point | None = None):
+        child = copy(self)
+        child._parent = self
+        if offset is not None:
+            child.offset = offset
+        return child

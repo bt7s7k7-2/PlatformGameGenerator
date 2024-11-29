@@ -83,6 +83,7 @@ class RoomPrefab:
 
     def instantiate_root(self, room: RoomInfo, controller: RoomController | None, world: World):
         context = RoomInstantiationContext(flip=self._is_flipped, room=room, world=world)
+        context.copy_connections(room)
         self.instantiate_using(context)
 
         if controller is None:
@@ -104,14 +105,38 @@ class RoomPrefab:
                     )
                 )
 
-    def instantiate_using(self, context: RoomInstantiationContext):
-        if self.only_once:
-            assert self.name not in context.only_once_rooms
-            context.only_once_rooms.add(self.name)
-        prev_value = context.flip
+    def _get_properties_in_context(self, context: RoomInstantiationContext):
         # We XOR our flip value with the context flip value so we flip correctly in
         # flipped context, for example if we are in a flipped context and our flip
         # value is false we will be flipped.
-        context.flip = prev_value != self._is_flipped
+        is_flipped = context.flip != self._is_flipped
+        name = self.name
+
+        if is_flipped:
+            if self._is_flipped:
+                pass
+            else:
+                name += "`1"
+        else:
+            if self._is_flipped:
+                name = name[0:-2]
+            else:
+                pass
+
+        return is_flipped, name
+
+    def is_usable_in_context(self, context: RoomInstantiationContext):
+        _, name = self._get_properties_in_context(context)
+        return not self.only_once or name not in context.only_once_rooms
+
+    def instantiate_using(self, context: RoomInstantiationContext):
+        prev_value = context.flip
+        is_flipped, name = self._get_properties_in_context(context)
+        context.flip = is_flipped
+
+        if self.only_once:
+            assert name not in context.only_once_rooms
+            context.only_once_rooms.add(name)
+
         LevelSerializer.deserialize(context.world, self.data, context.handle_actor)
         context.flip = prev_value

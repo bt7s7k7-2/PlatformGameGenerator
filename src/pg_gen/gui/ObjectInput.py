@@ -14,6 +14,7 @@ from .ButtonElement import ButtonElement
 from .CheckboxElement import CheckboxElement
 from .GuiElement import GuiContainer
 from .ListInput import ListInput
+from .NumberInput import NumberInput
 from .TextElement import TextElement
 from .TextInput import TextInput
 
@@ -42,6 +43,18 @@ class ObjectInput[T](ObjectManifestParser, GuiContainer):
         text_input = TextInput(font=self.font, on_changed=partial(self.handle_changed, attribute))
         text_input.value = attribute.getter()
         self._build_host(attribute).children.append(text_input)
+
+    @override
+    def handle_int(self, attribute: AttributeHandle):
+        input = NumberInput(font=self.font, on_number_changed=partial(self.handle_changed, attribute), integer=True)
+        input.number_value = attribute.getter()
+        self._build_host(attribute).children.append(input)
+
+    @override
+    def handle_float(self, attribute: AttributeHandle):
+        input = NumberInput(font=self.font, on_number_changed=partial(self.handle_changed, attribute), integer=False)
+        input.number_value = attribute.getter()
+        self._build_host(attribute).children.append(input)
 
     @override
     def handle_bool(self, attribute: AttributeHandle):

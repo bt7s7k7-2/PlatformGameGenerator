@@ -1,0 +1,49 @@
+{
+    "$config": {
+        "allow_flip": true,
+        "down": "closed",
+        "groups": [
+            "tri_link"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": true,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 6.5,
+                "y": 1.5
+            },
+            "size": {
+                "x": 3.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 5.0,
+                "y": 0.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 11.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 5.0,
+                "y": 0.5
+            },
+            "type": "Wall"
+        }
+    ]
+}

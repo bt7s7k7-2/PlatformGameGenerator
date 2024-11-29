@@ -15,15 +15,18 @@ class RoomPrefabRegistry:
         group_rooms = cls.rooms_by_group[group]
 
         for room in group_rooms:
-            if context is not None and room.only_once and room.name in context.only_once_rooms:
+            if debug_info is not None:
+                debug_info.append(f"  Testing room {room.name}")
+
+            if context is not None and not room.is_usable_in_context(context):
+                if debug_info is not None:
+                    debug_info.append(f"    Rejected: not usable in context")
                 continue
 
             if requirements is None:
                 result.append(room)
                 continue
 
-            if debug_info is not None:
-                debug_info.append(f"  Testing room {room.name}")
             if requirements.provides_key != NO_KEY and not room.key:
                 if debug_info is not None:
                     debug_info.append(f"    Rejected: need key")

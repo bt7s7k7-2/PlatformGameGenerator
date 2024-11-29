@@ -1,0 +1,49 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "tri_down_normal"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.5
+            },
+            "size": {
+                "x": 16.0,
+                "y": 2.0
+            },
+            "type": "Socket,@tri_fill"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 16.0,
+                "y": 0.5
+            },
+            "type": "Socket,@tri_link,@tri_link_easy,?down=NC"
+        },
+        {
+            "pos": {
+                "x": 5.5,
+                "y": 2.5
+            },
+            "size": {
+                "x": 5.0,
+                "y": 2.0
+            },
+            "type": "Socket,@block,@down_ladder,?down=NC"
+        }
+    ]
+}

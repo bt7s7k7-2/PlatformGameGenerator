@@ -32,6 +32,12 @@ class ObjectManifestParser:
     def handle_string(self, attribute: AttributeHandle):
         self.handle_unknown(attribute)
 
+    def handle_float(self, attribute: AttributeHandle):
+        self.handle_unknown(attribute)
+
+    def handle_int(self, attribute: AttributeHandle):
+        self.handle_unknown(attribute)
+
     def handle_bool(self, attribute: AttributeHandle):
         self.handle_unknown(attribute)
 
@@ -52,6 +58,14 @@ class ObjectManifestParser:
 
             if type is str:
                 self.handle_string(attribute)
+                continue
+
+            if type is int:
+                self.handle_int(attribute)
+                continue
+
+            if type is float:
+                self.handle_float(attribute)
                 continue
 
             if type is bool:
@@ -75,11 +89,12 @@ class ObjectManifestParser:
 
 
 class ObjectManifestSerializer[T](ObjectManifestParser):
-    def __init__(self, result: dict[str, Any] = {}) -> None:
+    def __init__(self, result: dict[str, Any]) -> None:
         self.result = result
 
     @staticmethod
-    def serialize(value: Any, manifest: ObjectManifest, result: dict[str, Any] = {}):
+    def serialize(value: Any, manifest: ObjectManifest, result: dict[str, Any] | None = None):
+        result = result or {}
         serializer = ObjectManifestSerializer(result)
         serializer.parse(AttributeHandle.from_manifest(value, manifest))
         return serializer.result
@@ -114,6 +129,10 @@ class ObjectManifestDeserializer[T](ObjectManifestParser):
 
         if type(value) is attribute.type:
             attribute.setter(value)
+            return
+
+        if type(value) is int and attribute.type is float:
+            attribute.setter(float(value))
             return
 
         raise TypeError(f"Property '{attribute.name}' is not of type '{attribute.type.__name__}'")

@@ -3,7 +3,8 @@
         "allow_flip": true,
         "down": "closed",
         "groups": [
-            "tri_connection"
+            "tri_link",
+            "tri_link_easy"
         ],
         "key": false,
         "left": "closed",
@@ -12,6 +13,17 @@
         "up": "closed"
     },
     "actors": [
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 16.0,
+                "y": 0.5
+            },
+            "type": "Wall"
+        },
         {
             "pos": {
                 "x": 3.0,

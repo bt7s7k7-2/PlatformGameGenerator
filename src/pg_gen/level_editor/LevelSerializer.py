@@ -2,7 +2,6 @@ import json
 from typing import TYPE_CHECKING, Callable, Dict, List, Literal
 
 from ..actors.support.ConfigurableObject import ConfigurableObject
-
 from ..support.Point import Point
 from ..world.Actor import Actor
 from .ActorRegistry import ActorRegistry, ActorType

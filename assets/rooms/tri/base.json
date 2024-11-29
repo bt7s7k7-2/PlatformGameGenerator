@@ -1,12 +1,15 @@
 {
     "$config": {
         "allow_flip": false,
-        "down": "open",
-        "groups": [],
+        "down": "any",
+        "groups": [
+            "default"
+        ],
         "key": false,
-        "left": "open",
-        "right": "open",
-        "up": "open"
+        "left": "any",
+        "only_once": false,
+        "right": "any",
+        "up": "any"
     },
     "actors": [
         {
@@ -81,32 +84,32 @@
                 "y": 2.0
             },
             "size": {
+                "x": 1,
+                "y": 2
+            },
+            "type": "Door:left"
+        },
+        {
+            "pos": {
                 "x": 16.0,
                 "y": 2.0
             },
-            "type": "Socket,test"
+            "size": {
+                "x": 1,
+                "y": 2
+            },
+            "type": "Door:right"
         },
         {
             "pos": {
                 "x": 1.0,
-                "y": 4.5
+                "y": 0.0
             },
             "size": {
                 "x": 16.0,
-                "y": 2.0
+                "y": 6.5
             },
-            "type": "Socket,test"
-        },
-        {
-            "pos": {
-                "x": 1.0,
-                "y": 7.0
-            },
-            "size": {
-                "x": 16.0,
-                "y": 2.0
-            },
-            "type": "Socket,test"
+            "type": "Socket,@tri_up_locked,@tri_up_normal,?up>NK"
         },
         {
             "pos": {
@@ -115,20 +118,9 @@
             },
             "size": {
                 "x": 16.0,
-                "y": 0.5
+                "y": 4.5
             },
-            "type": "Socket,tri_connection"
-        },
-        {
-            "pos": {
-                "x": 1.0,
-                "y": 4.0
-            },
-            "size": {
-                "x": 16.0,
-                "y": 0.5
-            },
-            "type": "Socket,tri_connection"
+            "type": "Socket,@tri_down_locked,@tri_down_normal,?down>NK"
         }
     ]
 }

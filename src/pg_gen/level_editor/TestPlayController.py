@@ -93,5 +93,9 @@ class TestPlayController(InputClient, GuiRenderer, ResourceClient, CameraClient)
         )
 
     def draw_gui(self):
+        for event in self._input.events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+                self.rebuild()
+
         self._gui.update_and_render(self._camera, self._input)
         return super().draw_gui()

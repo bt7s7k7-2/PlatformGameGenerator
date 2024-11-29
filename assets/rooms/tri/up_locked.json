@@ -1,0 +1,126 @@
+{
+    "$config": {
+        "allow_flip": true,
+        "down": "closed",
+        "groups": [
+            "tri_up_locked"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 7.5,
+                "y": 5.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Key"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 4.5
+            },
+            "size": {
+                "x": 16.0,
+                "y": 2.0
+            },
+            "type": "Socket,@tri_fill"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 4.0
+            },
+            "size": {
+                "x": 16.0,
+                "y": 0.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 4.5,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 7.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 4.0
+            },
+            "type": "Ladder"
+        },
+        {
+            "pos": {
+                "x": 5.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 2.0,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 8.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 2.0,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 10.5,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1,
+                "y": 2
+            },
+            "type": "Door:up"
+        },
+        {
+            "pos": {
+                "x": 2.5,
+                "y": 4.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.5
+            },
+            "type": "Ladder"
+        },
+        {
+            "pos": {
+                "x": 12.5,
+                "y": 4.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.5
+            },
+            "type": "Ladder"
+        }
+    ]
+}

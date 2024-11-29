@@ -27,6 +27,7 @@ class TextInput(SelectableElement):
     color: Any = TEXT_COLOR
 
     _value: list[str] = field(default_factory=lambda: [])
+    _changed: bool = False
 
     @property
     def value(self):
@@ -150,6 +151,8 @@ class TextInput(SelectableElement):
         else:
             del self._value[self.cursor_pos : self.cursor_pos + 1]
 
+        self._changed = True
+
     def write(self, char: str):
         if len(char) > 1:
             for c in char:
@@ -161,6 +164,7 @@ class TextInput(SelectableElement):
 
         self._value.insert(self.cursor_pos, char)
         self.cursor_pos += 1
+        self._changed = True
 
     @override
     def update_size(self):
@@ -215,10 +219,14 @@ class TextInput(SelectableElement):
                 if len(char) == 1 and char != "\r":
                     self.write(char)
 
-            if self.on_changed is not None:
-                self.on_changed(self.value)
-
+        if self._changed:
+            self._changed = False
+            self._handle_changed()
         return super().handle_event(event)
+
+    def _handle_changed(self):
+        if self.on_changed is not None:
+            self.on_changed(self.value)
 
     @override
     def render(self, camera: Camera):

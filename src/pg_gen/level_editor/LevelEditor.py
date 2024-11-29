@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
+from os import path
 from traceback import print_exc
 from typing import Callable, Dict, List, Tuple
 
@@ -25,7 +26,6 @@ from ..support.ObjectManifest import ObjectManifest, ObjectManifestDeserializer,
 from ..support.Point import Axis, Point
 from ..support.support import is_intersection
 from ..world.Actor import Actor
-from ..world.World import World
 from .ActorRegistry import ActorRegistry, ActorType
 from .LevelSerializer import LevelSerializer
 from .TestPlayController import TestPlayController
@@ -52,7 +52,6 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
     _redo_history: List[str] = field(init=False, repr=False, default_factory=lambda: [])
 
     _selected_actor_type: ActorType | None = None
-    _selected_actor: Actor | None = None
     _design_mode: bool = True
     _drag_callback: Callable[[Point], None] | None = None
     _aux_data: Dict = field(default_factory=lambda: {})
@@ -61,6 +60,18 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
 
     _editor_config: dict = field(default_factory=lambda: {})
     _config_init = False
+
+    _selected_actor: Actor | None = None
+    _multiselect_actors: list[Actor] | None = None
+
+    @property
+    def selected_actor(self):
+        return self._selected_actor
+
+    @selected_actor.setter
+    def selected_actor(self, actor: Actor | None):
+        self._selected_actor = actor
+        self._multiselect_actors = None
 
     def __post_init__(self):
         try:
@@ -179,7 +190,11 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
             for y in [y_min, y_max]:
                 self._camera.draw_placeholder_raw(Point(0, y * one_tile), horizontal_guide_size, Color.WHITE, 127)
 
-        if self._selected_actor is not None:
+        if self.selected_actor is not None:
+            if self._multiselect_actors is not None:
+                for actor in self._multiselect_actors:
+                    self._camera.draw_placeholder(actor.position, actor.size, Color.YELLOW.mix(Color.RED, 0.5), width=2)
+
             for position, size, _ in self.get_selection_handles():
                 pygame.draw.rect(
                     surface,
@@ -195,22 +210,22 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
                     width=1,
                 )
 
-            if isinstance(self._selected_actor, ConfigurableObject):
+            if self._multiselect_actors is None and isinstance(self.selected_actor, ConfigurableObject):
                 if self._object_config_gui is None:
                     self._object_config_gui = TextInput(selected=True, always_selected=True, font=self._resource_provider.font, placeholder="Config", on_changed=self._update_configurable)
-                    self._object_config_gui.value = self._selected_actor.config
+                    self._object_config_gui.value = self.selected_actor.config
 
-                self._object_config_gui.offset = self._camera.world_to_screen(self._selected_actor.position)
+                self._object_config_gui.offset = self._camera.world_to_screen(self.selected_actor.position)
 
-                if self._object_config_gui.value != self._selected_actor.config:
-                    self._object_config_gui.value = self._selected_actor.config
+                if self._object_config_gui.value != self.selected_actor.config:
+                    self._object_config_gui.value = self.selected_actor.config
             else:
                 self._object_config_gui = None
         else:
             self._object_config_gui = None
 
         for actor in self._managed_actors:
-            if actor != self._selected_actor and isinstance(actor, ConfigurableObject):
+            if (actor != self.selected_actor or self._multiselect_actors is not None) and isinstance(actor, ConfigurableObject):
                 self._resource_provider.font.render_to(self._camera.screen, self._camera.world_to_screen(actor.position).to_pygame_coordinates(), actor.config, TEXT_COLOR, TEXT_BG_COLOR)
 
         if self._object_config_gui is not None:
@@ -219,9 +234,9 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
             self._gui.update_and_render(self._camera, self._input)
 
     def _update_configurable(self, config: str):
-        assert isinstance(self._selected_actor, ConfigurableObject)
+        assert isinstance(self.selected_actor, ConfigurableObject)
         assert self._object_config_gui is not None
-        valid = self._selected_actor.apply_config(config)
+        valid = self.selected_actor.apply_config(config)
 
         if valid:
             self._object_config_gui.color = TEXT_COLOR
@@ -234,7 +249,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
         actor.position = position.quantize(0.5)
         self.world.add_actor(actor)
         self.add_managed_actor(actor, actor_type)
-        self._selected_actor = actor
+        self.selected_actor = actor
         return actor
 
     def add_managed_actor(self, actor: Actor, actor_type: ActorType):
@@ -249,8 +264,8 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
         is_negative = direction.is_negative()
 
         def callback(start_pos: Point):
-            assert self._selected_actor is not None
-            target = self._selected_actor
+            assert self.selected_actor is not None
+            target = self.selected_actor
 
             start_world_pos = target.position
             start_world_size = target.size
@@ -277,28 +292,28 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
 
     def create_move_callback(self):
         def callback(start_pos: Point):
-            assert self._selected_actor is not None
-            target = self._selected_actor
-            start_world_pos = target.position
+            assert self.selected_actor is not None
+            targets = [self.selected_actor] if self._multiselect_actors is None else self._multiselect_actors
+            start_world_positions = [target.position for target in targets]
 
             def on_drag(mouse_pos: Point):
                 delta = mouse_pos - start_pos
                 world_delta = delta * (1 / self._camera.zoom)
-                new_position = start_world_pos + world_delta
-                new_position = new_position.quantize(0.5)
-                target.position = new_position
-                pass
+                for start_world_pos, target in zip(start_world_positions, targets):
+                    new_position = start_world_pos + world_delta
+                    new_position = new_position.quantize(0.5)
+                    target.position = new_position
 
             return on_drag
 
         return callback
 
     def get_selection_handles(self) -> List[Tuple[Point, Point, Callable[[Point], Callable[[Point], None]]]]:
-        if self._selected_actor is None:
+        if self.selected_actor is None:
             return []
 
         handle_size = Point.ONE * 10
-        selected = self._selected_actor
+        selected = self.selected_actor
         position = self._camera.world_to_screen(selected.position)
         size = selected.size * self._camera.zoom
         center_offset = size * 0.5
@@ -332,11 +347,12 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
 
     def handle_file_changed(self):
         if self.file_path is not None:
+            if self._prefab is None:
+                self._prefab = RoomPrefab(name="", data="")
+            self._aux_data = {"$config": ObjectManifestSerializer.serialize(self._prefab, RoomPrefab.get_manifest())}
+            save_data = self.get_save_data(self._aux_data)
             with open(self.file_path, "wt") as file:
-                if self._prefab is None:
-                    self._prefab = RoomPrefab(name="", data="")
-                self._aux_data = {"$config": ObjectManifestSerializer.serialize(self._prefab, RoomPrefab.get_manifest())}
-                file.write(self.get_save_data(self._aux_data))
+                file.write(save_data)
 
     def open_file(self, file_path: str):
         self.file_path = file_path
@@ -352,7 +368,13 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
             pass
 
     def _create_history_entry(self, target: List[str]):
-        selected_index = self._managed_actors.index(self._selected_actor) if self._selected_actor is not None else None
+        if self._multiselect_actors:
+            selected_index = [self._managed_actors.index(v) for v in self._multiselect_actors]
+        elif self.selected_actor is not None:
+            selected_index = self._managed_actors.index(self.selected_actor)
+        else:
+            selected_index = None
+
         state = self.get_save_data({"selected_index": selected_index})
         target.append(state)
 
@@ -364,7 +386,10 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
         data = self.apply_save_data(state)
         selected_index = data["selected_index"]
         if isinstance(selected_index, int):
-            self._selected_actor = self._managed_actors[selected_index]
+            self.selected_actor = self._managed_actors[selected_index]
+        elif isinstance(selected_index, list):
+            self._multiselect_actors = [self._managed_actors[i] for i in selected_index]
+            self.selected_actor = self._managed_actors[selected_index[-1]]
 
         return True
 
@@ -381,7 +406,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
             self._undo_history.pop()
 
     def duplicate(self):
-        actor = self._selected_actor
+        actor = self.selected_actor
         if actor is None:
             return
         index = self._managed_actors.index(actor)
@@ -392,11 +417,13 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
         if isinstance(actor, ConfigurableObject):
             assert isinstance(copy, ConfigurableObject)
             copy.apply_config(actor.config)
+        self.world.add_actor(copy)
         self.add_managed_actor(copy, type)
-        self._selected_actor = copy
+        self.selected_actor = copy
 
     def test_play(self):
-        play_world = World(self.universe)
+        self.handle_file_changed()
+
         spawn_position = Point(*pygame.mouse.get_pos()) * (1 / self._camera.zoom) - Point(0.5, 0.5)
         if self._prefab is None:
             self._prefab = RoomPrefab(name="", data="")
@@ -405,23 +432,27 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
         test_controller = TestPlayController(self.universe, editor_world=self.world, room_prefab=self._prefab, spawn_position=spawn_position)
         test_controller.rebuild()
 
+    def _delete_actor(self, actor: Actor):
+        index = self._managed_actors.index(actor)
+        self._managed_actors.pop(index)
+        self._managed_actors_types.pop(index)
+        actor.remove()
+
     def update(self, delta: float):
+        is_ctrl = self._input.keys[pygame.K_LCTRL]
+        is_shift = self._input.keys[pygame.K_LSHIFT]
+
         for event in self._input.events:
             if event.type == pygame.KEYDOWN:
-                is_ctrl = self._input.keys[pygame.K_LCTRL]
-                is_shift = self._input.keys[pygame.K_LSHIFT]
 
                 if event.key == pygame.K_DELETE:
-                    if self._selected_actor is None:
+                    if self.selected_actor is None:
                         continue
                     # Deleting actor
                     self.push_undo_stack()
-                    actor_to_delete = self._selected_actor
-                    self._selected_actor = None
-                    index = self._managed_actors.index(actor_to_delete)
-                    self._managed_actors.pop(index)
-                    self._managed_actors_types.pop(index)
-                    actor_to_delete.remove()
+                    actor_to_delete = self.selected_actor
+                    self.selected_actor = None
+                    self._delete_actor(actor_to_delete)
                     self.handle_file_changed()
                 elif event.key == pygame.K_d and is_ctrl:
                     self.duplicate()
@@ -432,29 +463,45 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
                 elif event.key == pygame.K_z and is_ctrl:
                     self.undo()
                     self.handle_file_changed()
+                elif event.key == pygame.K_p and is_ctrl:
+                    if self.selected_actor is None or self.file_path is None:
+                        continue
+                    self.push_undo_stack()
+                    targets = [self.selected_actor] if self._multiselect_actors is None else self._multiselect_actors
+                    types = [self._managed_actors_types[self._managed_actors.index(target)] for target in targets]
+
+                    new_level = LevelSerializer.serialize(targets, types, {})
+                    with open(path.join(path.dirname(self.file_path), "out.json"), "wt") as file:
+                        file.write(new_level)
+
+                    for target in targets:
+                        self._delete_actor(target)
+
+                    self.selected_actor = None
+                    self.handle_file_changed()
                 elif event.key == pygame.K_RETURN:
                     self.test_play()
                 elif event.key == pygame.K_PAGEUP or event.key == pygame.K_PAGEDOWN:
                     print(event.key)
-                    if self._selected_actor is None:
+                    if self.selected_actor is None:
                         continue
 
-                    index = self._managed_actors.index(self._selected_actor)
+                    index = self._managed_actors.index(self.selected_actor)
                     self.push_undo_stack()
                     self._managed_actors.pop(index)
-                    self._selected_actor.remove()
+                    self.selected_actor.remove()
                     type = self._managed_actors_types.pop(index)
 
                     in_front = event.key == pygame.K_PAGEUP
 
                     if in_front:
-                        self._managed_actors.insert(0, self._selected_actor)
+                        self._managed_actors.insert(0, self.selected_actor)
                         self._managed_actors_types.insert(0, type)
                     else:
-                        self._managed_actors.append(self._selected_actor)
+                        self._managed_actors.append(self.selected_actor)
                         self._managed_actors_types.append(type)
 
-                    self.world.add_actor(self._selected_actor, in_front=in_front)
+                    self.world.add_actor(self.selected_actor, in_front=in_front)
                     self.handle_file_changed()
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -480,13 +527,22 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
                             if is_intersection(mouse_world_position, Point.ZERO, actor.position, actor.size):
                                 # Did click on actor, select
                                 self.push_undo_stack()
-                                self._selected_actor = actor
+                                if is_shift:
+                                    if self._multiselect_actors is not None:
+                                        if actor in self._multiselect_actors:
+                                            self._multiselect_actors.remove(actor)
+                                    else:
+                                        self._multiselect_actors = [self._selected_actor] if self._selected_actor is not None else []
+                                    self._multiselect_actors.append(actor)
+                                    self._selected_actor = actor
+                                else:
+                                    self.selected_actor = actor
                                 break
                         else:
                             # Did not click on any actors, unselect if any
-                            if self._selected_actor is not None:
+                            if self.selected_actor is not None:
                                 self.push_undo_stack()
-                                self._selected_actor = None
+                                self.selected_actor = None
             elif event.type == pygame.MOUSEMOTION:
                 if self._drag_callback is None:
                     continue
@@ -496,6 +552,8 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
                 if event.button == pygame.BUTTON_LEFT:
                     self._drag_callback = None
                     self.handle_file_changed()
+            elif event.type == pygame.WINDOWLEAVE:
+                self.handle_file_changed()
 
-        if self._selected_actor is not None and self._selected_actor.world is None:
-            self._selected_actor = None
+        if self.selected_actor is not None and self.selected_actor.world is None:
+            self.selected_actor = None

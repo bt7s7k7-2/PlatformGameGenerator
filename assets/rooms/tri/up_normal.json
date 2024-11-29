@@ -1,0 +1,71 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "tri_up_normal"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 7.5,
+                "y": 4.5
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Key"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 4.5
+            },
+            "size": {
+                "x": 16.0,
+                "y": 2.0
+            },
+            "type": "Socket,@tri_fill"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 4.0
+            },
+            "size": {
+                "x": 16.0,
+                "y": 0.5
+            },
+            "type": "Socket,@tri_link"
+        },
+        {
+            "pos": {
+                "x": 5.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 5.0,
+                "y": 4.0
+            },
+            "type": "Socket,@up_ladder,@block,?up=NK"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 16.0,
+                "y": 2.0
+            },
+            "type": "Socket,@tri_fill"
+        }
+    ]
+}
