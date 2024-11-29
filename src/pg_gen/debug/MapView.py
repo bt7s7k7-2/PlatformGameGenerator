@@ -9,7 +9,7 @@ from ..game_core.ResourceClient import ResourceClient
 from ..generation.RoomController import RoomController
 from ..generation.RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
 from ..support.Color import Color
-from ..support.constants import HIGHLIGHT_1_COLOR, HIGHLIGHT_2_COLOR, TEXT_BG_COLOR, TEXT_COLOR
+from ..support.constants import HIGHLIGHT_1_COLOR, HIGHLIGHT_2_COLOR, MUTED_COLOR, TEXT_BG_COLOR, TEXT_COLOR
 from ..support.Direction import Direction
 from ..support.Point import Point
 from ..world.ServiceActor import ServiceActor
@@ -115,10 +115,12 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
             if room == self.room_controller.room:
                 font.render_to(surface, astuple(origin + Point(tile_size, tile_size)), "X", HIGHLIGHT_1_COLOR, TEXT_BG_COLOR)
 
+            font.render_to(surface, astuple(origin + Point(0, tile_size * 2)), str(room.area), MUTED_COLOR, TEXT_BG_COLOR)
+
             if room.provides_key != NO_KEY:
                 font.render_to(surface, astuple(origin), str(room.provides_key), HIGHLIGHT_2_COLOR, TEXT_BG_COLOR)
 
             end = Point.max(origin, end)
 
-        assert current_room.prefab is not None
-        font.render_to(surface, astuple(Point(0, 0)), f"Room: {current_room.prefab.name}", TEXT_COLOR, TEXT_BG_COLOR)
+        if current_room.prefab is not None:
+            font.render_to(surface, astuple(Point(0, 0)), f"Room: {current_room.prefab.name}", TEXT_COLOR, TEXT_BG_COLOR)

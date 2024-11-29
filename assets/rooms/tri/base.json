@@ -3,9 +3,10 @@
         "allow_flip": false,
         "down": "any",
         "groups": [
-            "default"
+            "default",
+            "fallback"
         ],
-        "key": false,
+        "key": true,
         "left": "any",
         "only_once": false,
         "right": "any",
@@ -121,6 +122,28 @@
                 "y": 4.5
             },
             "type": "Socket,@tri_down_locked,@tri_down_normal,?down>NK"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Wall:left"
+        },
+        {
+            "pos": {
+                "x": 17.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Wall:right"
         }
     ]
 }

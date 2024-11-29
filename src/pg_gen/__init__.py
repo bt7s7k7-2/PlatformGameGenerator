@@ -10,6 +10,7 @@ from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
 from .generation.MapGenerator import MapGenerator
 from .generation.RoomController import RoomController
+from .generation.RoomParameter import RoomParameter
 from .generation.RoomPrefabRegistry import RoomPrefabRegistry
 from .level_editor.ActorRegistry import ActorRegistry
 from .level_editor.LevelEditor import LevelEditor
@@ -25,14 +26,22 @@ def main():
     RoomPrefabRegistry.load(ROOM_FOLDER)
 
     map_generator = MapGenerator(
+        seed=525416,
         max_width=50,
         max_height=50,
         sprawl_chance=0.5,
-        max_rooms=500,
+        max_rooms=100,
     )
+
+    map_generator.set_parameter(RoomParameter.ENEMY, 0.8)
+    map_generator.set_parameter(RoomParameter.REWARD, 0.8)
+    map_generator.set_parameter(RoomParameter.JUMP, 0.8)
+    map_generator.set_parameter(RoomParameter.SPRAWL, 0.8)
+
     universe = Universe(map_generator)
 
-    map_generator.generate(516)
+    map_generator.generate()
+    map_generator.assign_room_prefabs()
 
     world = World(universe)
     universe.set_world(world)

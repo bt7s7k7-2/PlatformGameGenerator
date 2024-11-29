@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, List, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from ..support.Direction import Direction
 from ..support.ObjectManifest import ObjectManifest
@@ -15,7 +15,7 @@ NO_KEY = 0
 
 @dataclass
 class RoomConnectionCollection:
-    _connections: List[int] = field(default_factory=lambda: [NOT_CONNECTED] * 4, init=False)
+    _connections: list[int] = field(default_factory=lambda: [NOT_CONNECTED] * 4, init=False)
 
     def get_connection(self, direction: Direction):
         return self._connections[direction]
@@ -45,7 +45,9 @@ class RoomInfo(RoomParameterCollection, RoomConnectionCollection):
     area: int
     prefab: "RoomPrefab | None" = None
     provides_key: int = NO_KEY
-    persistent_flags: List[Any] = field(default_factory=lambda: [], init=False)
+    persistent_flags: list[Any] = field(default_factory=lambda: [], init=False)
+
+    directions: list[Direction] = field(default_factory=lambda: Direction.get_directions())
 
     @staticmethod
     def get_manifest() -> ObjectManifest:

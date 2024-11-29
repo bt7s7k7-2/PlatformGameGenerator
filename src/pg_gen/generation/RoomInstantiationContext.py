@@ -37,7 +37,7 @@ class RoomInstantiationContext(RoomParameterCollection, RoomConnectionCollection
 
         flag = self.get_next_flag_id()
 
-        if len(self.room.persistent_flags) <= flag:
+        while len(self.room.persistent_flags) <= flag:
             self.room.persistent_flags.append(None)
 
         return flag
@@ -62,11 +62,21 @@ class RoomInstantiationContext(RoomParameterCollection, RoomConnectionCollection
 
         if isinstance(actor, Placeholder):
             replacement = actor.evaluate_placeholder(self)
+
+            if replacement == actor:
+                return None
+
             if isinstance(replacement, bool):
                 return replacement
+
             replacement.universe = self.world.universe
+
+            result = self.handle_placeholder(replacement)
+            if result == False:
+                return False
+
             self.world.add_actor(replacement)
-            self.handle_placeholder(replacement)
+
             return False
 
     def create_child(self, offset: Point | None = None):

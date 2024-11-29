@@ -30,8 +30,10 @@ class RoomController(Actor):
         assert self.room is not None
         world = World(self.universe)
 
-        assert self.room.prefab is not None
-        self.room.prefab.instantiate_root(self.room, self, world)
+        if self.room.prefab is not None:
+            self.room.prefab.instantiate_root(self.room, self, world)
+        else:
+            world.paused = True
 
         player = self.universe.di.try_inject(Player)
         if player is not None:
