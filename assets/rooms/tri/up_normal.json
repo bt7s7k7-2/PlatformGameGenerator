@@ -52,9 +52,9 @@
             },
             "size": {
                 "x": 5.0,
-                "y": 4.0
+                "y": 1.0
             },
-            "type": "Socket,@up_ladder,@block,?up=NK"
+            "type": "Socket,@up_ladder,Wall,?up=NK"
         },
         {
             "pos": {
@@ -66,6 +66,39 @@
                 "y": 2.0
             },
             "type": "Socket,@tri_fill"
+        },
+        {
+            "pos": {
+                "x": 5.5,
+                "y": 1.0
+            },
+            "size": {
+                "x": 5.0,
+                "y": 1.0
+            },
+            "type": "Socket,Wall,$up=NC,50%"
+        },
+        {
+            "pos": {
+                "x": 5.5,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Slope#/"
+        },
+        {
+            "pos": {
+                "x": 9.5,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Slope\\#"
         }
     ]
 }
