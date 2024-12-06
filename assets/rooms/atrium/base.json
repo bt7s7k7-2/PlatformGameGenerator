@@ -3,8 +3,7 @@
         "allow_flip": false,
         "down": "any",
         "groups": [
-            "default",
-            "starter"
+            "atrium"
         ],
         "key": true,
         "left": "any",
@@ -232,17 +231,6 @@
                 "y": 5.0
             },
             "type": "Ladder"
-        },
-        {
-            "pos": {
-                "x": 8.5,
-                "y": 5.0
-            },
-            "size": {
-                "x": 1,
-                "y": 1
-            },
-            "type": "Key"
         },
         {
             "pos": {
