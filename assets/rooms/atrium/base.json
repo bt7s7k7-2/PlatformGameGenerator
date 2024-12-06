@@ -74,7 +74,7 @@
                 "y": 9.0
             },
             "size": {
-                "x": 8.5,
+                "x": 1.0,
                 "y": 2.0
             },
             "type": "Wall"
@@ -232,17 +232,6 @@
                 "y": 5.0
             },
             "type": "Ladder"
-        },
-        {
-            "pos": {
-                "x": 9.5,
-                "y": 9.0
-            },
-            "size": {
-                "x": 8.5,
-                "y": 2.0
-            },
-            "type": "Wall"
         },
         {
             "pos": {
@@ -551,6 +540,61 @@
                 "y": 3.0
             },
             "type": "Socket,@atrium_up_none,@atrium_up,@atrium_door,?up=NK,?up=NC"
+        },
+        {
+            "pos": {
+                "x": 5.0,
+                "y": 9.0
+            },
+            "size": {
+                "x": 3.5,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 9.5,
+                "y": 9.0
+            },
+            "size": {
+                "x": 3.5,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 17.0,
+                "y": 9.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 9.0
+            },
+            "size": {
+                "x": 4.0,
+                "y": 2.0
+            },
+            "type": "Socket,@atrium_fire,Wall,?jump"
+        },
+        {
+            "pos": {
+                "x": 13.0,
+                "y": 9.0
+            },
+            "size": {
+                "x": 4.0,
+                "y": 2.0
+            },
+            "type": "Socket,@atrium_fire,Wall,?jump"
         }
     ]
 }
