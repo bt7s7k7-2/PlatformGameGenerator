@@ -6,7 +6,7 @@ from typing import Tuple
 from ..support.keys import KEY_COLORS
 from ..support.Point import Point
 from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
-from .RoomParameter import RoomParameterCollection
+from .RoomParameter import RoomParameter, RoomParameterCollection
 from .RoomPrefabRegistry import RoomPrefabRegistry
 
 
@@ -33,6 +33,7 @@ class MapGenerator(RoomParameterCollection):
     key_chance: float = 0.5
     max_rooms_per_area: int = 6
     min_rooms_per_area: int = 3
+    start_area_size = 5
 
     _min_x = 0
     _min_y = 0
@@ -154,7 +155,10 @@ class MapGenerator(RoomParameterCollection):
             next_area = current_area
             required_key = NO_KEY
 
-            if rooms_in_current_area >= self.max_rooms_per_area or (rooms_in_current_area > self.min_rooms_per_area and self.random_source.random() < self.lock_chance):
+            max_rooms = self.start_area_size if current_area.id == 0 else self.max_rooms_per_area
+            min_rooms = self.start_area_size if current_area.id == 0 else self.min_rooms_per_area
+
+            if rooms_in_current_area >= max_rooms or (rooms_in_current_area > min_rooms and self.random_source.random() < self.lock_chance):
                 required_key = self.random_source.choice(_POSSIBLE_KEYS)
                 next_area = self.add_area(parent=current_area)
 
@@ -233,8 +237,11 @@ class MapGenerator(RoomParameterCollection):
             debug: list[str] = []
 
             is_root = room.position == Point.ZERO
+            if is_root:
+                room.set_parameter(RoomParameter.ENEMY, 0)
+
             prefabs = RoomPrefabRegistry.find_rooms(
-                "default",  # "spawn" if is_root else "default",
+                "starter" if is_root else "default",
                 requirements=room,
                 context=None,
                 debug_info=debug,

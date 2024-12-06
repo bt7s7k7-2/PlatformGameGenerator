@@ -3,7 +3,8 @@
         "allow_flip": false,
         "down": "wall",
         "groups": [
-            "default"
+            "default",
+            "starter"
         ],
         "key": true,
         "left": "any",
