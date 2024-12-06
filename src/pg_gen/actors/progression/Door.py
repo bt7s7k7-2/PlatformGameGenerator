@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, override
+
+from pg_gen.generation.RoomInfo import RoomInfo
 
 from ...game_core.Camera import CameraClient
 from ...game_core.ResourceClient import ResourceClient
@@ -32,7 +34,9 @@ class Door(ResourceClient, CameraClient, PersistentObject[DoorState]):
     def _get_default_persistent_value(self) -> Any:
         return DoorState.CLOSED
 
-    def on_created(self):
+    @override
+    def init_persistent_object(self, room: RoomInfo, flag_index: int):
+        super().init_persistent_object(room, flag_index)
         self.state = self.persistent_value
         if self.state != DoorState.CLOSED:
             self.collision_flags = CollisionFlags(0)
