@@ -28,6 +28,9 @@ class RoomConnectionCollection:
         for i, value in enumerate(source._connections):
             self._connections[i] = value
 
+    def uses_key_of_type(self, key: int):
+        return any(v == key for v in self._connections)
+
     @staticmethod
     def get_manifest() -> ObjectManifest:
         connection_type = Literal[-1, 1, 0]

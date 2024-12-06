@@ -206,6 +206,8 @@ class MapGenerator(RoomParameterCollection):
         self.required_keys.sort(key=lambda x: x[0])
         rooms_by_depth: dict[int, list[RoomInfo]] = {}
         for max_depth, key in self.required_keys:
+            fail_count = 0
+
             while True:
                 if max_depth in rooms_by_depth:
                     possible_rooms = rooms_by_depth[max_depth]
@@ -225,6 +227,10 @@ class MapGenerator(RoomParameterCollection):
                 if room.provides_key != NO_KEY:
                     print(f"Cannot use {key} at {room.area}")
                     possible_rooms.remove(room)
+                    continue
+
+                if fail_count < 10 and room.uses_key_of_type(key):
+                    fail_count += 1
                     continue
 
                 room.provides_key = key
