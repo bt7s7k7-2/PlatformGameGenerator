@@ -22,6 +22,7 @@ class RoomConnectionCollection:
 
     def set_connection(self, direction: Direction, value: int):
         self._connections[direction] = value
+        return self
 
     def copy_connections(self, source: "RoomConnectionCollection"):
         for i, value in enumerate(source._connections):

@@ -1,0 +1,82 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "corr_up_none"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 3.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 2.5
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Key"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 2.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 3.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": -1.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@reward_brush"
+        }
+    ]
+}

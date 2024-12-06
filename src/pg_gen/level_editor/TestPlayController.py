@@ -30,7 +30,7 @@ class TestPlayController(InputClient, GuiRenderer, ResourceClient, CameraClient)
     spawn_position: Point
 
     use_info: ClassVar[bool] = False
-    room_info: ClassVar[RoomInfo] = RoomInfo(0, Point.ZERO, 0)
+    room_info: ClassVar[RoomInfo] = RoomInfo(0, Point.ZERO, 0).set_all_parameters(0.75)
 
     def rebuild(self):
         play_world = World(self.universe)

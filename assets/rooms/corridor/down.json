@@ -1,0 +1,149 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "corr_down",
+            "corr_down_any"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 1.0
+            },
+            "size": {
+                "x": 4.5,
+                "y": 3.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 6.5,
+                "y": 1.0
+            },
+            "size": {
+                "x": 4.5,
+                "y": 3.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 10.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 4.5,
+                "y": 1.0
+            },
+            "size": {
+                "x": 2.0,
+                "y": 3.5
+            },
+            "type": "Socket,@corr_down_ladder,@corr_down_block,@corr_down_none,?jump,?down=NK"
+        },
+        {
+            "pos": {
+                "x": 2.0,
+                "y": -1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 3.0,
+                "y": -1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 4.0,
+                "y": -1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 5.0,
+                "y": -1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 6.0,
+                "y": -1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 7.0,
+                "y": -1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward_brush"
+        },
+        {
+            "pos": {
+                "x": 8.0,
+                "y": -1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward_brush"
+        }
+    ]
+}

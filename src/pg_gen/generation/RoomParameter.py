@@ -20,6 +20,11 @@ class RoomParameterCollection:
 
     def set_parameter(self, parameter: RoomParameter, value: float):
         self._parameters[parameter.value] = value
+        return self
+
+    def set_all_parameters(self, value: float):
+        self._parameters = [value] * len(RoomParameter._member_map_)
+        return self
 
     def copy_parameters(self, source: "RoomParameterCollection"):
         for i, value in enumerate(source._parameters):

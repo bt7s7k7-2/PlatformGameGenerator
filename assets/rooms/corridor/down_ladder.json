@@ -1,0 +1,60 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "corr_down_ladder"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 0.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 3.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 2.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 3.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 4.5
+            },
+            "type": "Ladder"
+        }
+    ]
+}

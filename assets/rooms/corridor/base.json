@@ -1,0 +1,192 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "wall",
+        "groups": [
+            "default"
+        ],
+        "key": true,
+        "left": "any",
+        "only_once": false,
+        "right": "any",
+        "up": "wall"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": -1.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 3.5,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 15.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 2.5,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 4.0
+            },
+            "size": {
+                "x": 3.5,
+                "y": 7.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 14.5,
+                "y": 4.0
+            },
+            "size": {
+                "x": 3.5,
+                "y": 7.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 6.5,
+                "y": 4.0
+            },
+            "size": {
+                "x": 5.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 10.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 5.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 2.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 5.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 14.5,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Slope\\#"
+        },
+        {
+            "pos": {
+                "x": 2.5,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Slope#/"
+        },
+        {
+            "pos": {
+                "x": 7.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 3.0,
+                "y": 2.0
+            },
+            "type": "Socket,@corr_up_ladder,@corr_up_none,?up=NK"
+        },
+        {
+            "pos": {
+                "x": 0.5,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1,
+                "y": 2
+            },
+            "type": "Door:left"
+        },
+        {
+            "pos": {
+                "x": 16.5,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1,
+                "y": 2
+            },
+            "type": "Door:right"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 3.0,
+                "y": 2.0
+            },
+            "type": "Wall:left"
+        },
+        {
+            "pos": {
+                "x": 15.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 3.0,
+                "y": 2.0
+            },
+            "type": "Wall:right"
+        },
+        {
+            "pos": {
+                "x": 3.5,
+                "y": 6.5
+            },
+            "size": {
+                "x": 11.0,
+                "y": 4.5
+            },
+            "type": "Socket,@corr_down,@corr_down_any,@corr_down,?jump,?down=NK"
+        },
+        {
+            "pos": {
+                "x": 8.5,
+                "y": 3.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@enemy2"
+        }
+    ]
+}
