@@ -60,7 +60,7 @@ class Player(InputClient, GuiRenderer, SpriteActor):
 
     def draw_gui(self):
         text = str(self.score).zfill(6)
-        position = self._camera.world_to_screen(Point(11, 0.25))
+        position = self._camera.world_to_screen(Point(12.5, 0.25))
         text_buffer, _ = self._resource_provider.display_font.render(text=text, fgcolor=TEXT_COLOR)
         text_size = Point(*text_buffer.get_size())
         gradient_splits = 5
