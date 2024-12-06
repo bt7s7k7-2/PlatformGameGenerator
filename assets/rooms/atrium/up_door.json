@@ -1,0 +1,84 @@
+{
+    "$config": {
+        "allow_flip": true,
+        "down": "closed",
+        "groups": [
+            "atrium_up",
+            "atrium_up_none",
+            "atrium_door"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 2.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 3.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 2.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1,
+                "y": 2
+            },
+            "type": "Door:up"
+        },
+        {
+            "pos": {
+                "x": 4.5,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 2.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 3.0
+            },
+            "type": "Socket,Ladder,$up>NC"
+        },
+        {
+            "pos": {
+                "x": 2.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,Wall,$up=NC"
+        }
+    ]
+}

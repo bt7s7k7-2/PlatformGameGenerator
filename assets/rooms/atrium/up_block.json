@@ -1,0 +1,27 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "atrium_up_none"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 5.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        }
+    ]
+}

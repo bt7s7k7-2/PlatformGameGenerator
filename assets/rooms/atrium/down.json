@@ -1,0 +1,60 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "atrium_down"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 7.0,
+                "y": 0.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.5
+            },
+            "type": "Ladder"
+        },
+        {
+            "pos": {
+                "x": 5.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.5
+            },
+            "type": "Ladder"
+        },
+        {
+            "pos": {
+                "x": 3.0,
+                "y": 2.5
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Socket,@atrium_down_block,@atrium_down_ladder,?down=NC"
+        }
+    ]
+}
