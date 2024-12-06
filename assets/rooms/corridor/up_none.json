@@ -43,7 +43,7 @@
                 "x": 1.0,
                 "y": 2.0
             },
-            "type": "Socket,@reward_brush"
+            "type": "Socket,@reward"
         },
         {
             "pos": {
@@ -54,7 +54,7 @@
                 "x": 1.0,
                 "y": 2.0
             },
-            "type": "Socket,@reward_brush"
+            "type": "Socket,@reward"
         },
         {
             "pos": {
@@ -65,7 +65,7 @@
                 "x": 1.0,
                 "y": 2.0
             },
-            "type": "Socket,@reward_brush"
+            "type": "Socket,@reward"
         },
         {
             "pos": {
@@ -76,7 +76,7 @@
                 "x": 1.0,
                 "y": 2.0
             },
-            "type": "Socket,@reward_brush"
+            "type": "Socket,@reward"
         }
     ]
 }

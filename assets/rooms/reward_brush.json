@@ -3,7 +3,7 @@
         "allow_flip": false,
         "down": "closed",
         "groups": [
-            "reward_brush"
+            "reward"
         ],
         "key": false,
         "left": "closed",
