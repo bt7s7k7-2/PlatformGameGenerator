@@ -17,6 +17,8 @@ class Enemy(Actor):
     collider_size: float = 1
     can_fall: bool = True
 
+    _first = True
+
     @override
     def get_colliders(self):
         yield self.position + self.size * Point(0.5 - self.collider_size * 0.5, 1 - self.collider_size), self.size * self.collider_size
@@ -39,6 +41,10 @@ class Enemy(Actor):
         if will_collide or will_fall:
             self.direction = self.direction.invert()
             direction_vector = Point.from_direction(self.direction)
+            if self._first:
+                self.universe.queue_task(lambda: self.remove())
+
+        self._first = False
 
         self.position += direction_vector * self.speed * delta
         super().update(delta)
