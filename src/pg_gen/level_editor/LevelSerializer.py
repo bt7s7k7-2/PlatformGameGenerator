@@ -24,7 +24,7 @@ class LevelSerializer:
 
         data = {"actors": actors_data, **aux_data}
 
-        return json.dumps(data, indent=4, sort_keys=True)
+        return json.dumps(data, indent=4, sort_keys=True) + "\n"
 
     @staticmethod
     def deserialize(world: "World", raw_data: str, spawn_callback: Callable[[Actor, ActorType], Literal[False] | None] | None = None):

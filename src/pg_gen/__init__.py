@@ -92,4 +92,4 @@ def format_room_files():
             with open(room_path, "rt") as file:
                 file_content = file.read()
             with open(room_path, "wt") as file:
-                file.write(json.dumps(json.loads(file_content), indent=4, sort_keys=True))
+                file.write(json.dumps(json.loads(file_content), indent=4, sort_keys=True) + "\n")
