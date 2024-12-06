@@ -6,7 +6,7 @@
             "default",
             "starter"
         ],
-        "key": false,
+        "key": true,
         "left": "any",
         "only_once": false,
         "right": "any",
