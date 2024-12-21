@@ -1,7 +1,7 @@
 \documentclass[11pt,slovak,a4paper]{article}
 
 \usepackage[slovak]{babel}
-\usepackage[IL2]{fontenc}
+\usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{url} % \url
@@ -72,8 +72,15 @@
 \renewcommand{\familydefault}{\sfdefault} % Sans serif
 \raggedright
 
-\renewcommand{\labelenumii}{\theenumii} % použiť hiearchiálne ordered lists
+% použiť hiearchiálne ordered lists
+\renewcommand{\labelenumii}{\theenumii}
 \renewcommand{\theenumii}{\theenumi.\arabic{enumii}.}
+
+\renewcommand{\labelenumiii}{\theenumiii}
+\renewcommand{\theenumiii}{\theenumii\arabic{enumiii}.}
+
+\renewcommand{\labelenumiv}{\theenumiv}
+\renewcommand{\theenumiv}{\theenumiii\arabic{enumiv}.}
 
 \pagestyle{headings}
 \pagenumbering{roman}

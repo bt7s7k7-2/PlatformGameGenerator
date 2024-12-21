@@ -15,7 +15,6 @@ class AreaInfo:
     id: int
     parent: int | None
     depth: int
-    children: list[int] = field(default_factory=lambda: [])
     rooms: list[RoomInfo] = field(default_factory=lambda: [])
 
 
