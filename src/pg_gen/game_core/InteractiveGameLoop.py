@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 import pygame
@@ -33,6 +34,9 @@ class InteractiveGameLoop(GameLoop):
                 if self.allow_termination:
                     pygame.quit()
                     return True
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_F2:
+                pygame.image.save(self.surface, datetime.now().isoformat() + ".png")
 
         keys = pygame.key.get_pressed()
 

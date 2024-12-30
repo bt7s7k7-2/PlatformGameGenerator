@@ -62,9 +62,6 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
         if not self.show_map:
             return
 
-        if self.room_controller is None:
-            return
-
         map = self.universe.map
         if map is None:
             return
@@ -81,12 +78,11 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
             origin = (point - start) * (tile_size * 3) + offset
             return origin
 
-        current_room = self.room_controller.room
-        assert current_room is not None
+        current_room = self.room_controller.room if self.room_controller else None
 
-        current_room_offset = get_room_origin(current_room)
+        current_room_offset = get_room_origin(current_room) if current_room else Point.ZERO
         offset = Point.min(
-            Point(0, 12),
+            Point(12, 12),
             self._camera.screen_size - (current_room_offset + (Point.ONE * tile_size * 9)),
         )
 
@@ -112,7 +108,7 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
                 if connection > NO_KEY:
                     font.render_to(surface, astuple(origin + text_position), str(connection), TEXT_COLOR, TEXT_BG_COLOR)
 
-            if room == self.room_controller.room:
+            if self.room_controller and room == self.room_controller.room:
                 font.render_to(surface, astuple(origin + Point(tile_size, tile_size)), "X", HIGHLIGHT_1_COLOR, TEXT_BG_COLOR)
 
             font.render_to(surface, astuple(origin + Point(0, tile_size * 2)), str(room.area), MUTED_COLOR, TEXT_BG_COLOR)
@@ -122,5 +118,5 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
 
             end = Point.max(origin, end)
 
-        if current_room.prefab is not None:
+        if current_room is not None and current_room.prefab is not None:
             font.render_to(surface, astuple(Point(0, 0)), f"Room: {current_room.prefab.name}", TEXT_COLOR, TEXT_BG_COLOR)
