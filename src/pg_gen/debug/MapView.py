@@ -118,5 +118,13 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
 
             end = Point.max(origin, end)
 
-        if current_room is not None and current_room.prefab is not None:
-            font.render_to(surface, astuple(Point(0, 0)), f"Room: {current_room.prefab.name}", TEXT_COLOR, TEXT_BG_COLOR)
+        if current_room is not None:
+            text = ""
+
+            if current_room.prefab is not None:
+                text = f"Room: {current_room.prefab.name}; Difficulty: "
+
+            text += str(current_room.difficulty)
+
+            if len(text) > 0:
+                font.render_to(surface, astuple(Point(0, 0)), text, TEXT_COLOR, TEXT_BG_COLOR)

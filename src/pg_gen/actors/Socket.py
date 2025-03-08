@@ -96,6 +96,8 @@ class _ParameterCommand(_SocketCommand):
             parameter = context.get_connection(self.parameter)
         elif isinstance(self.parameter, RoomParameter):
             parameter = context.get_parameter(self.parameter)
+        else:
+            raise TypeError("Invalid type of parameter attribute")
 
         passes = False
         if self.comparison is None:

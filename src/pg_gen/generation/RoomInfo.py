@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
+from ..difficulty.DifficultyReport import DifficultyReport
 from ..support.Direction import Direction
 from ..support.ObjectManifest import ObjectManifest
 from ..support.Point import Point
@@ -52,6 +53,7 @@ class RoomInfo(RoomParameterCollection, RoomConnectionCollection):
     persistent_flags: list[Any] = field(default_factory=lambda: [], init=False)
 
     directions: list[Direction] = field(default_factory=lambda: Direction.get_directions())
+    difficulty: DifficultyReport = field(default_factory=lambda: DifficultyReport())
 
     @staticmethod
     def get_manifest() -> ObjectManifest:

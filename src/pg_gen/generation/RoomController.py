@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from ..actors.Player import Player
 from ..support.constants import JUMP_IMPULSE, ROOM_HEIGHT, ROOM_WIDTH
@@ -8,10 +9,17 @@ from ..world.Actor import Actor
 from ..world.World import World
 from .RoomInfo import RoomInfo
 
+if TYPE_CHECKING:
+    from ..game_core.Universe import Universe
+
 
 @dataclass
 class RoomController(Actor):
     room: RoomInfo | None = None
+
+    @property
+    def difficulty(self):
+        return self.room.difficulty if self.room is not None else None
 
     def switch_rooms(self, direction: Direction):
         assert self.room is not None
@@ -24,10 +32,24 @@ class RoomController(Actor):
             return
 
         next_room = self.universe.map.get_room(next_position)
-        self.universe.queue_task(lambda: RoomController(self.universe, room=next_room).initialize_room(direction.invert()))
+        self.universe.queue_task(
+            lambda: (
+                RoomController.initialize_and_activate(
+                    self.universe,
+                    next_room,
+                    entrance=direction.invert(),
+                ),
+                None,
+            )[1]
+        )
+
+    def activate(self):
+        self.universe.set_world(self.world)
+        return self
 
     def initialize_room(self, entrance: Direction | None = None):
         assert self.room is not None
+        self.room.difficulty.set_all_parameters(0)
         world = World(self.universe)
 
         if self.room.prefab is not None:
@@ -60,4 +82,8 @@ class RoomController(Actor):
                 player.velocity = Point(player.velocity.x, -JUMP_IMPULSE)
 
         world.add_actor(self)
-        self.universe.set_world(world)
+        return self
+
+    @staticmethod
+    def initialize_and_activate(universe: "Universe", room: RoomInfo, entrance: Direction | None = None):
+        return RoomController(universe, room=room).initialize_room(entrance).activate()

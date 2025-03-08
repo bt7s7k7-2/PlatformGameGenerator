@@ -22,13 +22,24 @@ class RoomParameterCollection:
         self._parameters[parameter.value] = value
         return self
 
+    def increment_parameter(self, parameter: RoomParameter, value: float):
+        self._parameters[parameter.value] += value
+
     def set_all_parameters(self, value: float):
         self._parameters = [value] * len(RoomParameter._member_map_)
         return self
 
-    def copy_parameters(self, source: "RoomParameterCollection"):
+    def copy_parameters_from(self, source: "RoomParameterCollection"):
         for i, value in enumerate(source._parameters):
             self._parameters[i] = value
+
+    def add_parameter_from(self, source: "RoomParameterCollection"):
+        for i, value in enumerate(source._parameters):
+            self._parameters[i] += value
+
+    def remove_parameter_from(self, source: "RoomParameterCollection"):
+        for i, value in enumerate(source._parameters):
+            self._parameters[i] -= value
 
     @staticmethod
     def get_manifest() -> ObjectManifest:

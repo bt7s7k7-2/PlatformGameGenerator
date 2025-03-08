@@ -43,7 +43,7 @@ class DoorPlaceholder(CameraClient, Placeholder):
     direction: Direction = Direction.LEFT
 
     @override
-    def evaluate_placeholder(self, context: "RoomInstantiationContext") -> Actor | bool:
+    def evaluate_placeholder(self, context: "RoomInstantiationContext"):
         door_type = context.room.get_connection(self.direction.flipX(self._flip))
         if door_type > NO_KEY:
             return Door(
@@ -74,7 +74,7 @@ class KeyPlaceholder(CameraClient, ResourceClient, Placeholder):
         return super().draw()
 
     @override
-    def evaluate_placeholder(self, context: "RoomInstantiationContext") -> Actor | bool:
+    def evaluate_placeholder(self, context: "RoomInstantiationContext"):
         door_type = context.room.provides_key
         if door_type != NO_KEY:
             return Key(position=self.position, key_type=door_type, room=context.room)
@@ -91,7 +91,7 @@ class WallPlaceholder(CameraClient, ResourceClient, Placeholder):
     layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
 
     @override
-    def evaluate_placeholder(self, context: "RoomInstantiationContext") -> Actor | bool:
+    def evaluate_placeholder(self, context: "RoomInstantiationContext"):
         door_type = context.room.get_connection(self.direction.flipX(self._flip))
         if door_type == NOT_CONNECTED:
             return Wall(position=self.position, size=self.size)

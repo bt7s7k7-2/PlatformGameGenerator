@@ -36,6 +36,6 @@ class FloatingEnemy(SimpleEnemy):
         self.flip = self.direction == Direction.RIGHT
 
 
-ActorRegistry.register_actor(RollingEnemy, name_override="Skull:roll", default_value=RollingEnemy(sprite="skull_sprite", collider_size=0.25))
-ActorRegistry.register_actor(FloatingEnemy, name_override="Bobber", default_value=FloatingEnemy(sprite="bobber_sprite", collider_size=0.25, speed=3))
-ActorRegistry.register_actor(SimpleEnemy, name_override="Blocker", default_value=SimpleEnemy(sprite="blocker", collider_size=0.25, speed=0, animation_speed=2))
+ActorRegistry.register_actor(RollingEnemy, name_override="Skull:roll", default_value=RollingEnemy(sprite="skull_sprite", collider_size=0.25, difficulty=1))
+ActorRegistry.register_actor(FloatingEnemy, name_override="Bobber", default_value=FloatingEnemy(sprite="bobber_sprite", collider_size=0.25, speed=3, difficulty=2))
+ActorRegistry.register_actor(SimpleEnemy, name_override="Blocker", default_value=SimpleEnemy(sprite="blocker", collider_size=0.25, speed=0, animation_speed=2, difficulty=0.5))

@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from typing import override
 
+from pg_gen.difficulty.DifficultyReport import DifficultyReport
+
+from ...difficulty.DifficultyProvider import DifficultyProvider
+from ...generation.RoomParameter import RoomParameter
 from ...support.constants import ROOM_WIDTH
 from ...support.Direction import Direction
 from ...support.Point import Point
@@ -10,12 +14,13 @@ from ..Player import Player
 
 
 @dataclass
-class Enemy(Actor):
+class Enemy(Actor, DifficultyProvider):
     collision_flags: CollisionFlags = CollisionFlags.TRIGGER
     direction: Direction = Direction.RIGHT
     speed: float = 2
     collider_size: float = 1
     can_fall: bool = True
+    difficulty: float = 0
 
     _first = True
 
@@ -52,3 +57,7 @@ class Enemy(Actor):
     def on_trigger(self, trigger: Actor):
         if isinstance(trigger, Player):
             trigger.take_damage()
+
+    @override
+    def apply_difficulty(self, difficulty: DifficultyReport):
+        difficulty.increment_parameter(RoomParameter.ENEMY, self.difficulty)

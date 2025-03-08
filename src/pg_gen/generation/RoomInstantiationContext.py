@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Literal
 
 from ..actors.Placeholders import Placeholder
 from ..actors.support.PersistentObject import PersistentObject
+from ..difficulty.DifficultyProvider import DifficultyProvider
+from ..difficulty.DifficultyReport import DifficultyReport
 from ..support.constants import ROOM_WIDTH
 from ..support.Point import Point
 from ..world.Actor import Actor
@@ -20,6 +22,7 @@ class RoomInstantiationContext(RoomParameterCollection, RoomConnectionCollection
     flip: bool
     room: "RoomInfo"
     world: World
+    difficulty: DifficultyReport | None
     offset: Point = Point.ZERO
     only_once_rooms: set[str] = field(default_factory=lambda: set())
 
@@ -59,6 +62,9 @@ class RoomInstantiationContext(RoomParameterCollection, RoomConnectionCollection
     def handle_placeholder(self, actor: Actor) -> Literal[False] | None:
         if isinstance(actor, PersistentObject):
             actor.init_persistent_object(self.room, self.get_next_flag())
+        
+        if self.difficulty is not None and isinstance(actor, DifficultyProvider):
+            actor.apply_difficulty(self.difficulty)
 
         if isinstance(actor, Placeholder):
             replacement = actor.evaluate_placeholder(self)

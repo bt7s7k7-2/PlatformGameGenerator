@@ -6,6 +6,7 @@ import pygame
 
 from .actors.Player import Player
 from .debug.MapView import MapView
+from .difficulty.DifficultyOptimizer import DifficultyOptimizer
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
 from .generation.MapGenerator import MapGenerator
@@ -39,16 +40,12 @@ def main():
     map_generator.generate()
     map_generator.assign_room_prefabs()
 
-    world = World(universe)
-    universe.set_world(world)
+    optimizer = DifficultyOptimizer(universe, map_generator)
+    print(f"Difficulty: {optimizer.get_global_difficulty()}")
 
-    world.add_actor(Player(position=Point(ROOM_WIDTH / 2, ROOM_HEIGHT / 2)))
-
-    room_controller = RoomController(room=map_generator.get_room(Point.ZERO))
-    world.add_actor(room_controller)
-    room_controller.initialize_room()
-
+    room_controller = RoomController.initialize_and_activate(universe, map_generator.get_room(Point.ZERO), None)
     room_controller.world.add_actor(MapView())
+    room_controller.world.add_actor(Player(position=Point(ROOM_WIDTH / 2, ROOM_HEIGHT / 2)))
 
     game_loop = InteractiveGameLoop(universe)
     game_loop.run()

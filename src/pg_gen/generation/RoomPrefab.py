@@ -82,9 +82,15 @@ class RoomPrefab:
         return flipped
 
     def instantiate_root(self, room: RoomInfo, controller: RoomController | None, world: World):
-        context = RoomInstantiationContext(flip=self._is_flipped, room=room, world=world)
+        context = RoomInstantiationContext(
+            flip=self._is_flipped,
+            room=room,
+            world=world,
+            difficulty=controller.difficulty if controller is not None else None,
+        )
+
         context.copy_connections(room)
-        context.copy_parameters(room)
+        context.copy_parameters_from(room)
         self.instantiate_using(context)
 
         if controller is None:

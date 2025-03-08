@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+
 from ...game_core.Camera import CameraClient
 from ...game_core.ResourceClient import ResourceClient
 from ...level_editor.ActorRegistry import ActorRegistry

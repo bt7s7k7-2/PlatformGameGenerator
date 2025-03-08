@@ -100,7 +100,7 @@ class MapGenerator(RoomParameterCollection):
             self._max_y = position.y
 
         room = RoomInfo(self.random_source.random(), position, area.id)
-        room.copy_parameters(self)
+        room.copy_parameters_from(self)
         assert position not in self.rooms
         self.rooms[position] = room
         self.room_list.append(room)
