@@ -18,7 +18,7 @@ class World:
         return self._actors
 
     def add_actor(self, actor: "Actor", in_front=False):
-        is_new = actor.universe is None
+        is_new = actor.universe is None  # type: ignore
         actor.world = self
         actor.universe = self.universe
         if is_new:

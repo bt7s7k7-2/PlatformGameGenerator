@@ -28,6 +28,7 @@ class Enemy(Actor, DifficultyProvider):
     def get_colliders(self):
         yield self.position + self.size * Point(0.5 - self.collider_size * 0.5, 1 - self.collider_size), self.size * self.collider_size
 
+    @override
     def update(self, delta: float):
         direction_vector = Point.from_direction(self.direction)
         collision_check_size = Point.ONE * 0.1
@@ -54,6 +55,7 @@ class Enemy(Actor, DifficultyProvider):
         self.position += direction_vector * self.speed * delta
         super().update(delta)
 
+    @override
     def on_trigger(self, trigger: Actor):
         if isinstance(trigger, Player):
             trigger.take_damage()

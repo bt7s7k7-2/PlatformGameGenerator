@@ -5,7 +5,6 @@ from os import path, walk
 from typing import Dict, Type
 
 from ..support.Point import Point
-
 from ..world.Actor import Actor
 
 

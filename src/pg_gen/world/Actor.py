@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 from pg_gen.world.CollisionFlags import CollisionFlags
 
 from ..support.Point import Point
-from ..support.support import resolve_intersection
 from .SpriteLayer import SpriteLayer
 
 if TYPE_CHECKING:
@@ -36,11 +35,11 @@ class Actor:
         yield self.position, self.size
 
     def transfer_world(self, new_world: "World"):
-        if self.world is not None:
+        if self.world is not None:  # type: ignore
             self.world.remove_actor(self)
         new_world.add_actor(self)
 
     def remove(self):
-        if self.world is None:
+        if self.world is None:  # type: ignore
             return
         self.world.remove_actor(self)

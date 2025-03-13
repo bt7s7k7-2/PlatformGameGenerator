@@ -62,7 +62,7 @@ class RoomInstantiationContext(RoomParameterCollection, RoomConnectionCollection
     def handle_placeholder(self, actor: Actor) -> Literal[False] | None:
         if isinstance(actor, PersistentObject):
             actor.init_persistent_object(self.room, self.get_next_flag())
-        
+
         if self.difficulty is not None and isinstance(actor, DifficultyProvider):
             actor.apply_difficulty(self.difficulty)
 

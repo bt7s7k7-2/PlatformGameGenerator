@@ -73,6 +73,7 @@ class SearchInput[T](GuiContainer):
 
         self.on_changed(self.selected)
 
+    @override
     def handle_event(self, event: GuiEvent):
         super().handle_event(event)
 

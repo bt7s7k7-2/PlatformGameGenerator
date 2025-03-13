@@ -54,6 +54,7 @@ class DoorPlaceholder(CameraClient, Placeholder):
 
         return False
 
+    @override
     def draw(self):
         self._camera.draw_placeholder(self.position, self.size, Color.YELLOW * 0.75)
         _draw_direction(self._camera, self.position, self.size, self.direction)

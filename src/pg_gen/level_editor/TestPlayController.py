@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from random import random
 from traceback import print_exc
-from typing import ClassVar
+from typing import ClassVar, override
 
 import pygame
 
@@ -52,7 +52,7 @@ class TestPlayController(InputClient, GuiRenderer, ResourceClient, CameraClient)
                 play_world.add_actor(player)
                 play_world.add_actor(self)
             except Exception:
-                if self.world is None:
+                if self.world is None:  # type: ignore
                     LevelSerializer.deserialize(play_world, self.room_prefab.data)
                     player = Player()
                     player.position = self.spawn_position
@@ -63,6 +63,7 @@ class TestPlayController(InputClient, GuiRenderer, ResourceClient, CameraClient)
 
         self.universe.queue_task(switch_world)
 
+    @override
     def update(self, delta: float):
         was_enter_pressed = any(event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN for event in self._input.events)
 
@@ -82,7 +83,7 @@ class TestPlayController(InputClient, GuiRenderer, ResourceClient, CameraClient)
                 del self._gui.children[1:]
                 return
 
-            self._gui.children.extend(config)
+            self._gui.children.extend(config)  # type: ignore
 
         return GuiContainer(
             axis=Axis.COLUMN,
@@ -92,6 +93,7 @@ class TestPlayController(InputClient, GuiRenderer, ResourceClient, CameraClient)
             ],
         )
 
+    @override
     def draw_gui(self):
         for event in self._input.events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:

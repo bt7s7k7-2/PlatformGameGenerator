@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from math import floor, isnan, nan, sqrt
-from typing import ClassVar, Dict
+from typing import ClassVar, Dict, override
 
 from .Direction import Direction
 
@@ -33,7 +33,7 @@ class Point:
     def __mul__(self, other: "Point | float | int"):
         if isinstance(other, Point):
             return Point(self.x * other.x, self.y * other.y)
-        elif isinstance(other, (int, float)):
+        elif isinstance(other, (int, float)):  # type: ignore
             return Point(self.x * other, self.y * other)
         else:
             return NotImplemented
@@ -41,7 +41,7 @@ class Point:
     def __truediv__(self, other: "Point | float | int"):
         if isinstance(other, Point):
             return Point(self.x / other.x, self.y / other.y)
-        elif isinstance(other, (int, float)):
+        elif isinstance(other, (int, float)):  # type: ignore
             return Point(self.x / other, self.y / other)
         else:
             return NotImplemented
@@ -116,6 +116,7 @@ class Point:
 
         assert False, "Invalid direction enum value"
 
+    @override
     def __repr__(self) -> str:
         return f"Point({self.x:.2f}, {self.y:.2f})"
 

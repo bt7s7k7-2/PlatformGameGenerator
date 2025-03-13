@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
+from typing import override
 
 from ...game_core.Camera import CameraClient
 from ...game_core.ResourceClient import ResourceClient
 from ...generation.RoomInfo import NO_KEY, RoomInfo
-from ...level_editor.ActorRegistry import ActorRegistry
-from ...support.keys import KEY_COLORS, MAX_KEY_TYPE
+from ...support.keys import KEY_COLORS
 from ...world.Actor import Actor
 from ...world.CollisionFlags import CollisionFlags
 from ..Player import Player
@@ -17,11 +17,13 @@ class Key(ResourceClient, CameraClient):
     key_type: int = NO_KEY
     room: "RoomInfo | None" = field(default=None)
 
+    @override
     def draw(self):
         color = KEY_COLORS[self.key_type - 1]
         sprite = self._resource_provider.key_sprite
         self._camera.draw_texture(self.position, self.size, sprite, color)
 
+    @override
     def on_trigger(self, trigger: Actor):
         if not isinstance(trigger, Player):
             return
@@ -37,6 +39,7 @@ class Key(ResourceClient, CameraClient):
 class KeyItem(InventoryItem, ResourceClient, CameraClient):
     key_type: int = NO_KEY
 
+    @override
     def draw(self):
         color = KEY_COLORS[self.key_type - 1]
         sprite = self._resource_provider.key_sprite

@@ -94,10 +94,8 @@ class _ParameterCommand(_SocketCommand):
 
         if isinstance(self.parameter, Direction):
             parameter = context.get_connection(self.parameter)
-        elif isinstance(self.parameter, RoomParameter):
-            parameter = context.get_parameter(self.parameter)
         else:
-            raise TypeError("Invalid type of parameter attribute")
+            parameter = context.get_parameter(self.parameter)
 
         passes = False
         if self.comparison is None:
@@ -129,6 +127,7 @@ class Socket(PersistentObject[SocketState], ResourceClient, CameraClient, Config
     def size_string(self):
         return f"{self.size.x}x{self.size.y}"
 
+    @override
     def _get_default_persistent_value(self) -> Any:
         return None
 
@@ -271,6 +270,7 @@ class Socket(PersistentObject[SocketState], ResourceClient, CameraClient, Config
 
         return False
 
+    @override
     def draw(self):
         self._resource_provider.font.render_to(
             self._camera.screen,

@@ -20,15 +20,18 @@ class Gem(SpriteActor, PersistentObject[bool], Placeholder, DifficultyProvider):
     sprite: str | None = field(default="gem_sprite")
     collision_flags: CollisionFlags = CollisionFlags.TRIGGER
 
+    @override
     def _get_default_persistent_value(self) -> Any:
         return True
 
+    @override
     def evaluate_placeholder(self, context: RoomInstantiationContext) -> Actor | Literal[False]:
         if self.persistent_value == False:
             return False
 
         return self
 
+    @override
     def on_trigger(self, trigger: Actor):
         if isinstance(trigger, Player):
             trigger.score += 10

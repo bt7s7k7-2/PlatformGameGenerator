@@ -4,7 +4,7 @@ from enum import Enum
 from functools import cached_property
 from os import path
 from traceback import print_exc
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple, override
 
 import pygame
 
@@ -54,7 +54,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
     _selected_actor_type: ActorType | None = None
     _design_mode: bool = True
     _drag_callback: Callable[[Point], None] | None = None
-    _aux_data: Dict = field(default_factory=lambda: {})
+    _aux_data: dict = field(default_factory=lambda: {})
     _prefab: RoomPrefab | None = None
     _object_config_gui: TextInput | None = None
 
@@ -91,6 +91,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
     def get_config(self) -> dict:
         return self._editor_config.setdefault(self.file_path, {})
 
+    @override
     def on_added(self):
         self.world.paused = True
         if self._config_init:
@@ -164,6 +165,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
             max_results=5,
         )
 
+    @override
     def draw_gui(self):
         surface = self._camera.screen
 
@@ -438,6 +440,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
         self._managed_actors_types.pop(index)
         actor.remove()
 
+    @override
     def update(self, delta: float):
         is_ctrl = self._input.keys[pygame.K_LCTRL]
         is_shift = self._input.keys[pygame.K_LSHIFT]
@@ -555,5 +558,5 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
             elif event.type == pygame.WINDOWLEAVE:
                 self.handle_file_changed()
 
-        if self.selected_actor is not None and self.selected_actor.world is None:
+        if self.selected_actor is not None and self.selected_actor.world is None:  # type: ignore
             self.selected_actor = None

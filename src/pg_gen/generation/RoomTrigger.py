@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from ..actors.Player import Player
 from ..game_core.Camera import CameraClient
@@ -18,11 +18,13 @@ class RoomTrigger(CameraClient):
     room_controller: "RoomController" = field(default=None, repr=False)  # type: ignore
     direction: Direction = field(default=Direction.UP)
 
+    @override
     def on_trigger(self, trigger: Actor):
         if not isinstance(trigger, Player):
             return
 
         self.room_controller.switch_rooms(self.direction)
 
+    @override
     def draw(self):
         self._camera.draw_placeholder(self.position, self.size, Color.GREEN)

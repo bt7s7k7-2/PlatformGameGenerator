@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import override
 
 from ...game_core.Camera import CameraClient
 from ...game_core.ResourceClient import ResourceClient
@@ -17,11 +18,13 @@ class SpriteActor(ResourceClient, CameraClient):
     animation_timer: float = 0.0
     tint: Color = Color.WHITE
 
+    @override
     def update(self, delta: float):
         if self.animation_speed != 0:
             self.animation_timer += delta * self.animation_speed
         return super().update(delta)
 
+    @override
     def draw(self):
         if self.sprite is None:
             return

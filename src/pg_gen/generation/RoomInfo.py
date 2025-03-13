@@ -1,6 +1,6 @@
 from copy import copy
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, override
 
 from ..difficulty.DifficultyReport import DifficultyReport
 from ..support.Direction import Direction
@@ -68,6 +68,7 @@ class RoomInfo(RoomParameterCollection, RoomConnectionCollection):
         return cloned_object
 
     @staticmethod
+    @override
     def get_manifest() -> ObjectManifest:
         key_type = Literal[0, 1]
 

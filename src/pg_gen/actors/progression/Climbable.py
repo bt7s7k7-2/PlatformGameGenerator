@@ -22,6 +22,7 @@ class Climbable(CameraClient, ResourceClient):
     def draw(self):
         self._camera.draw_texture(self.position, Point.ONE, self._resource_provider.__getattribute__(self.sprite), repeat=self.size)
 
+    @override
     def on_trigger(self, trigger: Actor):
         if isinstance(trigger, Player):
             trigger.curr_climbable = self

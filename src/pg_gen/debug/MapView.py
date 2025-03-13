@@ -1,4 +1,5 @@
 from dataclasses import astuple
+from typing import override
 
 import pygame
 
@@ -21,12 +22,14 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
     room_controller: RoomController | None = None
     has_paused = False
 
+    @override
     def on_added(self):
         self.room_controller = next((x for x in self.world.get_actors() if isinstance(x, RoomController)), None)
         if self.has_paused:
             self.world.paused = True
         return super().on_added()
 
+    @override
     def update(self, delta: float):
         self.show_map = self._input.keys[pygame.K_m]
         if not self.show_map:
@@ -58,6 +61,7 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
                 if direction is not None:
                     self.universe.queue_task(lambda: self.room_controller.switch_rooms(direction))  # type: ignore
 
+    @override
     def draw_gui(self):
         if not self.show_map:
             return

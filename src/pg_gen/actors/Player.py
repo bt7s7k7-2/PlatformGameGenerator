@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Flag
 from math import copysign
-from typing import TYPE_CHECKING, Callable, List
+from typing import TYPE_CHECKING, Callable, List, override
 
 import pygame
 
@@ -29,7 +29,7 @@ class ClimbState(Flag):
 @dataclass
 class Player(InputClient, GuiRenderer, SpriteActor):
     size: Point = field(default=Point(1, 1))
-    sprite: str = field(default="player_sprite")
+    sprite: str | None = field(default="player_sprite")
 
     _inventory: List[InventoryItem | None] = field(default_factory=lambda: [None] * 5, init=False)
 
@@ -50,14 +50,17 @@ class Player(InputClient, GuiRenderer, SpriteActor):
     def take_damage(self):
         self.universe.queue_task(self.respawn)
 
+    @override
     def on_added(self):
         self._spawn_point = self.position
         self._spawn_state = self.climb_state
         self.universe.di.register(Player, self)
 
+    @override
     def on_removed(self):
         self.universe.di.unregister(Player, self)
 
+    @override
     def draw_gui(self):
         text = str(self.score).zfill(6)
         position = self._camera.world_to_screen(Point(12.5, 0.25))
@@ -97,6 +100,7 @@ class Player(InputClient, GuiRenderer, SpriteActor):
         item.remove()
         return item
 
+    @override
     def transfer_world(self, new_world: "World"):
         super().transfer_world(new_world)
         for item in self._inventory:
@@ -104,6 +108,7 @@ class Player(InputClient, GuiRenderer, SpriteActor):
                 item.transfer_world(new_world)
         self.curr_climbable = None
 
+    @override
     def update(self, delta: float):
         if self.world.paused:
             return

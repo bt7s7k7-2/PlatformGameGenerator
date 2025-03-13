@@ -1,5 +1,5 @@
 from dataclasses import astuple
-from typing import Literal
+from typing import Literal, override
 
 import numpy as np
 import pygame
@@ -15,7 +15,7 @@ from pg_gen.support.constants import CAMERA_SCALE, ROOM_HEIGHT, ROOM_WIDTH
 from pg_gen.support.Point import Point
 from pg_gen.world.World import World
 
-RenderMode = Literal["human"] | Literal["rgb_array"]
+RenderMode = Literal["human"] | Literal["rgb_array"] | None
 
 
 class PgEnv(Env):
@@ -38,7 +38,7 @@ class PgEnv(Env):
         self.action_space = spaces.MultiBinary(len(self._action_to_direction))
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
-        self.render_mode: RenderMode = render_mode
+        self.render_mode: RenderMode = render_mode  # type: ignore
 
         self.universe: Universe | None = None
         self.game_loop: GameLoop | None = None
@@ -51,7 +51,8 @@ class PgEnv(Env):
     def _get_info(self):
         return {}
 
-    def reset(self, seed=None, options=None):
+    @override
+    def reset(self, seed=None, options=None):  # type: ignore
         # We need the following line to seed self.np_random
         super().reset(seed=seed)
 
@@ -73,6 +74,7 @@ class PgEnv(Env):
 
         return observation, info
 
+    @override
     def step(self, action):
         assert self.universe is not None
 
@@ -92,6 +94,7 @@ class PgEnv(Env):
 
         return observation, reward, terminated, False, info
 
+    @override
     def render(self):
         if self.render_mode == "rgb_array":
             return self._render_frame()

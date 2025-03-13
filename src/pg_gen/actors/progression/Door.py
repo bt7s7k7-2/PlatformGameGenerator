@@ -31,6 +31,7 @@ class Door(ResourceClient, CameraClient, PersistentObject[DoorState]):
     layer: SpriteLayer = field(default=SpriteLayer.BACKGROUND)
     state: DoorState = DoorState.CLOSED
 
+    @override
     def _get_default_persistent_value(self) -> Any:
         return DoorState.CLOSED
 
@@ -41,6 +42,7 @@ class Door(ResourceClient, CameraClient, PersistentObject[DoorState]):
         if self.state != DoorState.CLOSED:
             self.collision_flags = CollisionFlags(0)
 
+    @override
     def draw(self):
         color = KEY_COLORS[self.key_type - 1]
 
@@ -58,6 +60,7 @@ class Door(ResourceClient, CameraClient, PersistentObject[DoorState]):
 
             self._camera.draw_texture(position, Point(2, 2), sprite, color)
 
+    @override
     def on_trigger(self, trigger: Actor):
         if not isinstance(trigger, Player):
             return

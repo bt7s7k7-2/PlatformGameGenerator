@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from math import sin
+from typing import override
 
 from ...level_editor.ActorRegistry import ActorRegistry
 from ...support.Direction import Direction
@@ -15,6 +16,7 @@ class SimpleEnemy(Enemy, SpriteActor):
 
 @dataclass
 class RollingEnemy(SimpleEnemy):
+    @override
     def update(self, delta: float):
         rotation_speed = self.speed * 100
         self.rotation += delta * rotation_speed if self.direction == Direction.LEFT else -delta * rotation_speed
@@ -26,6 +28,7 @@ class FloatingEnemy(SimpleEnemy):
     time = 0.0
     can_fall: bool = field(default=False)
 
+    @override
     def update(self, delta: float):
         last_offset = sin(self.time)
         self.time += delta * self.speed * 2

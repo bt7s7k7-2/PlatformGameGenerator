@@ -65,8 +65,8 @@ class ObjectInput[T](ObjectManifestParser, GuiContainer):
         self._build_host(attribute).children.append(ListInput(font=self.font, value=attribute.getter(), on_changed=partial(self.handle_changed, attribute, None)))
 
     @override
-    def handle_enum(self, elements: dict[str, Enum], attribute: AttributeHandle):
-        self._handle_enum(list(elements.items()), attribute)
+    def handle_enum(self, enum_values: dict[str, Enum], attribute: AttributeHandle):
+        self._handle_enum(list(enum_values.items()), attribute)
 
     @override
     def handle_atom(self, values: tuple[Any, ...], attribute: AttributeHandle):
