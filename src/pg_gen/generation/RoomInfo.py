@@ -1,3 +1,4 @@
+from copy import copy
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -29,6 +30,8 @@ class RoomConnectionCollection:
         for i, value in enumerate(source._connections):
             self._connections[i] = value
 
+        return self
+
     def uses_key_of_type(self, key: int):
         return any(v == key for v in self._connections)
 
@@ -54,6 +57,15 @@ class RoomInfo(RoomParameterCollection, RoomConnectionCollection):
 
     directions: list[Direction] = field(default_factory=lambda: Direction.get_directions())
     difficulty: DifficultyReport = field(default_factory=lambda: DifficultyReport())
+
+    def clone(self):
+        cloned_object = copy(self)
+        cloned_object._parameters = copy(self._parameters)
+        cloned_object._connections = copy(self._connections)
+        cloned_object.persistent_flags = copy(self.persistent_flags)
+        cloned_object.directions = copy(self.directions)
+        cloned_object.difficulty = DifficultyReport().copy_parameters_from(self.difficulty)
+        return cloned_object
 
     @staticmethod
     def get_manifest() -> ObjectManifest:

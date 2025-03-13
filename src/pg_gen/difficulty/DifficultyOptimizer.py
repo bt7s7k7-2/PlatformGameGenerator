@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from time import perf_counter
 
 from ..game_core.Universe import Universe
-from ..generation.MapGenerator import MapGenerator
+from ..generation.Map import Map
 from ..generation.RoomController import RoomController
 from ..generation.RoomInfo import RoomInfo
 from .DifficultyReport import DifficultyReport
@@ -11,7 +11,7 @@ from .DifficultyReport import DifficultyReport
 @dataclass
 class DifficultyOptimizer:
     universe: Universe
-    map: MapGenerator
+    map: Map
 
     def get_room_difficulty(self, room: RoomInfo):
         RoomController(self.universe, room=room).initialize_room(None)

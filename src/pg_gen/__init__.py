@@ -10,6 +10,7 @@ from .difficulty.DifficultyOptimizer import DifficultyOptimizer
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
 from .generation.MapGenerator import MapGenerator
+from .generation.Requirements import Requirements
 from .generation.RoomController import RoomController
 from .generation.RoomPrefabRegistry import RoomPrefabRegistry
 from .level_editor.ActorRegistry import ActorRegistry
@@ -25,7 +26,7 @@ def main():
 
     RoomPrefabRegistry.load(ROOM_FOLDER)
 
-    map_generator = MapGenerator(
+    requirements = Requirements(
         seed=62911,
         max_width=50,
         max_height=50,
@@ -33,17 +34,16 @@ def main():
         max_rooms=100,
     )
 
-    map_generator.set_all_parameters(0.75)
+    requirements.parameter_chances.set_all_parameters(0.75)
 
-    universe = Universe(map_generator)
+    map = MapGenerator(requirements).generate()
 
-    map_generator.generate()
-    map_generator.assign_room_prefabs()
+    universe = Universe(map)
 
-    optimizer = DifficultyOptimizer(universe, map_generator)
+    optimizer = DifficultyOptimizer(universe, map)
     print(f"Difficulty: {optimizer.get_global_difficulty()}")
 
-    room_controller = RoomController.initialize_and_activate(universe, map_generator.get_room(Point.ZERO), None)
+    room_controller = RoomController.initialize_and_activate(universe, map.get_room(Point.ZERO), None)
     room_controller.world.add_actor(MapView())
     room_controller.world.add_actor(Player(position=Point(ROOM_WIDTH / 2, ROOM_HEIGHT / 2)))
 

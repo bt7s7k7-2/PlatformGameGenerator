@@ -33,6 +33,8 @@ class RoomParameterCollection:
         for i, value in enumerate(source._parameters):
             self._parameters[i] = value
 
+        return self
+
     def add_parameter_from(self, source: "RoomParameterCollection"):
         for i, value in enumerate(source._parameters):
             self._parameters[i] += value

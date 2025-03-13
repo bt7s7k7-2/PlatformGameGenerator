@@ -1,127 +1,81 @@
-from dataclasses import dataclass, field
-from functools import cached_property
 from random import Random
-from typing import Tuple
 
 from ..support.keys import KEY_COLORS
 from ..support.Point import Point
+from .AreaInfo import AreaInfo
+from .Map import Map
+from .Requirements import Requirements
 from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
-from .RoomParameter import RoomParameter, RoomParameterCollection
+from .RoomParameter import RoomParameter
 from .RoomPrefabRegistry import RoomPrefabRegistry
-
-
-@dataclass
-class AreaInfo:
-    id: int
-    parent: int | None
-    depth: int
-    rooms: list[RoomInfo] = field(default_factory=lambda: [])
-
 
 _POSSIBLE_KEYS = [i + 1 for i in range(len(KEY_COLORS))]
 
 
-@dataclass(kw_only=True)
-class MapGenerator(RoomParameterCollection):
-    seed: int
-    max_rooms: int = 10
-    max_width: int | None = None
-    max_height: int | None = None
-    sprawl_chance: float = 0.5
-    lock_chance: float = 0.75
-    key_chance: float = 0.5
-    max_rooms_per_area: int = 6
-    min_rooms_per_area: int = 3
-    start_area_size = 5
+class MapGenerator:
+    requirements: Requirements
+    pending_rooms: list[RoomInfo]
+    current_room: RoomInfo
+    map: Map
+    random_source: Random
+    pending_rooms: list[RoomInfo]
 
-    _min_x = 0
-    _min_y = 0
-    _max_x = 0
-    _max_y = 0
+    def __init__(self, requirements: Requirements):
+        super().__init__()
+        self.requirements = requirements
+        self.random_source = Random(requirements.seed)
+        self.pending_rooms = []
 
-    room_list: list[RoomInfo] = field(default_factory=lambda: [])
-    rooms: dict[Point, RoomInfo] = field(default_factory=lambda: {})
-    areas: dict[int, AreaInfo] = field(default_factory=lambda: {})
-    pending_rooms: list[RoomInfo] = field(default_factory=lambda: [])
-    current_room: RoomInfo = None  # type: ignore
-    current_area: AreaInfo = None  # type: ignore
+        self.map = Map()
+        root_area = self.map.add_area(None)
+        root_room = self.create_room(Point.ZERO, root_area)
+        assert root_room is not None
+        self.pending_rooms.append(root_room)
+        self.current_room = root_room
 
-    required_keys: list[Tuple[int, int]] = field(default_factory=lambda: [])
+    def clone(self):
+        cloned_object = MapGenerator(self.requirements)
+        cloned_object.random_source.setstate(self.random_source.getstate())
+        return cloned_object
 
-    def add_key_requirement(self, max_depth: int, key: int):
-        self.required_keys.append((max_depth, key))
+    def create_room(self, position: Point, area: AreaInfo):
+        map = self.map
 
-    @cached_property
-    def random_source(self):
-        return Random(self.seed)
-
-    def get_start(self):
-        return Point(self._min_x, self._min_y)
-
-    def get_size(self):
-        return Point(self._max_x - self._min_x, self._max_y - self._min_y)
-
-    def has_room(self, position: Point):
-        return position in self.rooms
-
-    def get_room(self, position: Point):
-        return self.rooms[position]
-
-    def get_rooms(self):
-        return iter(self.rooms.values())
-
-    def add_room(self, position: Point, area: AreaInfo):
-        if position.x < self._min_x:
-            if self.max_width is not None:
-                new_width = self._max_x - self._min_x + 2
-                if new_width > self.max_width:
+        if position.x < map.min_x:
+            if self.requirements.max_width is not None:
+                new_width = map.max_x - map.min_x + 2
+                if new_width > self.requirements.max_width:
                     return None
-            self._min_x = position.x
 
-        if position.y < self._min_y:
-            if self.max_height is not None:
-                new_height = self._max_y - self._min_y + 2
-                if new_height > self.max_height:
+        if position.y < map.min_y:
+            if self.requirements.max_height is not None:
+                new_height = map.max_y - map.min_y + 2
+                if new_height > self.requirements.max_height:
                     return None
-            self._min_y = position.y
 
-        if position.x > self._max_x:
-            if self.max_width is not None:
-                new_width = self._max_x - self._min_x + 2
-                if new_width > self.max_width:
+        if position.x > map.max_x:
+            if self.requirements.max_width is not None:
+                new_width = map.max_x - map.min_x + 2
+                if new_width > self.requirements.max_width:
                     return None
-            self._max_x = position.x
 
-        if position.y > self._max_y:
-            if self.max_height is not None:
-                new_height = self._max_y - self._min_y + 2
-                if new_height > self.max_height:
+        if position.y > map.max_y:
+            if self.requirements.max_height is not None:
+                new_height = map.max_y - map.min_y + 2
+                if new_height > self.requirements.max_height:
                     return None
-            self._max_y = position.y
 
         room = RoomInfo(self.random_source.random(), position, area.id)
-        room.copy_parameters_from(self)
-        assert position not in self.rooms
-        self.rooms[position] = room
-        self.room_list.append(room)
-        area.rooms.append(room)
+        room.copy_parameters_from(self.requirements.parameter_chances)
 
-        print(f"Added room at {position}, current size is now {len(self.rooms)} at {self._max_x - self._min_x + 1} x {self._max_y - self._min_y + 1}")
+        map.add_room(room)
+
+        print(f"Added room at {position}, current size is now {len(map.rooms)} at {map.max_x - map.min_x + 1} x {map.max_y - map.min_y + 1}")
 
         return room
 
-    def add_area(self, parent: AreaInfo | None):
-        id = len(self.areas)
-        area = AreaInfo(
-            id,
-            parent=parent.id if parent is not None else None,
-            depth=id,  # parent.depth + 1 if parent is not None else 0,
-        )
-        self.areas[id] = area
-        return area
-
     def next_iteration(self):
-        if len(self.rooms) >= self.max_rooms:
+        if len(self.map.rooms) >= self.requirements.max_rooms:
             return False
 
         directions = self.current_room.directions
@@ -136,8 +90,8 @@ class MapGenerator(RoomParameterCollection):
                 continue
 
             next_position = self.current_room.position + Point.from_direction(direction)
-            if self.has_room(next_position):
-                connected_room = self.get_room(next_position)
+            if self.map.has_room(next_position):
+                connected_room = self.map.get_room(next_position)
 
                 compatible = connected_room.area == self.current_room.area
                 if not compatible:
@@ -149,19 +103,19 @@ class MapGenerator(RoomParameterCollection):
                 success = True
                 break
 
-            current_area = self.areas[self.current_room.area]
+            current_area = self.map.areas[self.current_room.area]
             rooms_in_current_area = len(current_area.rooms)
             next_area = current_area
             required_key = NO_KEY
 
-            max_rooms = self.start_area_size if current_area.id == 0 else self.max_rooms_per_area
-            min_rooms = self.start_area_size if current_area.id == 0 else self.min_rooms_per_area
+            max_rooms = self.requirements.start_area_size if current_area.id == 0 else self.requirements.max_rooms_per_area
+            min_rooms = self.requirements.start_area_size if current_area.id == 0 else self.requirements.min_rooms_per_area
 
-            if rooms_in_current_area >= max_rooms or (rooms_in_current_area > min_rooms and self.random_source.random() < self.lock_chance):
+            if rooms_in_current_area >= max_rooms or (rooms_in_current_area > min_rooms and self.random_source.random() < self.requirements.lock_chance):
                 required_key = self.random_source.choice(_POSSIBLE_KEYS)
-                next_area = self.add_area(parent=current_area)
+                next_area = self.map.add_area(parent=current_area)
 
-            new_room = self.add_room(next_position, next_area)
+            new_room = self.create_room(next_position, next_area)
             if new_room is None:
                 continue
 
@@ -169,7 +123,7 @@ class MapGenerator(RoomParameterCollection):
             new_room.set_connection(direction.invert(), NO_KEY)
 
             if required_key != NO_KEY:
-                self.add_key_requirement(current_area.depth, required_key)
+                self.map.add_key_requirement(current_area.depth, required_key)
 
             self.current_room = new_room
             self.pending_rooms.append(self.current_room)
@@ -185,33 +139,38 @@ class MapGenerator(RoomParameterCollection):
             return True
 
         # Random chance to switch to a different branch
-        if self.random_source.random() < self.sprawl_chance:
+        if self.random_source.random() < self.requirements.sprawl_chance:
             self.current_room = self.random_source.choice(self.pending_rooms)
             return True
 
         return True
 
-    def generate(self):
-        root_room = self.add_room(Point.ZERO, self.add_area(None))
-        assert root_room is not None
-        self.pending_rooms.append(root_room)
-        self.current_room = root_room
-
+    def generate_layout(self):
         while True:
             success = self.next_iteration()
             if not success:
                 break
 
-        self.required_keys.sort(key=lambda x: x[0])
+    def generate(self):
+        self.generate_layout()
+        self.distribute_keys()
+        self.assign_room_prefabs()
+
+        return self.map
+
+    def distribute_keys(self):
+        map = self.map
+
+        map.required_keys.sort(key=lambda x: x[0])
         rooms_by_depth: dict[int, list[RoomInfo]] = {}
-        for max_depth, key in self.required_keys:
+        for max_depth, key in map.required_keys:
             fail_count = 0
 
             while True:
                 if max_depth in rooms_by_depth:
                     possible_rooms = rooms_by_depth[max_depth]
                 else:
-                    possible_rooms = [v for v in self.room_list if self.areas[v.area].depth == max_depth]
+                    possible_rooms = [v for v in map.room_list if map.areas[v.area].depth == max_depth]
                     rooms_by_depth[max_depth] = possible_rooms
                     print(f"Keys for depth {max_depth}: {[room.area for room in possible_rooms]}")
 
@@ -238,7 +197,9 @@ class MapGenerator(RoomParameterCollection):
                 break
 
     def assign_room_prefabs(self):
-        for room in self.room_list:
+        map = self.map
+
+        for room in map.room_list:
             debug: list[str] = []
 
             is_root = room.position == Point.ZERO

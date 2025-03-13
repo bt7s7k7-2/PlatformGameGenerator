@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Callable, List
 
 if TYPE_CHECKING:
     from ..world.ServiceActor import ServiceActor
-    from ..generation.MapGenerator import MapGenerator
+    from ..generation.Map import Map
     from ..world.World import World
 
 from .DependencyInjection import DependencyInjection
@@ -47,7 +47,7 @@ class Universe:
     def queue_task(self, task: Callable[[], None]):
         self._pending_tasks.append(task)
 
-    def __init__(self, map: "MapGenerator | None"):
+    def __init__(self, map: "Map | None"):
         self.di = DependencyInjection()
         self.map = map
         self._pending_tasks: List[Callable[[], None]] = []
