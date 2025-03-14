@@ -1,11 +1,12 @@
 from random import Random
+from time import perf_counter
 
 from ..support.keys import KEY_COLORS
 from ..support.Point import Point
 from .AreaInfo import AreaInfo
 from .Map import Map
 from .Requirements import Requirements
-from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
+from .RoomInfo import ALTAR, NO_KEY, NOT_CONNECTED, PORTAL, RoomInfo
 from .RoomParameter import RoomParameter
 from .RoomPrefabRegistry import RoomPrefabRegistry
 
@@ -152,9 +153,13 @@ class MapGenerator:
                 break
 
     def generate(self):
+        start = perf_counter()
         self.generate_layout()
         self.distribute_keys()
         self.assign_room_prefabs()
+        end = perf_counter()
+
+        print(f"Map generation took: {(end - start) * 1000:.2f} ms")
 
         return self.map
 
@@ -163,6 +168,15 @@ class MapGenerator:
 
         map.required_keys.sort(key=lambda x: x[0])
         rooms_by_depth: dict[int, list[RoomInfo]] = {}
+
+        for altar in map.altars:
+            room = map.rooms[altar]
+            room.pickup_type = ALTAR
+
+        if map.portal is not None:
+            room = map.rooms[map.portal]
+            room.pickup_type = PORTAL
+
         for max_depth, key in map.required_keys:
             fail_count = 0
 
@@ -182,7 +196,7 @@ class MapGenerator:
                     continue
 
                 room = self.random_source.choice(possible_rooms)
-                if room.provides_key != NO_KEY:
+                if room.pickup_type != NO_KEY:
                     print(f"Cannot use {key} at {room.area}")
                     possible_rooms.remove(room)
                     continue
@@ -191,12 +205,13 @@ class MapGenerator:
                     fail_count += 1
                     continue
 
-                room.provides_key = key
+                room.pickup_type = key
                 possible_rooms.remove(room)
                 print(f"Saved key {key} at {room.area}")
                 break
 
     def assign_room_prefabs(self):
+        start = perf_counter()
         map = self.map
 
         for room in map.room_list:
@@ -206,8 +221,19 @@ class MapGenerator:
             if is_root:
                 room.set_parameter(RoomParameter.ENEMY, 0)
 
+            group = "default"
+
+            if is_root:
+                group = "starter"
+
+            if room.pickup_type == ALTAR:
+                group = "altar"
+
+            if room.pickup_type == PORTAL:
+                group = "portal"
+
             prefabs = RoomPrefabRegistry.find_rooms(
-                "starter" if is_root else "default",
+                group,
                 requirements=room,
                 context=None,
                 debug_info=debug,
@@ -220,3 +246,6 @@ class MapGenerator:
                 continue
 
             room.prefab = self.random_source.choice(prefabs)
+        end = perf_counter()
+
+        print(f"Assigning room prefabs took: {(end - start) * 1000:.2f} ms")

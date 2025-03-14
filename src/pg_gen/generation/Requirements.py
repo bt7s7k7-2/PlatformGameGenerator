@@ -15,5 +15,6 @@ class Requirements:
     max_rooms_per_area: int = 6
     min_rooms_per_area: int = 3
     start_area_size = 5
+    altar_count = 3
     parameter_chances: RoomParameterCollection = field(default_factory=lambda: RoomParameterCollection())
     target_difficulty: RoomParameterCollection = field(default_factory=lambda: RoomParameterCollection())

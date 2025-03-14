@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Literal, override
 
 from ..game_core.Camera import Camera, CameraClient
 from ..game_core.ResourceClient import ResourceClient
-from ..generation.RoomInfo import NO_KEY, NOT_CONNECTED
+from ..generation.RoomInfo import ALTAR, NO_KEY, NOT_CONNECTED
 from ..level_editor.ActorRegistry import ActorRegistry
 from ..support.Color import Color
 from ..support.Direction import Direction
@@ -76,9 +76,9 @@ class KeyPlaceholder(CameraClient, ResourceClient, Placeholder):
 
     @override
     def evaluate_placeholder(self, context: "RoomInstantiationContext"):
-        door_type = context.room.provides_key
-        if door_type != NO_KEY:
-            return Key(position=self.position, key_type=door_type, room=context.room)
+        pickup_type = context.room.pickup_type
+        if pickup_type > NO_KEY or pickup_type == ALTAR:
+            return Key(position=self.position, key_type=pickup_type, room=context.room)
         return False
 
 

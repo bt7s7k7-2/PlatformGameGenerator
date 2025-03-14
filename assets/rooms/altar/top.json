@@ -1,0 +1,247 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "altar_top"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Wall:left"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 1.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 7.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.5,
+                "y": 0.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 16.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 1.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 17.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 17.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "type": "Wall:right"
+        },
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1,
+                "y": 2
+            },
+            "type": "Door:left"
+        },
+        {
+            "pos": {
+                "x": 17.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1,
+                "y": 2
+            },
+            "type": "Door:right"
+        },
+        {
+            "pos": {
+                "x": 9.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.5,
+                "y": 0.5
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 8.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 0.5
+            },
+            "type": "Socket,Wall,$up=NC"
+        },
+        {
+            "pos": {
+                "x": 8.5,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 4.0
+            },
+            "type": "Socket,Ladder,$up>NC"
+        },
+        {
+            "pos": {
+                "x": 5.5,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 1.0
+            },
+            "type": "Socket,Wall,$up>NK"
+        },
+        {
+            "pos": {
+                "x": 11.5,
+                "y": 1.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 3.0
+            },
+            "type": "Socket,Wall,$up>NK"
+        },
+        {
+            "pos": {
+                "x": 5.5,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1,
+                "y": 2
+            },
+            "type": "Door:up"
+        },
+        {
+            "pos": {
+                "x": 11.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 5.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 2.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 5.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 2.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward"
+        },
+        {
+            "pos": {
+                "x": 3.5,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward"
+        },
+        {
+            "pos": {
+                "x": 15.0,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward"
+        },
+        {
+            "pos": {
+                "x": 13.5,
+                "y": 2.0
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Socket,@reward"
+        }
+    ]
+}

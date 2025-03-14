@@ -1,4 +1,5 @@
 import json
+from copy import copy
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
@@ -460,6 +461,13 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
                 elif event.key == pygame.K_d and is_ctrl:
                     self.duplicate()
                     self.handle_file_changed()
+                elif event.key == pygame.K_a and is_ctrl:
+                    if len(self._managed_actors) == 0:
+                        continue
+                    self.push_undo_stack()
+                    if self._selected_actor is None:
+                        self._selected_actor = self._managed_actors[0]
+                    self._multiselect_actors = copy(self._managed_actors)
                 elif event.key == pygame.K_z and is_ctrl and is_shift:
                     self.redo()
                     self.handle_file_changed()

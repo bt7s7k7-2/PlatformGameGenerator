@@ -1,4 +1,6 @@
+from copy import copy
 from dataclasses import dataclass
+from random import Random
 from time import perf_counter
 
 from ..game_core.Universe import Universe
@@ -18,10 +20,24 @@ class DifficultyOptimizer:
     def achieve_target_difficulty(self):
         best_map: Map | None = None
         max_attempts = 100
+        random = Random(self.requirements.seed)
+        self.requirements.seed = random.randint(1, 100000)
 
         while True:
             generator = MapGenerator(self.requirements)
-            map = generator.generate()
+
+            generator.generate_layout()
+            map = generator.map
+
+            altar_rooms = copy(map.room_list)
+            random.shuffle(altar_rooms)
+            altar_rooms = altar_rooms[0 : self.requirements.altar_count]
+            for altar_room in altar_rooms:
+                map.altars.append(altar_room.position)
+
+            generator.distribute_keys()
+            generator.assign_room_prefabs()
+
             difficulty = self.get_global_difficulty(map)
             print(f"Candidate difficulty: {difficulty}")
 
@@ -54,6 +70,6 @@ class DifficultyOptimizer:
 
         end = perf_counter()
 
-        print(f"Calculating global difficulty took: {(end - start) * 100:.2f} ms")
+        print(f"Calculating global difficulty took: {(end - start) * 1000:.2f} ms")
 
         return report

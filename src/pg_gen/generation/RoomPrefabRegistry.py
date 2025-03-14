@@ -3,7 +3,7 @@ from os import path, walk
 
 from ..support.Direction import Direction
 from ..support.ObjectManifest import ObjectManifestDeserializer
-from .RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
+from .RoomInfo import NO_KEY, NO_PICKUP, NOT_CONNECTED, PORTAL, RoomInfo
 from .RoomInstantiationContext import RoomInstantiationContext
 from .RoomPrefab import RoomPrefab, RoomPrefabEntrance
 
@@ -27,7 +27,7 @@ class RoomPrefabRegistry:
                 result.append(room)
                 continue
 
-            if requirements.provides_key != NO_KEY and not room.key:
+            if requirements.pickup_type != NO_PICKUP and requirements.pickup_type != PORTAL and not room.key:
                 if debug_info is not None:
                     debug_info.append(f"    Rejected: need key")
                 continue

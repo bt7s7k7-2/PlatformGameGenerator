@@ -13,6 +13,9 @@ if TYPE_CHECKING:
 
 NOT_CONNECTED = -1
 NO_KEY = 0
+NO_PICKUP = 0
+ALTAR = -2
+PORTAL = -3
 
 
 @dataclass
@@ -52,7 +55,7 @@ class RoomInfo(RoomParameterCollection, RoomConnectionCollection):
     position: Point
     area: int
     prefab: "RoomPrefab | None" = None
-    provides_key: int = NO_KEY
+    pickup_type: int = NO_PICKUP
     persistent_flags: list[Any] = field(default_factory=lambda: [], init=False)
 
     directions: list[Direction] = field(default_factory=lambda: Direction.get_directions())
@@ -74,6 +77,6 @@ class RoomInfo(RoomParameterCollection, RoomConnectionCollection):
 
         return [
             *RoomConnectionCollection.get_manifest(),
-            ("provides_key", key_type),
+            ("pickup_type", key_type),
             *RoomParameterCollection.get_manifest(),
         ]

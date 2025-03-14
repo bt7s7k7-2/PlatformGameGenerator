@@ -8,7 +8,7 @@ from ..game_core.Camera import CameraClient
 from ..game_core.InputClient import InputClient
 from ..game_core.ResourceClient import ResourceClient
 from ..generation.RoomController import RoomController
-from ..generation.RoomInfo import NO_KEY, NOT_CONNECTED, RoomInfo
+from ..generation.RoomInfo import NO_KEY, NO_PICKUP, NOT_CONNECTED, RoomInfo
 from ..support.Color import Color
 from ..support.constants import HIGHLIGHT_1_COLOR, HIGHLIGHT_2_COLOR, MUTED_COLOR, TEXT_BG_COLOR, TEXT_COLOR
 from ..support.Direction import Direction
@@ -117,8 +117,8 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
 
             font.render_to(surface, astuple(origin + Point(0, tile_size * 2)), str(room.area), MUTED_COLOR, TEXT_BG_COLOR)
 
-            if room.provides_key != NO_KEY:
-                font.render_to(surface, astuple(origin), str(room.provides_key), HIGHLIGHT_2_COLOR, TEXT_BG_COLOR)
+            if room.pickup_type != NO_PICKUP:
+                font.render_to(surface, astuple(origin), str(room.pickup_type), HIGHLIGHT_2_COLOR, TEXT_BG_COLOR)
 
             end = Point.max(origin, end)
 

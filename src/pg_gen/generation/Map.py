@@ -19,6 +19,9 @@ class Map:
     rooms: dict[Point, RoomInfo] = field(default_factory=lambda: {})
     areas: dict[int, AreaInfo] = field(default_factory=lambda: {})
 
+    altars: list[Point] = field(default_factory=lambda: [])
+    portal: Point | None = None
+
     required_keys: list[Tuple[int, int]] = field(default_factory=lambda: [])
 
     def add_key_requirement(self, max_depth: int, key: int):
@@ -88,5 +91,6 @@ class Map:
         cloned_object.rooms = rooms
         cloned_object.areas = areas
         cloned_object.required_keys = copy(self.required_keys)
+        cloned_object.altars = copy(self.altars)
 
         return cloned_object
