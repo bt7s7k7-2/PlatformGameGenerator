@@ -7,7 +7,7 @@ from ..game_core.Camera import Camera
 from ..game_core.InputState import InputState
 from ..support.Color import Color
 from ..support.Point import Axis, Point
-from ..support.support import is_intersection
+from ..support.resolve_intersection import is_intersection
 
 EVENT_LEAVE = 1
 EVENT_MOVE = 2

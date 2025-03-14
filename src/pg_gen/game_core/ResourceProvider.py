@@ -28,6 +28,9 @@ class ResourceProvider:
         self.fire = [spritesheet.slice(Point(x * 16, 48), Point(16, 16)) for x in range(4)]
         self.fire = [*reversed(self.fire)]
 
+        self.portal = [spritesheet.slice(x, Point(48, 48)) for x in [Point(0, 112), Point(48, 64), Point(0, 64)]]
+        self.empty_portal = spritesheet.slice(Point(48, 112), Point(48, 48))
+
         self.blocker = [spritesheet.slice(Point(64, x * 16), Point(16, 16)) for x in range(2)]
 
     __singleton_service__ = True

@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Iterable, List
 
 from ..support.Point import Point
-from ..support.support import is_intersection, resolve_intersection
+from ..support.resolve_intersection import is_intersection, resolve_intersection
 from .CollisionFlags import CollisionFlags
 from .SpriteLayer import SpriteLayer
 

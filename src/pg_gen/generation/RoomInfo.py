@@ -73,7 +73,7 @@ class RoomInfo(RoomParameterCollection, RoomConnectionCollection):
     @staticmethod
     @override
     def get_manifest() -> ObjectManifest:
-        key_type = Literal[0, 1]
+        key_type = Literal[0, 1, -2, -3]
 
         return [
             *RoomConnectionCollection.get_manifest(),

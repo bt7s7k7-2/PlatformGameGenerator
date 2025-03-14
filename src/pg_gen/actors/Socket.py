@@ -82,7 +82,7 @@ _ParameterComparison = Literal[None, "<", "=", ">"]
 
 @dataclass
 class _ParameterCommand(_SocketCommand):
-    parameter: Direction | RoomParameter
+    parameter: Direction | RoomParameter | Literal["key"]
     comparison: _ParameterComparison
     threshold: float
     target: _SocketCommand
@@ -94,8 +94,10 @@ class _ParameterCommand(_SocketCommand):
 
         if isinstance(self.parameter, Direction):
             parameter = context.get_connection(self.parameter)
-        else:
+        elif isinstance(self.parameter, RoomParameter):
             parameter = context.get_parameter(self.parameter)
+        else:
+            parameter = context.room.pickup_type
 
         passes = False
         if self.comparison is None:
@@ -205,6 +207,8 @@ class Socket(PersistentObject[SocketState], ResourceClient, CameraClient, Config
                     parameter = Direction[parameter_name]
                 elif parameter_name in RoomParameter._member_map_:
                     parameter = RoomParameter[parameter_name]
+                elif parameter_name == "KEY":
+                    parameter = "key"
                 else:
                     return None
 

@@ -4,6 +4,7 @@ from typing import override
 from ...game_core.Camera import CameraClient
 from ...game_core.ResourceClient import ResourceClient
 from ...generation.RoomInfo import ALTAR, NO_KEY, RoomInfo
+from ...level_editor.ActorRegistry import ActorRegistry
 from ...support.keys import KEY_COLORS
 from ...world.Actor import Actor
 from ...world.CollisionFlags import CollisionFlags
@@ -37,6 +38,9 @@ class Key(ResourceClient, CameraClient):
             self.universe.queue_task(lambda: self.remove())
             if self.room is not None:
                 self.room.pickup_type = NO_KEY
+
+
+ActorRegistry.register_actor(Key, name_override="Eye", default_value=Key(key_type=ALTAR))
 
 
 @dataclass

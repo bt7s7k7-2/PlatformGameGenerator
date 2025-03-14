@@ -31,7 +31,9 @@ class DifficultyOptimizer:
 
             altar_rooms = copy(map.room_list)
             random.shuffle(altar_rooms)
-            altar_rooms = altar_rooms[0 : self.requirements.altar_count]
+            altar_rooms = altar_rooms[0 : self.requirements.altar_count + 1]
+            portal_room = altar_rooms.pop()
+            map.portal = portal_room.position
             for altar_room in altar_rooms:
                 map.altars.append(altar_room.position)
 

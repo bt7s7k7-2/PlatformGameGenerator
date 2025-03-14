@@ -25,7 +25,7 @@ from ..support.Color import Color
 from ..support.constants import HIGHLIGHT_2_COLOR, ROOM_HEIGHT, ROOM_WIDTH, TEXT_BG_COLOR, TEXT_COLOR
 from ..support.ObjectManifest import ObjectManifest, ObjectManifestDeserializer, ObjectManifestSerializer
 from ..support.Point import Axis, Point
-from ..support.support import is_intersection
+from ..support.resolve_intersection import is_intersection
 from ..world.Actor import Actor
 from .ActorRegistry import ActorRegistry, ActorType
 from .LevelSerializer import LevelSerializer

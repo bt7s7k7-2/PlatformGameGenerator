@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from enum import Enum
-from math import floor, isnan, nan, sqrt
+from math import floor, hypot, isnan, nan, sqrt
 from typing import ClassVar, Dict, override
 
 from .Direction import Direction
+from .support import lerp
 
 
 class Axis(Enum):
@@ -129,6 +130,9 @@ class Point:
             self.y if isnan(other.y) else other.y,
         )
 
+    def lerp(self, other: "Point", t: float):
+        return Point(lerp(self.x, other.x, t), lerp(self.y, other.y, t))
+
     def __getitem__(self, axis: Axis):
         return self.right() if axis == Axis.ROW else self.down()
 
@@ -150,6 +154,10 @@ class Point:
             a.x if abs(a.x) > abs(b.x) else b.x,
             a.y if abs(a.y) > abs(b.y) else b.y,
         )
+
+    @staticmethod
+    def distance(a: "Point", b: "Point"):
+        return hypot(a.x - b.x, a.y - b.y)
 
     ZERO: ClassVar["Point"]
     ONE: ClassVar["Point"]
