@@ -9,6 +9,7 @@ from .DependencyInjection import DependencyInjection
 
 
 class Universe:
+    map: "Map | None" = None
 
     @property
     def world(self):
@@ -47,9 +48,8 @@ class Universe:
     def queue_task(self, task: Callable[[], None]):
         self._pending_tasks.append(task)
 
-    def __init__(self, map: "Map | None"):
+    def __init__(self):
         self.di = DependencyInjection()
-        self.map = map
         self._pending_tasks: List[Callable[[], None]] = []
         self._service_actors: List["ServiceActor"] = []
         pass

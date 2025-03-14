@@ -9,7 +9,6 @@ from .debug.MapView import MapView
 from .difficulty.DifficultyOptimizer import DifficultyOptimizer
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
-from .generation.MapGenerator import MapGenerator
 from .generation.Requirements import Requirements
 from .generation.RoomController import RoomController
 from .generation.RoomPrefabRegistry import RoomPrefabRegistry
@@ -36,12 +35,11 @@ def main():
 
     requirements.parameter_chances.set_all_parameters(0.75)
 
-    map = MapGenerator(requirements).generate()
+    universe = Universe()
 
-    universe = Universe(map)
-
-    optimizer = DifficultyOptimizer(universe, map)
-    print(f"Difficulty: {optimizer.get_global_difficulty()}")
+    optimizer = DifficultyOptimizer(universe, requirements)
+    map = optimizer.achieve_target_difficulty()
+    universe.map = map
 
     room_controller = RoomController.initialize_and_activate(universe, map.get_room(Point.ZERO), None)
     room_controller.world.add_actor(MapView())
@@ -59,7 +57,7 @@ def start_editor():
     if len(sys.argv) > 1:
         file_path = sys.argv[1]
 
-    universe = Universe(map=None)
+    universe = Universe()
 
     world = World(universe)
     universe.set_world(world)
