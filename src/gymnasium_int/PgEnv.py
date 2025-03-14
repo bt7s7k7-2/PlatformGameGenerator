@@ -10,10 +10,12 @@ from pg_gen.game_core.GameLoop import GameLoop
 from pg_gen.game_core.InputState import InputState
 from pg_gen.game_core.InteractiveGameLoop import InteractiveGameLoop
 from pg_gen.game_core.Universe import Universe
-from pg_gen.level_editor.LevelSerializer import LevelSerializer
-from pg_gen.support.constants import CAMERA_SCALE, ROOM_HEIGHT, ROOM_WIDTH
+from pg_gen.generation.RoomController import RoomController
+from pg_gen.generation.RoomInfo import RoomInfo
+from pg_gen.generation.RoomPrefabRegistry import RoomPrefabRegistry
+from pg_gen.level_editor.ActorRegistry import ActorRegistry
+from pg_gen.support.constants import CAMERA_SCALE, ROOM_FOLDER, ROOM_HEIGHT, ROOM_WIDTH
 from pg_gen.support.Point import Point
-from pg_gen.world.World import World
 
 RenderMode = Literal["human"] | Literal["rgb_array"] | None
 
@@ -29,9 +31,7 @@ class PgEnv(Env):
         self.window_size = 512  # The size of the PyGame window
 
         self.observation_space = spaces.Dict(
-            {
-                "agent": spaces.Box(low=0, high=max(ROOM_WIDTH, ROOM_HEIGHT), shape=(2,), dtype=np.float64),
-            }
+            {"agent": spaces.Box(low=0, high=max(ROOM_WIDTH, ROOM_HEIGHT), shape=(2,), dtype=np.float64), "score": spaces.Box(low=0, high=10000, shape=(1,), dtype=np.int32)}
         )
 
         self._action_to_direction = ["right", "up", "left", "down", "jump"]
@@ -43,10 +43,16 @@ class PgEnv(Env):
         self.universe: Universe | None = None
         self.game_loop: GameLoop | None = None
         self.terminated = False
+        self.last_score = 0
 
     def _get_obs(self):
         assert self.universe is not None
-        return {"agent": np.array([*astuple(self.universe.di.inject(Player).position)], dtype=np.float64)}
+        player = self.universe.di.inject(Player)
+
+        return {
+            "agent": np.array([*astuple(player.position)], dtype=np.float64),
+            "score": np.array([player.score], dtype=np.int32),
+        }
 
     def _get_info(self):
         return {}
@@ -58,13 +64,17 @@ class PgEnv(Env):
 
         self.terminated = False
 
-        self.universe = Universe(None)
-        world = World(self.universe)
+        ActorRegistry.load_actors()
+        RoomPrefabRegistry.load(ROOM_FOLDER)
+
+        room_info = RoomInfo(1, Point.ZERO, 0, RoomPrefabRegistry.find_rooms("empty_room", None, None)[0])
+
+        self.universe = Universe()
+
+        room = RoomController.initialize_and_activate(self.universe, room_info)
+        world = room.world
         world.add_actor(Player(position=Point(2, 2)))
         self.universe.set_world(world)
-
-        with open("./assets/rooms/empty_room.json", "rt") as file:
-            LevelSerializer.deserialize(world, file.read())
 
         observation = self._get_obs()
         info = self._get_info()
@@ -85,8 +95,14 @@ class PgEnv(Env):
             input_state.__setattr__(name, True if action_value else False)
 
         terminated = self.terminated
-        reward = 1 if terminated else 0  # Binary sparse rewards
+
         observation = self._get_obs()
+
+        reward = 0 if terminated else 1
+        score = float(observation["score"])
+        reward += score - self.last_score
+        self.last_score = score
+
         info = self._get_info()
 
         if self.render_mode == "human":

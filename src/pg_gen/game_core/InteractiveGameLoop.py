@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 import pygame
 
@@ -16,6 +16,11 @@ class InteractiveGameLoop(GameLoop):
 
     allow_termination = True
     disable_input_clearing = False
+    game_over_reached = False
+
+    @override
+    def game_over(self):
+        self.game_over_reached = True
 
     def run(self):
         while True:
@@ -47,7 +52,8 @@ class InteractiveGameLoop(GameLoop):
         self.input.right |= keys[pygame.K_d]
         self.input.down |= keys[pygame.K_s]
         self.input.jump |= keys[pygame.K_SPACE]
-        return False
+
+        return self.game_over_reached
 
     def update_time(self):
         now = time.monotonic()

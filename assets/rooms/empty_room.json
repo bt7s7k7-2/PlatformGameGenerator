@@ -1,0 +1,93 @@
+{
+    "$config": {
+        "allow_flip": false,
+        "down": "closed",
+        "groups": [
+            "empty_room"
+        ],
+        "key": false,
+        "left": "closed",
+        "only_once": false,
+        "right": "closed",
+        "up": "closed"
+    },
+    "actors": [
+        {
+            "pos": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 11.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 17.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 1.0,
+                "y": 11.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 10.0
+            },
+            "size": {
+                "x": 16.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 0.0
+            },
+            "size": {
+                "x": 16.0,
+                "y": 1.0
+            },
+            "type": "Wall"
+        },
+        {
+            "pos": {
+                "x": 2.5,
+                "y": 7.0
+            },
+            "size": {
+                "x": 3,
+                "y": 3
+            },
+            "type": "Portal"
+        },
+        {
+            "pos": {
+                "x": 2.5,
+                "y": 5.5
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Eye"
+        },
+        {
+            "pos": {
+                "x": 1.0,
+                "y": 8.5
+            },
+            "size": {
+                "x": 1,
+                "y": 1
+            },
+            "type": "Gem"
+        }
+    ]
+}

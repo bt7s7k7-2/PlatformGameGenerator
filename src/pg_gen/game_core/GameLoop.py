@@ -9,6 +9,8 @@ if TYPE_CHECKING:
 
 
 class GameLoop:
+    def game_over(self): ...
+
     def update_logic(self, delta_time: float):
         world = self.universe.world
         if world is not None:
@@ -32,4 +34,5 @@ class GameLoop:
         self.surface = surface
         camera = Camera(screen=self.surface)
         self.universe.di.register(Camera, camera)
+        self.universe.di.register(GameLoop, self)
         pass

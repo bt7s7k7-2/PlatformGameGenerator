@@ -46,6 +46,7 @@ class RoomInstantiationContext(RoomParameterCollection, RoomConnectionCollection
         return flag
 
     def handle_actor(self, actor: Actor, _):
+        actor.universe = self.world.universe
         if self.offset != Point.ZERO:
             actor.position += self.offset
 

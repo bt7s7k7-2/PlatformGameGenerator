@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Callable, List, override
 
 import pygame
 
+from ..game_core.GameLoop import GameLoop
 from ..game_core.InputClient import InputClient
 from ..support.Color import Color
 from ..support.support import find_index_by_predicate
@@ -42,6 +43,9 @@ class Player(InputClient, GuiRenderer, SpriteActor):
     curr_climbable: "Climbable | None" = None
     climb_state: ClimbState = ClimbState(0)
     score = 0
+
+    def game_over(self):
+        self.universe.di.inject(GameLoop).game_over()
 
     def respawn(self):
         self.position = self._spawn_point

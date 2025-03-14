@@ -24,6 +24,7 @@ class PortalEyeAnimation(ResourceClient, CameraClient, Actor):
     end_pos: Point
     portal: "Portal"
     time = 0.0
+    player: Player
 
     @override
     def update(self, delta: float):
@@ -33,6 +34,7 @@ class PortalEyeAnimation(ResourceClient, CameraClient, Actor):
             self.universe.queue_task(lambda: self.remove())
             self.portal.persistent_value += 1
             self.time = 1
+            self.player.score += 50
         self.size = Point.ONE * float(sin(self.time * pi) ** 0.5)
 
     @override
@@ -86,6 +88,7 @@ class Portal(ResourceClient, CameraClient, PersistentObject[int], Actor):
                     start_pos=player_center,
                     end_pos=self_center,
                     portal=self,
+                    player=player,
                 )
             )
             self.time = 0
@@ -109,7 +112,7 @@ class Portal(ResourceClient, CameraClient, PersistentObject[int], Actor):
     @override
     def on_trigger(self, trigger: Actor):
         if self.is_open and isinstance(trigger, Player):
-            print("Game over!")
+            trigger.game_over()
 
 
 ActorRegistry.register_actor(Portal)
