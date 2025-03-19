@@ -8,6 +8,7 @@ import pygame
 from .actors.Player import Player
 from .debug.MapView import MapView
 from .difficulty.DifficultyOptimizer import DifficultyOptimizer
+from .difficulty.LevelSolver import LevelSolver
 from .difficulty.PathFinder import PathFinder
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
@@ -153,6 +154,24 @@ def test_pathfinding():
     viewer_world.add_actor(map_view)
 
     universe.set_world(viewer_world)
+
+    level_solver = LevelSolver(map)
+    path_colors = [Color.GREEN, Color.CYAN, Color.MAGENTA, Color.WHITE, Color.ORANGE]
+    solution = level_solver.solve()
+    for i, path in enumerate(solution.steps):
+        for node, next in pairwise(chain(path, [path[-1]])):
+            vector = next - node
+            if vector == Point.UP:
+                glyph = "↑"
+            elif vector == Point.DOWN:
+                glyph = "↓"
+            elif vector == Point.LEFT:
+                glyph = "←"
+            elif vector == Point.RIGHT:
+                glyph = "→"
+            else:
+                glyph = "*"
+            map_view.add_annotation(node, glyph, path_colors[i % len(path_colors)])
 
     game_loop = InteractiveGameLoop(universe)
     game_loop.run()

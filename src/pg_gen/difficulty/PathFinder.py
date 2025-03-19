@@ -1,9 +1,8 @@
-from copy import copy
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from time import perf_counter
 
 from ..generation.Map import Map
-from ..generation.RoomInfo import NO_KEY
+from ..generation.RoomInfo import NOT_CONNECTED
 from ..support.Direction import Direction
 from ..support.Heap import NOT_IN_HEAP, Heap, HeapItem
 from ..support.Point import Point
@@ -16,26 +15,6 @@ class PathFinderState(HeapItem):
     distance_to_end: float
     closed = False
     parent: "PathFinderState | None" = None
-    _keys: dict[int, int] = field(default_factory=lambda: {})
-
-    def get_key(self, key: int):
-        return self._keys.get(key, 0)
-
-    def modify_key(self, key: int, change: int):
-        new_keys = copy(self._keys)
-        value = self.get_key(key) + change
-        if value == 0:
-            del new_keys[key]
-        else:
-            new_keys[key] = value
-
-        self._keys = new_keys
-
-    def pickup_key(self, key: int):
-        self.modify_key(key, 1)
-
-    def use_key(self, key: int):
-        self.modify_key(key, -1)
 
     def get_path(self):
         path: list[Point] = []
@@ -49,11 +28,6 @@ class PathFinderState(HeapItem):
 
         path.reverse()
         return path
-
-    def clone(self):
-        cloned_object = copy(self)
-        cloned_object.heap_index = NOT_IN_HEAP
-        return cloned_object
 
 
 @dataclass
@@ -108,7 +82,7 @@ class PathFinder:
 
             for direction in Direction.get_directions():
                 connection = room.get_connection(direction)
-                if connection != NO_KEY:
+                if connection == NOT_CONNECTED:
                     continue
 
                 neighbour_position = current.position + Point.from_direction(direction)
