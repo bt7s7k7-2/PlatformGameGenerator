@@ -21,12 +21,10 @@ class RoomController(Actor):
     def difficulty(self):
         return self.room.difficulty if self.room is not None else None
 
-    def switch_rooms(self, direction: Direction):
+    def switch_rooms_absolute(self, direction: Direction | None, next_position: Point):
         assert self.room is not None
         assert self.universe.map is not None
 
-        offset = Point.from_direction(direction)
-        next_position = self.room.position + offset
         if not self.universe.map.has_room(next_position):
             print(f"Tried to teleport to invalid room {next_position}")
             return
@@ -37,11 +35,17 @@ class RoomController(Actor):
                 RoomController.initialize_and_activate(
                     self.universe,
                     next_room,
-                    entrance=direction.invert(),
+                    entrance=direction.invert() if direction is not None else None,
                 ),
                 None,
             )[1]
         )
+
+    def switch_rooms(self, direction: Direction):
+        assert self.room is not None
+        offset = Point.from_direction(direction)
+        next_position = self.room.position + offset
+        self.switch_rooms_absolute(direction, next_position)
 
     def activate(self):
         self.universe.set_world(self.world)

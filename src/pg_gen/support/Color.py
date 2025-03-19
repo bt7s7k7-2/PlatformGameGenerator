@@ -18,6 +18,7 @@ class Color:
     YELLOW: ClassVar["Color"]
     CYAN: ClassVar["Color"]
     MAGENTA: ClassVar["Color"]
+    ORANGE: ClassVar["Color"]
 
     def to_pygame_color(self, opacity: int | None = None):
         if opacity is not None:
@@ -39,3 +40,4 @@ Color.BLUE = Color(0, 0, 255)
 Color.YELLOW = Color(255, 255, 0)
 Color.CYAN = Color(0, 255, 255)
 Color.MAGENTA = Color(255, 0, 255)
+Color.ORANGE = Color(255, 127, 0)

@@ -16,6 +16,7 @@ start = "pg_gen:main"
 start-gym = "gymnasium_int:main"
 start-editor = "pg_gen:start_editor"
 format-rooms = "pg_gen:format_room_files"
+test-pathfinding = "pg_gen:test_pathfinding"
 
 [tool.rye]
 managed = true
