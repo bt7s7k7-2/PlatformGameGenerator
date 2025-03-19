@@ -1,5 +1,6 @@
 import json
 import sys
+from itertools import chain, pairwise
 from os import path, walk
 
 import pygame
@@ -131,8 +132,19 @@ def test_pathfinding():
         if start is not None and end is not None:
             path_finder = PathFinder(map)
             path = path_finder.find_path(start, end)
-            for node in path:
-                map_view.add_annotation(node, "*", Color.GREEN)
+            for node, next in pairwise(chain(path, [path[-1]])):
+                vector = next - node
+                if vector == Point.UP:
+                    glyph = "↑"
+                elif vector == Point.DOWN:
+                    glyph = "↓"
+                elif vector == Point.LEFT:
+                    glyph = "←"
+                elif vector == Point.RIGHT:
+                    glyph = "→"
+                else:
+                    glyph = "*"
+                map_view.add_annotation(node, glyph, Color.GREEN)
 
     map_view = MapView(
         always_show=True,
