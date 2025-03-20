@@ -21,9 +21,15 @@ class LevelSolverState:
     unlock_state: set[Tuple[Point, Direction | None]] = field(default_factory=lambda: set())
 
     def add_step(self, path: list[Point]):
+        assert path[0] == self.position
+
+        if len(path) == 1:
+            return
+
         self.steps.append(path)
         # Path also includes the starting position, so its length is one longer than the amount of steps required to perform it
         self.length += len(path) - 1
+        self.position = path[-1]
 
     def is_unlocked(self, room: Point, direction: Direction):
         return (room, direction) in self.unlock_state
@@ -109,6 +115,12 @@ class LevelSolver:
 
             for path_position, next in pairwise(path):
                 room = self.map.rooms[path_position]
+
+                if room.pickup_type > NO_KEY and not state.is_room_key_pickup_used(path_position):
+                    print(f"Pick up key {room.pickup_type} at {path_position}")
+                    state.use_room_key_pickup(path_position)
+                    state.pickup_key(room.pickup_type)
+
                 vector = next - path_position
                 direction = vector.as_direction()
 
@@ -123,6 +135,12 @@ class LevelSolver:
 
                 key_to_find = connection
                 print(f"Detected locked door at {path_position} -> {direction} with required key {connection}")
+
+                if state.get_key(connection) > 0:
+                    state.use_key(connection)
+                    state.unlock(path_position, direction)
+                    print(f"Unlocking door {path_position} -> {direction} with key from inventory")
+                    continue
 
                 possible_keys = self.key_locations[key_to_find]
                 key_paths = [
@@ -155,7 +173,6 @@ class LevelSolver:
                 path_from_key = list(reversed(best_key_path))
                 checkpoint.add_step(path_to_key)
                 checkpoint.add_step(path_from_key)
-                checkpoint.position = path_from_key[-1]
                 print(f"Unlocking door {path_position} -> {direction}")
                 checkpoint.use_room_key_pickup(best_key)
                 checkpoint.unlock(path_position, direction)
@@ -163,5 +180,4 @@ class LevelSolver:
                 break
             else:
                 checkpoint.add_step(path)
-                checkpoint.position = path[-1]
                 continue
