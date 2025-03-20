@@ -89,9 +89,9 @@ class LevelSolver:
         portal = self.map.portal
         assert portal is not None
         initial_state = LevelSolverState(position=self.map.room_list[0].position)
-        solution: list[LevelSolverState] = []
-        self.solve_permutation(initial_state, altars, portal, solution)
-        best_candidate = min(solution, key=lambda v: v.length)
+        solutions: list[LevelSolverState] = []
+        self.solve_permutation(initial_state, altars, portal, solutions)
+        best_candidate = solutions[0]
         end_time = perf_counter()
         print(f"Best candidate length: {best_candidate.length}, took {(end_time-start_time)*100:.2f}ms")
         return best_candidate
@@ -103,9 +103,15 @@ class LevelSolver:
             if checkpoint is None:
                 continue
 
+            if len(solutions) > 0 and solutions[0].length <= checkpoint.length:
+                continue
+
             if target == portal:
                 print(f"-- Solution of length {checkpoint.length}")
-                solutions.append(checkpoint)
+                if len(solutions) == 0:
+                    solutions.append(checkpoint)
+                else:
+                    solutions[0] = checkpoint
                 return
 
             child_remaining_altars = remaining_altars[:]
