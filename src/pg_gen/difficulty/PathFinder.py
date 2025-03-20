@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from time import perf_counter
 
 from ..generation.Map import Map
@@ -33,8 +33,12 @@ class PathFinderState(HeapItem):
 @dataclass
 class PathFinder:
     map: Map
+    _cache: dict[tuple[Point, Point], list[Point] | None] = field(default_factory=lambda: {})
 
-    def find_path(self, start: Point, end: Point, /, can_traverse_locked_doors: bool | set[tuple[Point, Direction | None]], best_effort: bool):
+    def find_path(self, start: Point, end: Point, /, can_traverse_locked_doors: bool, best_effort: bool):
+        if not best_effort and can_traverse_locked_doors and (start, end) in self._cache:
+            return self._cache[(start, end)]
+
         if start == end:
             return [end]
 
@@ -93,9 +97,6 @@ class PathFinder:
                 if can_traverse_locked_doors:
                     if connection == NOT_CONNECTED:
                         continue
-
-                    if connection > NO_KEY and isinstance(can_traverse_locked_doors, set) and (current.position, direction) not in can_traverse_locked_doors:
-                        continue
                 else:
                     if connection != NO_KEY:
                         continue
@@ -116,8 +117,12 @@ class PathFinder:
                     open_queue.update_item(neighbour)
 
         end_time = perf_counter()
+        result_path = global_closest.get_path() if global_closest else None
         if global_closest is None:
             print(f"Failed to find path in {(end_time-start_time)*1000:.2f}ms")
         else:
             print(f"Found path in {(end_time-start_time)*1000:.2f}ms")
-        return global_closest.get_path() if global_closest else None
+
+        if not best_effort and can_traverse_locked_doors:
+            self._cache[(start, end)] = result_path
+        return result_path
