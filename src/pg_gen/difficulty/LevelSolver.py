@@ -1,9 +1,9 @@
 from copy import copy
 from dataclasses import dataclass, field
 from functools import cached_property
-from itertools import chain, pairwise, permutations
+from itertools import chain, pairwise
 from time import perf_counter
-from typing import Iterable, Tuple
+from typing import Tuple
 
 from ..generation.Map import Map
 from ..generation.RoomInfo import NO_KEY, NOT_CONNECTED
@@ -86,32 +86,32 @@ class LevelSolver:
     def solve(self):
         start_time = perf_counter()
         altars = self.map.altars
-        candidates: list[LevelSolverState] = []
-        for altar_order in permutations(altars, len(altars)):
-            print(f"-- Solving candidate {altar_order}")
-            solution = self.solve_permutation(altar_order)
-            if solution is None:
-                print(f"-- Solution not found for {altar_order}")
-                continue
-
-            print(f"-- Solution of length {solution.length} for {altar_order}")
-            candidates.append(solution)
-
-        best_candidate = min(candidates, key=lambda v: v.length)
+        portal = self.map.portal
+        assert portal is not None
+        initial_state = LevelSolverState(position=self.map.room_list[0].position)
+        solution: list[LevelSolverState] = []
+        self.solve_permutation(initial_state, altars, portal, solution)
+        best_candidate = min(solution, key=lambda v: v.length)
         end_time = perf_counter()
         print(f"Best candidate length: {best_candidate.length}, took {(end_time-start_time)*100:.2f}ms")
         return best_candidate
 
-    def solve_permutation(self, altars: Iterable[Point]):
-        state = LevelSolverState(position=Point.ZERO)
-        portal_position = self.map.portal
-        assert portal_position is not None
-        for target_position in chain(altars, [portal_position]):
-            print(f"Solving path from {state.position} to {target_position}")
-            state = self.solve_path(state, target_position)
-            if state is None:
-                return None
-        return state
+    def solve_permutation(self, state: LevelSolverState, remaining_altars: list[Point], portal: Point, solutions: list[LevelSolverState]):
+        for target in remaining_altars if len(remaining_altars) > 0 else [portal]:
+            checkpoint = state.clone()
+            checkpoint = self.solve_path(checkpoint, target)
+            if checkpoint is None:
+                continue
+
+            if target == portal:
+                print(f"-- Solution of length {checkpoint.length}")
+                solutions.append(checkpoint)
+                return
+
+            child_remaining_altars = remaining_altars[:]
+            child_remaining_altars.remove(target)
+
+            self.solve_permutation(checkpoint, child_remaining_altars, portal, solutions)
 
     def solve_path(self, state: LevelSolverState, end: Point, circular_dependency_prevention: set[int] | None = None):
         while state.position != end:
