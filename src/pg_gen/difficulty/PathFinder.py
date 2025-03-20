@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from time import perf_counter
 
 from ..generation.Map import Map
-from ..generation.RoomInfo import NOT_CONNECTED
+from ..generation.RoomInfo import NO_KEY, NOT_CONNECTED
 from ..support.Direction import Direction
 from ..support.Heap import NOT_IN_HEAP, Heap, HeapItem
 from ..support.Point import Point
@@ -34,7 +34,10 @@ class PathFinderState(HeapItem):
 class PathFinder:
     map: Map
 
-    def find_path(self, start: Point, end: Point):
+    def find_path(self, start: Point, end: Point, /, can_traverse_locked_doors: bool | set[tuple[Point, Direction | None]], best_effort: bool):
+        if start == end:
+            return [end]
+
         start_time = perf_counter()
         state_cache: dict[Point, PathFinderState] = {}
         open_queue = Heap[PathFinderState]()
@@ -65,14 +68,18 @@ class PathFinder:
         start_node = get_node(start, None)
         open_queue.add(start_node)
 
-        global_closest = start_node
+        global_closest: PathFinderState | None = None
+        if best_effort:
+            global_closest = start_node
 
         while len(open_queue) > 0:
             current = open_queue.pop()
             current.closed = True
 
-            if current.distance_to_end < global_closest.distance_to_end:
-                global_closest = current
+            if best_effort:
+                assert global_closest is not None
+                if current.distance_to_end < global_closest.distance_to_end:
+                    global_closest = current
 
             if current.position == end:
                 global_closest = current
@@ -82,8 +89,16 @@ class PathFinder:
 
             for direction in Direction.get_directions():
                 connection = room.get_connection(direction)
-                if connection == NOT_CONNECTED:
-                    continue
+
+                if can_traverse_locked_doors:
+                    if connection == NOT_CONNECTED:
+                        continue
+
+                    if connection > NO_KEY and isinstance(can_traverse_locked_doors, set) and (current.position, direction) not in can_traverse_locked_doors:
+                        continue
+                else:
+                    if connection != NO_KEY:
+                        continue
 
                 neighbour_position = current.position + Point.from_direction(direction)
                 neighbour = get_node(neighbour_position, current)
@@ -101,5 +116,8 @@ class PathFinder:
                     open_queue.update_item(neighbour)
 
         end_time = perf_counter()
-        print(f"Found path in {(end_time-start_time)*1000:.2f}ms")
-        return global_closest.get_path()
+        if global_closest is None:
+            print(f"Failed to find path in {(end_time-start_time)*1000:.2f}ms")
+        else:
+            print(f"Found path in {(end_time-start_time)*1000:.2f}ms")
+        return global_closest.get_path() if global_closest else None

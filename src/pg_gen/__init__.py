@@ -113,6 +113,21 @@ def test_pathfinding():
     start: Point | None = None
     end: Point | None = None
 
+    def add_annotation_for_path(path: list[Point], index: int):
+        for node, next in pairwise(chain(path, [path[-1]])):
+            label = str(index)
+            if node == path[0]:
+                label += "^"
+            elif node == path[-1]:
+                label += "*"
+            map_view.add_annotation(node, label, path_colors[index % len(path_colors)])
+
+            if next == node:
+                continue
+
+            vector = next - node
+            map_view.add_annotation(node, ((index % 10) - 5, vector.as_direction()), path_colors[index % len(path_colors)])
+
     def click_callback(button: int, position: Point):
         nonlocal start, end
 
@@ -132,20 +147,9 @@ def test_pathfinding():
 
         if start is not None and end is not None:
             path_finder = PathFinder(map)
-            path = path_finder.find_path(start, end)
-            for node, next in pairwise(chain(path, [path[-1]])):
-                vector = next - node
-                if vector == Point.UP:
-                    glyph = "↑"
-                elif vector == Point.DOWN:
-                    glyph = "↓"
-                elif vector == Point.LEFT:
-                    glyph = "←"
-                elif vector == Point.RIGHT:
-                    glyph = "→"
-                else:
-                    glyph = "*"
-                map_view.add_annotation(node, glyph, Color.GREEN)
+            path = path_finder.find_path(start, end, can_traverse_locked_doors=True, best_effort=True)
+            assert path is not None
+            add_annotation_for_path(path, 0)
 
     map_view = MapView(
         always_show=True,
@@ -159,19 +163,7 @@ def test_pathfinding():
     path_colors = [Color.GREEN, Color.CYAN, Color.MAGENTA, Color.WHITE, Color.ORANGE]
     solution = level_solver.solve()
     for i, path in enumerate(solution.steps):
-        for node, next in pairwise(chain(path, [path[-1]])):
-            vector = next - node
-            if vector == Point.UP:
-                glyph = "↑"
-            elif vector == Point.DOWN:
-                glyph = "↓"
-            elif vector == Point.LEFT:
-                glyph = "←"
-            elif vector == Point.RIGHT:
-                glyph = "→"
-            else:
-                glyph = "*"
-            map_view.add_annotation(node, glyph, path_colors[i % len(path_colors)])
+        add_annotation_for_path(path, i)
 
     game_loop = InteractiveGameLoop(universe)
     game_loop.run()

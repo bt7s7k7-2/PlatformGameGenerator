@@ -86,6 +86,17 @@ class Point:
     def quantize(self, grid: float):
         return (self * (1 / grid)).round() * grid
 
+    def as_direction(self):
+        direction_factors = [
+            max(0, -self.y),  # up
+            max(0, self.x),  # right
+            max(0, self.y),  # down
+            max(0, -self.x),  # left
+        ]
+        largest_direction_index = max(range(4), key=lambda i: direction_factors[i])
+        direction = Direction.get_directions()[largest_direction_index]
+        return direction
+
     def to_pygame_coordinates(self):
         x = floor(self.x + 0.0001)
         y = floor(self.y + 0.0001)

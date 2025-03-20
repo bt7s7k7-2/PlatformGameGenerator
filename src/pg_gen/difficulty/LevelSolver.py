@@ -1,11 +1,13 @@
 from copy import copy
 from dataclasses import dataclass, field
 from functools import cached_property
-from itertools import chain, permutations
-from typing import Iterable
+from itertools import chain, pairwise, permutations
+from time import perf_counter
+from typing import Iterable, Tuple
 
 from ..generation.Map import Map
-from ..generation.RoomInfo import NO_KEY
+from ..generation.RoomInfo import NO_KEY, NOT_CONNECTED
+from ..support.Direction import Direction
 from ..support.Point import Point
 from .PathFinder import PathFinder
 
@@ -16,6 +18,24 @@ class LevelSolverState:
     length: float = 0
     steps: list[list[Point]] = field(default_factory=lambda: [])
     _keys: dict[int, int] = field(default_factory=lambda: {})
+    unlock_state: set[Tuple[Point, Direction | None]] = field(default_factory=lambda: set())
+
+    def add_step(self, path: list[Point]):
+        self.steps.append(path)
+        # Path also includes the starting position, so its length is one longer than the amount of steps required to perform it
+        self.length += len(path) - 1
+
+    def is_unlocked(self, room: Point, direction: Direction):
+        return (room, direction) in self.unlock_state
+
+    def is_room_key_pickup_used(self, room: Point):
+        return (room, None) in self.unlock_state
+
+    def unlock(self, room: Point, direction: Direction):
+        self.unlock_state.add((room, direction))
+
+    def use_room_key_pickup(self, room: Point):
+        self.unlock_state.add((room, None))
 
     def get_key(self, key: int):
         return self._keys.get(key, 0)
@@ -36,6 +56,7 @@ class LevelSolverState:
     def clone(self):
         cloned_object = copy(self)
         cloned_object._keys = copy(self._keys)
+        cloned_object.unlock_state = copy(self.unlock_state)
         return cloned_object
 
 
@@ -56,15 +77,18 @@ class LevelSolver:
         return keys
 
     def solve(self):
+        start_time = perf_counter()
         altars = self.map.altars
         candidates: list[LevelSolverState] = []
         for altar_order in permutations(altars, len(altars)):
+            print(f"-- Solving candidate {altar_order}")
             solution = self.solve_permutation(altar_order)
-            print(f"Solution of length {solution.length} for {altar_order}")
+            print(f"-- Solution of length {solution.length} for {altar_order}")
             candidates.append(solution)
 
         best_candidate = min(candidates, key=lambda v: v.length)
-        print(f"Best candidate length: {best_candidate.length}")
+        end_time = perf_counter()
+        print(f"Best candidate length: {best_candidate.length}, took {(end_time-start_time)*100:.2f}ms")
         return best_candidate
 
     def solve_permutation(self, altars: Iterable[Point]):
@@ -72,8 +96,72 @@ class LevelSolver:
         portal_position = self.map.portal
         assert portal_position is not None
         for target_position in chain(altars, [portal_position]):
-            path = self.path_finder.find_path(state.position, target_position)
-            state.steps.append(path)
-            state.length += len(path) - 1  # Path also includes the starting position, so its length is one longer than the amount of steps required to perform it
-            state.position = target_position
+            print(f"Solving path from {state.position} to {target_position}")
+            self.solve_path(state, target_position)
         return state
+
+    def solve_path(self, state: LevelSolverState, end: Point):
+        checkpoint = state
+
+        while checkpoint.position != end:
+            path = self.path_finder.find_path(checkpoint.position, end, best_effort=False, can_traverse_locked_doors=True)
+            assert path is not None
+
+            for path_position, next in pairwise(path):
+                room = self.map.rooms[path_position]
+                vector = next - path_position
+                direction = vector.as_direction()
+
+                connection = room.get_connection(direction)
+                assert connection != NOT_CONNECTED
+                if connection == NO_KEY:
+                    continue
+
+                if checkpoint.is_unlocked(path_position, direction):
+                    print(f"Detected door at {path_position} -> {direction} but it is already unlocked")
+                    continue
+
+                key_to_find = connection
+                print(f"Detected locked door at {path_position} -> {direction} with required key {connection}")
+
+                possible_keys = self.key_locations[key_to_find]
+                key_paths = [
+                    v
+                    for v in (
+                        self.path_finder.find_path(
+                            path_position,
+                            key_position,
+                            can_traverse_locked_doors=checkpoint.unlock_state,
+                            best_effort=False,
+                        )
+                        for key_position in possible_keys
+                        if not checkpoint.is_room_key_pickup_used(key_position)
+                    )
+                    if v is not None
+                ]
+                assert len(key_paths) > 0
+
+                best_key_path = min(key_paths, key=lambda v: len(v))
+                best_key = best_key_path[-1]
+                print(f"Found key at {best_key}")
+
+                path_to_key = self.path_finder.find_path(
+                    checkpoint.position,
+                    best_key,
+                    can_traverse_locked_doors=True,
+                    best_effort=False,
+                )
+                assert path_to_key is not None
+                path_from_key = list(reversed(best_key_path))
+                checkpoint.add_step(path_to_key)
+                checkpoint.add_step(path_from_key)
+                checkpoint.position = path_from_key[-1]
+                print(f"Unlocking door {path_position} -> {direction}")
+                checkpoint.use_room_key_pickup(best_key)
+                checkpoint.unlock(path_position, direction)
+                print(f"Getting key adds {len(path_to_key) + len(path_from_key)}")
+                break
+            else:
+                checkpoint.add_step(path)
+                checkpoint.position = path[-1]
+                continue

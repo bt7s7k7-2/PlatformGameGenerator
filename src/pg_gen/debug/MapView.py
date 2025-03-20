@@ -27,10 +27,10 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
     click_callback: Callable[[int, Point], None] | None = None
     always_show: bool = False
     _last_click: Tuple[int, Point] | None = None
-    _annotations: dict[Point, list[Tuple[str, Color]]] = field(default_factory=lambda: {})
+    _annotations: dict[Point, list[Tuple[str | tuple[int, Direction], Color]]] = field(default_factory=lambda: {})
 
-    def add_annotation(self, position: Point, text: str, color: Color):
-        self._annotations.setdefault(position, []).append((text, color))
+    def add_annotation(self, position: Point, content: str | tuple[int, Direction], color: Color):
+        self._annotations.setdefault(position, []).append((content, color))
 
     def clear_annotations(self):
         self._annotations.clear()
@@ -149,9 +149,22 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
                 font.render_to(surface, astuple(origin), str(room.pickup_type), HIGHLIGHT_2_COLOR, TEXT_BG_COLOR)
 
             annotations = self._annotations.get(room.position, None)
+            text_index = 1
             if annotations is not None:
-                for i, (text, color) in enumerate(annotations):
-                    font.render_to(surface, astuple(origin + Point(0, tile_size // 2 * (1 + i))), str(text), color.to_pygame_color())
+                for content, color in annotations:
+                    if isinstance(content, str):
+                        font.render_to(surface, astuple(origin + Point(0, tile_size // 2 * text_index)), content, color.to_pygame_color())
+                        text_index += 1
+                    else:
+                        path_index, path_direction = content
+                        if path_direction == Direction.UP:
+                            self._camera.draw_placeholder_raw(origin + Point(line_size, -line_size) + Point.ONE * (path_index * 2), Point(1, line_size * 2), color)
+                        elif path_direction == Direction.DOWN:
+                            self._camera.draw_placeholder_raw(origin + Point(line_size, line_size) + Point.ONE * (path_index * 2), Point(1, line_size * 2), color)
+                        elif path_direction == Direction.LEFT:
+                            self._camera.draw_placeholder_raw(origin + Point(-line_size, line_size) + Point.ONE * (path_index * 2), Point(line_size * 2, 1), color)
+                        elif path_direction == Direction.RIGHT:
+                            self._camera.draw_placeholder_raw(origin + Point(line_size, line_size) + Point.ONE * (path_index * 2), Point(line_size * 2, 1), color)
 
             end = Point.max(origin, end)
 
