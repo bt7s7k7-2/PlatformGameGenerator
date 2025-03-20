@@ -2,14 +2,14 @@ import json
 import sys
 from itertools import chain, pairwise
 from os import path, walk
+from traceback import print_exc
 
 import pygame
 
 from .actors.Player import Player
 from .debug.MapView import MapView
 from .difficulty.DifficultyOptimizer import DifficultyOptimizer
-from .difficulty.LevelSolver import LevelSolver
-from .difficulty.PathFinder import PathFinder
+from .difficulty.LevelSolver import LevelSolver, LevelSolverState
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
 from .generation.Requirements import Requirements
@@ -146,10 +146,14 @@ def test_pathfinding():
             map_view.add_annotation(end, "End", Color.ORANGE)
 
         if start is not None and end is not None:
-            path_finder = PathFinder(map)
-            path = path_finder.find_path(start, end, can_traverse_locked_doors=True, best_effort=True)
-            assert path is not None
-            add_annotation_for_path(path, 0)
+            state = LevelSolverState(position=start)
+            try:
+                level_solver.solve_path(state, end)
+                for i, step in enumerate(state.steps):
+                    add_annotation_for_path(step, i)
+            except AssertionError:
+                print_exc()
+                print("!! Failed to find path")
 
     map_view = MapView(
         always_show=True,
