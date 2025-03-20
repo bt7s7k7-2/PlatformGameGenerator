@@ -1,3 +1,5 @@
+from enum import Enum
+from functools import total_ordering
 from random import Random
 from time import perf_counter
 
@@ -13,60 +15,76 @@ from .RoomPrefabRegistry import RoomPrefabRegistry
 _POSSIBLE_KEYS = [i + 1 for i in range(len(KEY_COLORS))]
 
 
+@total_ordering
+class GenerationStage(Enum):
+    EMPTY = 0
+    LAYOUT = 1
+    ALTARS = 2
+    KEYS = 3
+    PREFABS = 4
+
+    def __lt__(self, other):
+        if isinstance(other, GenerationStage):
+            return self.value < other.value
+        return NotImplemented
+
+
 class MapGenerator:
     requirements: Requirements
     pending_rooms: list[RoomInfo]
     current_room: RoomInfo
     map: Map
-    random_source: Random
-    pending_rooms: list[RoomInfo]
+    random: Random
+    stage: GenerationStage
 
-    def __init__(self, requirements: Requirements):
+    def __init__(self, requirements: Requirements, map: Map | None = None):
         super().__init__()
         self.requirements = requirements
-        self.random_source = Random(requirements.seed)
+        self.random = Random(requirements.seed)
         self.pending_rooms = []
+        self.stage = GenerationStage.EMPTY
 
-        self.map = Map()
-        root_area = self.map.add_area(None)
-        root_room = self.create_room(Point.ZERO, root_area)
-        assert root_room is not None
-        self.pending_rooms.append(root_room)
-        self.current_room = root_room
+        if map is None:
+            self.map = Map()
+            root_area = self.map.add_area(None)
+            root_room = self.create_room(Point.ZERO, root_area)
+            assert root_room is not None
+            self.pending_rooms.append(root_room)
+            self.current_room = root_room
+        else:
+            self.map = map.clone()
+            self.current_room = self.map.room_list[0]
 
     def clone(self):
-        cloned_object = MapGenerator(self.requirements)
-        cloned_object.random_source.setstate(self.random_source.getstate())
+        cloned_object = MapGenerator(self.requirements, map=self.map)
+        cloned_object.random.setstate(self.random.getstate())
+        cloned_object.stage = self.stage
         return cloned_object
 
     def create_room(self, position: Point, area: AreaInfo):
         map = self.map
 
         if position.x < map.min_x:
-            if self.requirements.max_width is not None:
-                new_width = map.max_x - map.min_x + 2
-                if new_width > self.requirements.max_width:
-                    return None
+            new_width = map.max_x - map.min_x + 2
+            if new_width > self.requirements.max_width:
+                return None
 
         if position.y < map.min_y:
-            if self.requirements.max_height is not None:
-                new_height = map.max_y - map.min_y + 2
-                if new_height > self.requirements.max_height:
-                    return None
+            new_height = map.max_y - map.min_y + 2
+            if new_height > self.requirements.max_height:
+                return None
 
         if position.x > map.max_x:
-            if self.requirements.max_width is not None:
-                new_width = map.max_x - map.min_x + 2
-                if new_width > self.requirements.max_width:
-                    return None
+            new_width = map.max_x - map.min_x + 2
+            if new_width > self.requirements.max_width:
+                return None
 
         if position.y > map.max_y:
-            if self.requirements.max_height is not None:
-                new_height = map.max_y - map.min_y + 2
-                if new_height > self.requirements.max_height:
-                    return None
+            new_height = map.max_y - map.min_y + 2
+            if new_height > self.requirements.max_height:
+                return None
 
-        room = RoomInfo(self.random_source.random(), position, area.id)
+        room = RoomInfo(self.random.random(), position, area.id)
         room.copy_parameters_from(self.requirements.parameter_chances)
 
         map.add_room(room)
@@ -83,7 +101,7 @@ class MapGenerator:
         success = False
 
         while len(directions) > 0:
-            directionIndex = self.random_source.randint(0, len(directions) - 1)
+            directionIndex = self.random.randint(0, len(directions) - 1)
             direction = directions.pop(directionIndex)
 
             already_connected = self.current_room.get_connection(direction) != NOT_CONNECTED
@@ -112,8 +130,8 @@ class MapGenerator:
             max_rooms = self.requirements.start_area_size if current_area.id == 0 else self.requirements.max_rooms_per_area
             min_rooms = self.requirements.start_area_size if current_area.id == 0 else self.requirements.min_rooms_per_area
 
-            if rooms_in_current_area >= max_rooms or (rooms_in_current_area > min_rooms and self.random_source.random() < self.requirements.lock_chance):
-                required_key = self.random_source.choice(_POSSIBLE_KEYS)
+            if rooms_in_current_area >= max_rooms or (rooms_in_current_area > min_rooms and self.random.random() < self.requirements.lock_chance):
+                required_key = self.random.choice(_POSSIBLE_KEYS)
                 next_area = self.map.add_area(parent=current_area)
 
             new_room = self.create_room(next_position, next_area)
@@ -136,12 +154,12 @@ class MapGenerator:
             self.pending_rooms.remove(self.current_room)
             if len(self.pending_rooms) == 0:
                 return False
-            self.current_room = self.random_source.choice(self.pending_rooms)
+            self.current_room = self.random.choice(self.pending_rooms)
             return True
 
         # Random chance to switch to a different branch
-        if self.random_source.random() < self.requirements.sprawl_chance:
-            self.current_room = self.random_source.choice(self.pending_rooms)
+        if self.random.random() < self.requirements.sprawl_chance:
+            self.current_room = self.random.choice(self.pending_rooms)
             return True
 
         return True
@@ -151,12 +169,32 @@ class MapGenerator:
             success = self.next_iteration()
             if not success:
                 break
+        self.stage = GenerationStage.LAYOUT
 
-    def generate(self):
+    def distribute_altars(self):
+        altar_rooms = self.map.room_list[:]
+        self.random.shuffle(altar_rooms)
+        altar_rooms = altar_rooms[0 : self.requirements.altar_count + 1]
+        portal_room = altar_rooms.pop()
+        self.map.portal = portal_room.position
+        self.map.altars.extend(altar_room.position for altar_room in altar_rooms)
+        self.stage = GenerationStage.ALTARS
+
+    def generate(self, target_stage: GenerationStage = GenerationStage.PREFABS):
         start = perf_counter()
-        self.generate_layout()
-        self.distribute_keys()
-        self.assign_room_prefabs()
+
+        if target_stage >= GenerationStage.LAYOUT and self.stage < GenerationStage.LAYOUT:
+            self.generate_layout()
+
+        if target_stage >= GenerationStage.ALTARS and self.stage < GenerationStage.ALTARS:
+            self.distribute_altars()
+
+        if target_stage >= GenerationStage.KEYS and self.stage < GenerationStage.KEYS:
+            self.distribute_keys()
+
+        if target_stage >= GenerationStage.PREFABS and self.stage < GenerationStage.PREFABS:
+            self.assign_room_prefabs()
+
         end = perf_counter()
 
         print(f"Map generation took: {(end - start) * 1000:.2f} ms")
@@ -195,7 +233,7 @@ class MapGenerator:
                     max_depth -= 1
                     continue
 
-                room = self.random_source.choice(possible_rooms)
+                room = self.random.choice(possible_rooms)
                 if room.pickup_type != NO_KEY:
                     print(f"Cannot use {key} at {room.area}")
                     possible_rooms.remove(room)
@@ -209,6 +247,7 @@ class MapGenerator:
                 possible_rooms.remove(room)
                 print(f"Saved key {key} at {room.area}")
                 break
+        self.stage = GenerationStage.KEYS
 
     def assign_room_prefabs(self):
         start = perf_counter()
@@ -245,7 +284,8 @@ class MapGenerator:
                 room.prefab = RoomPrefabRegistry.rooms_by_group["fallback"][0]
                 continue
 
-            room.prefab = self.random_source.choice(prefabs)
+            room.prefab = self.random.choice(prefabs)
         end = perf_counter()
 
         print(f"Assigning room prefabs took: {(end - start) * 1000:.2f} ms")
+        self.stage = GenerationStage.PREFABS

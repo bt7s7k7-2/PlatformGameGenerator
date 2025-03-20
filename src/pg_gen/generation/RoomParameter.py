@@ -11,6 +11,9 @@ class RoomParameter(Enum):
     SPRAWL = 3
 
 
+UNUSED_PARAMETER = -1
+
+
 @dataclass
 class RoomParameterCollection:
     _parameters: list[float] = field(default_factory=lambda: [0] * len(RoomParameter._member_map_), kw_only=True)

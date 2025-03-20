@@ -20,6 +20,15 @@ class LevelSolverState:
     _keys: dict[int, int] = field(default_factory=lambda: {})
     unlock_state: set[Tuple[Point, Direction | None]] = field(default_factory=lambda: set())
 
+    def get_steps_as_single_path(self):
+        previous: Point | None = None
+        for path in self.steps:
+            for room in path:
+                if room == previous:
+                    continue
+                yield room
+                previous = room
+
     def add_step(self, path: list[Point]):
         assert path[0] == self.position
 
@@ -70,10 +79,7 @@ class LevelSolverState:
 @dataclass
 class LevelSolver:
     map: Map
-
-    @cached_property
-    def path_finder(self):
-        return PathFinder(self.map)
+    path_finder: PathFinder
 
     @cached_property
     def key_locations(self):
