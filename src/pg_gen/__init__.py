@@ -148,7 +148,8 @@ def test_pathfinding():
         if start is not None and end is not None:
             state = LevelSolverState(position=start)
             try:
-                level_solver.solve_path(state, end)
+                state = level_solver.solve_path(state, end)
+                assert state is not None
                 for i, step in enumerate(state.steps):
                     add_annotation_for_path(step, i)
             except AssertionError:

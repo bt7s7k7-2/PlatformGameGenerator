@@ -63,6 +63,7 @@ class LevelSolverState:
         cloned_object = copy(self)
         cloned_object._keys = copy(self._keys)
         cloned_object.unlock_state = copy(self.unlock_state)
+        cloned_object.steps = copy(self.steps)
         return cloned_object
 
 
@@ -89,6 +90,10 @@ class LevelSolver:
         for altar_order in permutations(altars, len(altars)):
             print(f"-- Solving candidate {altar_order}")
             solution = self.solve_permutation(altar_order)
+            if solution is None:
+                print(f"-- Solution not found for {altar_order}")
+                continue
+
             print(f"-- Solution of length {solution.length} for {altar_order}")
             candidates.append(solution)
 
@@ -103,14 +108,14 @@ class LevelSolver:
         assert portal_position is not None
         for target_position in chain(altars, [portal_position]):
             print(f"Solving path from {state.position} to {target_position}")
-            self.solve_path(state, target_position)
+            state = self.solve_path(state, target_position)
+            if state is None:
+                return None
         return state
 
-    def solve_path(self, state: LevelSolverState, end: Point):
-        checkpoint = state
-
-        while checkpoint.position != end:
-            path = self.path_finder.find_path(checkpoint.position, end, best_effort=False, can_traverse_locked_doors=True)
+    def solve_path(self, state: LevelSolverState, end: Point, circular_dependency_prevention: set[int] | None = None):
+        while state.position != end:
+            path = self.path_finder.find_path(state.position, end, best_effort=False, can_traverse_locked_doors=True)
             assert path is not None
 
             for path_position, next in pairwise(path):
@@ -129,12 +134,15 @@ class LevelSolver:
                 if connection == NO_KEY:
                     continue
 
-                if checkpoint.is_unlocked(path_position, direction):
+                if state.is_unlocked(path_position, direction):
                     print(f"Detected door at {path_position} -> {direction} but it is already unlocked")
                     continue
 
                 key_to_find = connection
                 print(f"Detected locked door at {path_position} -> {direction} with required key {connection}")
+
+                if circular_dependency_prevention and key_to_find in circular_dependency_prevention:
+                    return None
 
                 if state.get_key(connection) > 0:
                     state.use_key(connection)
@@ -142,42 +150,33 @@ class LevelSolver:
                     print(f"Unlocking door {path_position} -> {direction} with key from inventory")
                     continue
 
-                possible_keys = self.key_locations[key_to_find]
-                key_paths = [
-                    v
-                    for v in (
-                        self.path_finder.find_path(
-                            path_position,
-                            key_position,
-                            can_traverse_locked_doors=checkpoint.unlock_state,
-                            best_effort=False,
-                        )
-                        for key_position in possible_keys
-                        if not checkpoint.is_room_key_pickup_used(key_position)
-                    )
-                    if v is not None
-                ]
-                assert len(key_paths) > 0
+                possible_keys = [x for x in self.key_locations[key_to_find] if not state.is_room_key_pickup_used(x)]
+                key_acquisition_candidates: list[LevelSolverState] = []
 
-                best_key_path = min(key_paths, key=lambda v: len(v))
-                best_key = best_key_path[-1]
+                forbidden_keys = set(chain(circular_dependency_prevention, [key_to_find]) if circular_dependency_prevention else [key_to_find])
+                for key_position in possible_keys:
+                    checkpoint = state.clone()
+                    checkpoint = self.solve_path(checkpoint, key_position, circular_dependency_prevention=forbidden_keys)
+                    if checkpoint is None:
+                        continue
+                    checkpoint = self.solve_path(checkpoint, path_position)
+                    if checkpoint is None:
+                        continue
+
+                    key_acquisition_candidates.append(checkpoint)
+
+                best_key_path = min(key_acquisition_candidates, key=lambda v: v.length)
+                best_key = best_key_path.position
                 print(f"Found key at {best_key}")
 
-                path_to_key = self.path_finder.find_path(
-                    checkpoint.position,
-                    best_key,
-                    can_traverse_locked_doors=True,
-                    best_effort=False,
-                )
-                assert path_to_key is not None
-                path_from_key = list(reversed(best_key_path))
-                checkpoint.add_step(path_to_key)
-                checkpoint.add_step(path_from_key)
                 print(f"Unlocking door {path_position} -> {direction}")
-                checkpoint.use_room_key_pickup(best_key)
-                checkpoint.unlock(path_position, direction)
-                print(f"Getting key adds {len(path_to_key) + len(path_from_key)}")
+                state.use_room_key_pickup(best_key)
+                state.unlock(path_position, direction)
+                print(f"Getting key adds {best_key_path.length - state.length}")
+                state = best_key_path
                 break
             else:
-                checkpoint.add_step(path)
+                state.add_step(path)
                 continue
+
+        return state
