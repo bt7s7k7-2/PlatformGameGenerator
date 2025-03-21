@@ -111,10 +111,12 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
         )
 
         surface = self._camera.screen
+        pending_annotations: list[RoomInfo] = []
+
+        size = Point.ONE * (tile_size * 3 + 1)
 
         for room in map.get_rooms():
             origin = get_room_origin(room)
-            size = Point.ONE * (tile_size * 3 + 1)
 
             self._camera.draw_placeholder_raw(origin - Point.ONE, size, Color.BLACK, opacity=127)
             self._camera.draw_placeholder_raw(origin - Point.ONE, size, Color.WHITE, width=1, opacity=127)
@@ -135,8 +137,8 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
                 connection = room.get_connection(direction)
                 if connection == NOT_CONNECTED:
                     continue
-                size = Point(line_size, 1) if direction.horizontal else Point(1, line_size)
-                self._camera.draw_placeholder_raw(origin + line_position, size, _LINE_COLOR)
+                connection_line_size = Point(line_size, 1) if direction.horizontal else Point(1, line_size)
+                self._camera.draw_placeholder_raw(origin + line_position, connection_line_size, _LINE_COLOR)
                 if connection > NO_KEY:
                     font.render_to(surface, astuple(origin + text_position), str(connection), TEXT_COLOR, TEXT_BG_COLOR)
 
@@ -145,9 +147,16 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
 
             font.render_to(surface, astuple(origin + Point(0, tile_size * 2)), str(room.area), MUTED_COLOR, TEXT_BG_COLOR)
 
+            if room.position in self._annotations:
+                pending_annotations.append(room)
+
             if room.pickup_type != NO_PICKUP:
                 font.render_to(surface, astuple(origin), str(room.pickup_type), HIGHLIGHT_2_COLOR, TEXT_BG_COLOR)
 
+            end = Point.max(origin, end)
+
+        for room in pending_annotations:
+            origin = get_room_origin(room)
             annotations = self._annotations.get(room.position, None)
             text_index = 1
             if annotations is not None:
@@ -165,8 +174,6 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
                             self._camera.draw_placeholder_raw(origin + Point(-line_size, line_size) + Point.ONE * (path_index * 2), Point(line_size * 2, 1), color)
                         elif path_direction == Direction.RIGHT:
                             self._camera.draw_placeholder_raw(origin + Point(line_size, line_size) + Point.ONE * (path_index * 2), Point(line_size * 2, 1), color)
-
-            end = Point.max(origin, end)
 
         if current_room is not None:
             text = ""
