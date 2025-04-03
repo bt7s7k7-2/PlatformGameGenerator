@@ -1,5 +1,6 @@
 import json
-from typing import TYPE_CHECKING, Callable, Dict, List, Literal
+from copy import copy
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal
 
 from ..actors.support.ConfigurableObject import ConfigurableObject
 from ..support.Point import Point
@@ -8,6 +9,8 @@ from .ActorRegistry import ActorRegistry, ActorType
 
 if TYPE_CHECKING:
     from ..world.World import World
+
+_JSON_CACHE: dict[str, Any] = {}
 
 
 class LevelSerializer:
@@ -28,7 +31,12 @@ class LevelSerializer:
 
     @staticmethod
     def deserialize(world: "World", raw_data: str, spawn_callback: Callable[[Actor, ActorType], Literal[False] | None] | None = None):
-        data = json.loads(raw_data)
+        data = _JSON_CACHE.get(raw_data)
+        if data is None:
+            data = json.loads(raw_data)
+            _JSON_CACHE[raw_data] = data
+        data = copy(data)
+
         actors = data["actors"]
         del data["actors"]
 
