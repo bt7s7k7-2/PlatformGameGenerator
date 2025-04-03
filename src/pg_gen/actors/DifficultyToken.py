@@ -1,4 +1,7 @@
-from typing import override
+from typing import Literal, override
+
+from pg_gen.generation.RoomInstantiationContext import RoomInstantiationContext
+from pg_gen.world.Actor import Actor
 
 from ..difficulty.DifficultyProvider import DifficultyProvider
 from ..difficulty.DifficultyReport import DifficultyReport
@@ -6,10 +9,11 @@ from ..game_core.Camera import CameraClient
 from ..generation.RoomParameter import RoomParameter
 from ..level_editor.ActorRegistry import ActorRegistry
 from ..support.Color import Color
+from .Placeholders import Placeholder
 from .support.ConfigurableObject import ConfigurableObject
 
 
-class DifficultyToken(ConfigurableObject, DifficultyProvider, CameraClient):
+class DifficultyToken(ConfigurableObject, DifficultyProvider, CameraClient, Placeholder):
     @override
     def apply_config(self, config: str) -> bool:
         super().apply_config(config)
@@ -45,6 +49,10 @@ class DifficultyToken(ConfigurableObject, DifficultyProvider, CameraClient):
 
         parameter, value = config
         difficulty.increment_parameter(parameter, value)
+
+    @override
+    def evaluate_placeholder(self, context: RoomInstantiationContext) -> Actor | Literal[False]:
+        return False
 
     @override
     def draw(self):
