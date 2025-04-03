@@ -8,6 +8,7 @@ from typing import Tuple
 from ..generation.Map import Map
 from ..generation.RoomInfo import NO_KEY, NOT_CONNECTED
 from ..support.Direction import Direction
+from ..support.keys import KEY_COLORS
 from ..support.Point import Point
 from .PathFinder import PathFinder
 
@@ -84,9 +85,13 @@ class LevelSolver:
     @cached_property
     def key_locations(self):
         keys: dict[int, list[Point]] = {}
+        for key_type in range(len(KEY_COLORS)):
+            keys[key_type + 1] = []
+
         for room in self.map.room_list:
             if room.pickup_type > NO_KEY:
-                keys.setdefault(room.pickup_type, []).append(room.position)
+                keys[room.pickup_type].append(room.position)
+
         return keys
 
     def solve(self):
@@ -97,6 +102,9 @@ class LevelSolver:
         initial_state = LevelSolverState(position=self.map.room_list[0].position)
         solutions: list[LevelSolverState] = []
         self.solve_permutation(initial_state, altars, portal, solutions)
+        if len(solutions) == 0:
+            return None
+
         best_candidate = solutions[0]
         end_time = perf_counter()
         print(f"Best candidate length: {best_candidate.length}, took {(end_time-start_time)*100:.2f}ms")
@@ -176,6 +184,9 @@ class LevelSolver:
                         continue
 
                     key_acquisition_candidates.append(checkpoint)
+
+                if len(key_acquisition_candidates) == 0:
+                    return None
 
                 best_key_path = min(key_acquisition_candidates, key=lambda v: v.length)
                 best_key = best_key_path.position

@@ -1,9 +1,12 @@
 from dataclasses import dataclass, field
 from typing import override
 
+from ...difficulty.DifficultyProvider import DifficultyProvider
+from ...difficulty.DifficultyReport import DifficultyReport
 from ...game_core.Camera import CameraClient
 from ...game_core.ResourceClient import ResourceClient
 from ...generation.RoomInfo import ALTAR, NO_KEY, RoomInfo
+from ...generation.RoomParameter import RoomParameter
 from ...level_editor.ActorRegistry import ActorRegistry
 from ...support.keys import KEY_COLORS
 from ...world.Actor import Actor
@@ -13,7 +16,7 @@ from ..support.InventoryItem import InventoryItem
 
 
 @dataclass
-class Key(ResourceClient, CameraClient):
+class Key(ResourceClient, CameraClient, DifficultyProvider):
     collision_flags: CollisionFlags = field(default=CollisionFlags.TRIGGER)
     key_type: int = NO_KEY
     room: "RoomInfo | None" = field(default=None)
@@ -38,6 +41,10 @@ class Key(ResourceClient, CameraClient):
             self.universe.queue_task(lambda: self.remove())
             if self.room is not None:
                 self.room.pickup_type = NO_KEY
+
+    @override
+    def apply_difficulty(self, difficulty: DifficultyReport):
+        difficulty.increment_parameter(RoomParameter.REWARD, 10)
 
 
 ActorRegistry.register_actor(Key, name_override="Eye", default_value=Key(key_type=ALTAR))

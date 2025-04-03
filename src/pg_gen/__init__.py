@@ -3,6 +3,7 @@ import sys
 from itertools import chain, pairwise
 from os import path, walk
 from random import Random
+from time import perf_counter
 from traceback import print_exc
 
 import pygame
@@ -34,12 +35,20 @@ def main():
 
     target_difficulty = RoomParameterCollection()
     target_difficulty.set_all_parameters(UNUSED_PARAMETER)
-    target_difficulty.set_parameter(RoomParameter.REWARD, 0)
+    target_difficulty.set_parameter(RoomParameter.REWARD, 500)
+    target_difficulty.set_parameter(RoomParameter.JUMP, 10)
+    target_difficulty.set_parameter(RoomParameter.ENEMY, 100)
+    target_difficulty.set_parameter(RoomParameter.SPRAWL, 50)
     optimizer = DifficultyOptimizer(universe, target_difficulty=target_difficulty, random=Random(108561))
+
+    start = perf_counter()
     optimizer.initialize_population()
+    optimizer.optimize()
+    end = perf_counter()
+    print(f"Optimization took: {(end-start)*1000:.2f} ms")
 
     best_candidate = optimizer.get_best_candidate()
-    print(f"Best candidate: {best_candidate.requirements}")
+    print(f"Best candidate: {optimizer.get_best_difficulty()} {best_candidate.requirements}")
     map = best_candidate.get_map()
     universe.map = map
 
