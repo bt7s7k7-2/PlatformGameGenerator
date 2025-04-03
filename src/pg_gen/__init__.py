@@ -39,6 +39,7 @@ def main():
     optimizer.initialize_population()
 
     best_candidate = optimizer.get_best_candidate()
+    print(f"Best candidate: {best_candidate.requirements}")
     map = best_candidate.get_map()
     universe.map = map
 
@@ -61,6 +62,9 @@ def main():
         add_annotation_for_path(map_view, path, i)
 
     room_controller.world.add_actor(Player(position=Point(ROOM_WIDTH / 2, ROOM_HEIGHT / 2)))
+
+    if len(sys.argv) > 1 and sys.argv[1] == "only-generate":
+        sys.exit(0)
 
     game_loop = InteractiveGameLoop(universe)
     game_loop.run()
@@ -118,11 +122,11 @@ def test_pathfinding():
 
     target_difficulty = RoomParameterCollection()
     target_difficulty.set_all_parameters(UNUSED_PARAMETER)
-    optimizer = DifficultyOptimizer(universe, target_difficulty, Random(108567), max_population=1)
+    optimizer = DifficultyOptimizer(universe, target_difficulty, Random(108560), max_population=1)
 
-    optimizer.default_requirements.max_rooms = 100
-    optimizer.default_requirements.max_width = 100
-    optimizer.default_requirements.max_height = 100
+    optimizer.get_parameter("max_rooms").override_value(100)
+    optimizer.get_parameter("max_width").override_value(100)
+    optimizer.get_parameter("max_height").override_value(100)
 
     optimizer.initialize_population()
     best_candidate = optimizer.get_best_candidate()

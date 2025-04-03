@@ -12,9 +12,43 @@ from ..generation.RoomController import RoomController
 from ..generation.RoomInfo import RoomInfo
 from ..generation.RoomParameter import UNUSED_PARAMETER, RoomParameter, RoomParameterCollection
 from ..support.Point import Point
+from ..support.support import weighted_random
 from .DifficultyReport import DifficultyReport
 from .LevelSolver import LevelSolver, LevelSolverState
 from .PathFinder import PathFinder
+
+
+@dataclass
+class ParameterInfo:
+    name: str | RoomParameter
+    is_float: bool
+    range: tuple[float, float]
+    weight: float
+
+    @property
+    def min(self):
+        return self.range[0]
+
+    @property
+    def max(self):
+        return self.range[1]
+
+    def set(self, target: Requirements, value: float):
+        if isinstance(self.name, RoomParameter):
+            target.parameter_chances.set_parameter(self.name, value)
+            return
+
+        setattr(target, self.name, value)
+
+    def get(self, target: Requirements):
+        if isinstance(self.name, RoomParameter):
+            return target.parameter_chances.get_parameter(self.name)
+
+        return getattr(target, self.name)
+
+    def override_value(self, value: float):
+        self.range = (value, value)
+        self.weight = 0
 
 
 @dataclass
@@ -72,9 +106,45 @@ class DifficultyOptimizer:
     max_population: int = 10
     elitism_factor: float = 0.2
     selection_factor: float = 0.3
-    default_requirements: Requirements = field(default_factory=lambda: Requirements(seed=0))
+
+    parameters: list[ParameterInfo] = field(
+        default_factory=lambda: [
+            ParameterInfo("seed", is_float=True, range=(0, 1), weight=0.1),
+            ParameterInfo("max_rooms", is_float=False, range=(10, 100), weight=0.75),
+            ParameterInfo("max_width", is_float=False, range=(10, 30), weight=0.5),
+            ParameterInfo("max_height", is_float=False, range=(10, 30), weight=0.5),
+            ParameterInfo("sprawl_chance", is_float=True, range=(0, 1), weight=1),
+            ParameterInfo("lock_chance", is_float=True, range=(0, 1), weight=1),
+            ParameterInfo("altar_count", is_float=False, range=(0, 3), weight=0.5),
+            ParameterInfo(RoomParameter.ENEMY, is_float=True, range=(0, 1), weight=1.5),
+            ParameterInfo(RoomParameter.JUMP, is_float=True, range=(0, 1), weight=1.5),
+            ParameterInfo(RoomParameter.REWARD, is_float=True, range=(0, 1), weight=1.5),
+        ]
+    )
 
     valid_candidates: list[tuple[LevelCandidate, LevelCandidate, float]] = field(default_factory=lambda: [])
+
+    def _apply_random_parameters(self, target: Requirements):
+        for parameter in self.parameters:
+            value = self.random.uniform(parameter.min, parameter.max) if parameter.is_float else self.random.randint(int(parameter.min), int(parameter.max))
+            parameter.set(target, value)
+
+    def _mutate_random_parameter(self, target: Requirements):
+        parameter = weighted_random(self.parameters, self.random.random(), lambda v: v.weight)
+        value = parameter.get(target)
+        range = (parameter.max - parameter.min) * 0.25
+        delta = self.random.uniform(-range, range)
+        value += delta
+
+        if value > parameter.max:
+            value = parameter.max
+        elif value < parameter.min:
+            value = parameter.min
+
+        parameter.set(target, value)
+
+    def get_parameter(self, name: str | RoomParameter):
+        return next(v for v in self.parameters if v.name == name)
 
     def get_best_candidate(self):
         return self.valid_candidates[0][1]
@@ -110,8 +180,8 @@ class DifficultyOptimizer:
         candidates: list[LevelCandidate] = []
 
         for _ in range(self.max_population):
-            requirements = self.default_requirements.clone()
-            requirements.seed = self.random.random()
+            requirements = Requirements(seed=0)
+            self._apply_random_parameters(requirements)
             candidate = LevelCandidate(requirements)
             candidates.append(candidate)
 

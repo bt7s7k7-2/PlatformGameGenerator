@@ -17,10 +17,8 @@ class Requirements:
     start_area_size: int = 5
     altar_count: int = 3
     parameter_chances: RoomParameterCollection = field(default_factory=lambda: RoomParameterCollection().set_all_parameters(0.75))
-    target_difficulty: RoomParameterCollection = field(default_factory=lambda: RoomParameterCollection())
 
     def clone(self):
         cloned_object = copy(self)
         cloned_object.parameter_chances = RoomParameterCollection().copy_parameters_from(self.parameter_chances)
-        cloned_object.target_difficulty = RoomParameterCollection().copy_parameters_from(self.target_difficulty)
         return cloned_object
