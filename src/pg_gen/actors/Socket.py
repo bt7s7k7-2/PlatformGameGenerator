@@ -121,6 +121,9 @@ class _ParameterCommand(_SocketCommand):
         return self.target.get_value()
 
 
+_CONFIG_CACHE: dict[str, _SocketCommand | None] = {}
+
+
 @dataclass(kw_only=True)
 class Socket(PersistentObject[SocketState], ResourceClient, CameraClient, ConfigurableObject, Placeholder):
     _actor_instance: Actor | None = field(default=None, init=False)
@@ -143,8 +146,14 @@ class Socket(PersistentObject[SocketState], ResourceClient, CameraClient, Config
         return True
 
     def parse_config(self):
+        cached = _CONFIG_CACHE.get(self.config, -1)
+        if cached != -1:
+            return cached
+
         arguments = self.config.split(",")
         stack: list[_SocketCommand] = []
+
+        _CONFIG_CACHE[self.config] = None
 
         if len(arguments) < 1:
             return None
@@ -243,6 +252,7 @@ class Socket(PersistentObject[SocketState], ResourceClient, CameraClient, Config
 
         if len(stack) != 1:
             return None
+        _CONFIG_CACHE[self.config] = stack[0]
         return stack[0]
 
     @override
