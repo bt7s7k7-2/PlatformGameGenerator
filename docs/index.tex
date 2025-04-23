@@ -42,7 +42,8 @@
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 
 \lstdefinestyle{mystyle}{ 
-    commentstyle=\sffamily\color{codegreen},
+    %commentstyle=\sffamily\color{codegreen},
+    commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
@@ -72,6 +73,10 @@
     columns=fullflexible,
 	literate={ú}{{\'u}}1 {í}{{\'i}}1 {á}{{\'a}}1 {ĺ}{{\'l}}1 {é}{{\'e}}1 {ý}{{\'y}}1 {ó}{{\'o}}1 {ž}{{\v{z}}}1 {š}{{\v{s}}}1 {ď}{{\v{d}}}1 {č}{{\v{c}}}1 {ň}{{\v{n}}}1 {ť}{{\v{t}}}1 {ľ}{{\v{l}}}1 {ä}{{\"{a}}}1 {Δ}{{\ensuremath{\Delta}}}1
 }
+
+% definuje nadpis bez čísla, použitý pri prílohách
+\newcommand{\usection}[1]{\section*{#1}
+\addcontentsline{toc}{section}{#1}}
 
 \DeclareUnicodeCharacter{21D2}{\ensuremath{\Rightarrow}}
 
@@ -212,5 +217,8 @@ The generator allows users to easily create new levels by setting a small number
 \bibliography{bibliography}
 \bibliographystyle{stn690}
 
+\newpage
+
+\input{additions.tex}
 
 \end{document}

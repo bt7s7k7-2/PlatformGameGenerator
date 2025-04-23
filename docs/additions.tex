@@ -1,0 +1,108 @@
+\usection{Príloha A: Návod k použitiu programu}
+
+\subsection*{Použitie programu priamo}
+
+Program potrebuje k svojej činnosti zdroje. Očakáva že bude mať k dispozíií priečinok \texttt{assets} umiestnený vo working directory. Zdroje sú uložené v globálnych objektoch ktoré treba načítať.
+
+\begin{lstlisting}[language=python]
+import pygame
+from pg_gen.generation.RoomPrefabRegistry import RoomPrefabRegistry
+from pg_gen.level_editor.ActorRegistry import ActorRegistry
+from pg_gen.support.constants import ROOM_FOLDER
+
+pygame.init()
+ActorRegistry.load_actors()
+RoomPrefabRegistry.load(ROOM_FOLDER)
+\end{lstlisting}
+
+Ďalším krokom je zvoliť si obtiažnosť ktorú vyžadujete. Parametre majú následovný výzam:
+
+\begin{itemize}
+    \item \texttt{JUMP} ⇒ počet skokov v ceste
+    \item \texttt{REWARD} ⇒ počet drahokamov v ceste
+    \item \texttt{ENEMY} ⇒ počet nepriateľov v ceste (obtiažnejší nepriateľia sa rátajú ako viacej nepriateľov)
+    \item \texttt{SPRAWL} ⇒ dĺžka cesty
+\end{itemize}
+
+\begin{lstlisting}[language=python]
+from pg_gen.generation.RoomParameter import UNUSED_PARAMETER
+from pg_gen.difficulty.DifficultyReport import DifficultyReport
+
+target_difficulty = DifficultyReport()
+target_difficulty.set_all_parameters(UNUSED_PARAMETER)
+target_difficulty.set_parameter(RoomParameter.REWARD, 500)
+target_difficulty.set_parameter(RoomParameter.JUMP, 10)
+target_difficulty.set_parameter(RoomParameter.ENEMY, 100)
+target_difficulty.set_parameter(RoomParameter.SPRAWL, 50)
+\end{lstlisting}
+
+
+
+Následne je potrebné vytvoriť optimizátor, a vložiť do neho zvolené parametre. Optimizátor ďalej príjima argumenty \texttt{random}, kde je potrebné vložiť náhodný generátor - tu je možné nastaviť konsistetný seed. Optimizátor má možnosť nastaviť populáciu cez parameter \texttt{max\_population} a počet iterácií cez parameter \texttt{max\_generations}.
+
+\begin{lstlisting}[language=python]
+from random import Random
+from pg_gen.game_core.Universe import Universe
+from pg_gen.difficulty.DifficultyOptimizer import DifficultyOptimizer
+
+universe = Universe()
+optimizer = DifficultyOptimizer(universe, target_difficulty=target_difficulty, random=Random(108561))
+\end{lstlisting}
+
+Nie je potrebné špecifikovať všetky parametre, nepoužité parametre ostanú ako \texttt{UNUSED\_PARAMETER}. Tieto parametre budú mať po optimizácií náhodnú hodnotu, pravdepodobne je múdre ich nastaviť na konštatnú hodnotu. Takto je možné nastaviť všetky parametre, ktoré sa menia pri optimalzácií.
+
+\begin{lstlisting}[language=python]
+optimizer.get_parameter(RoomParameter.REWARD).override_value(0.5)
+\end{lstlisting}
+
+Po zvolení parametrov a obtiažnosti je možné spustiť optimizátor.
+
+\begin{lstlisting}[language=python]
+optimizer.initialize_population()
+optimizer.optimize()
+\end{lstlisting}
+
+Po optimizácií je možné vybrať najbližšieho kandidáta a použiť jeho úroveň. Následne je potrebné aktivovať koreňovú miestnosť a vložiť do nej objekt hráča.
+
+\begin{lstlisting}[language=python]
+from pg_gen.generation.RoomController import RoomController
+from pg_gen.actors.Player import Player
+from pg_gen.support.Point import Point
+from pg_gen.support.constants import ROOM_HEIGHT, ROOM_WIDTH
+
+best_candidate = optimizer.get_best_candidate()
+map = best_candidate.get_map()
+universe.map = map
+
+room_controller = RoomController.initialize_and_activate(universe, map.get_room(Point.ZERO), None)
+room_controller.world.add_actor(Player(position=Point(ROOM_WIDTH / 2, ROOM_HEIGHT / 2)))
+\end{lstlisting}
+
+Pre použitie hry interaktívne stači spustiť \texttt{InteractiveGameLoop}.
+
+\begin{lstlisting}[language=python]
+from pg_gen.game_core.InteractiveGameLoop import InteractiveGameLoop
+
+game_loop = InteractiveGameLoop(universe)
+game_loop.run()
+\end{lstlisting}
+
+Pre použitie s modelom je potrebné vytvoriť vlastný pygame-ový \texttt{Surface} a vložiť ho do \texttt{GameLoop}. Následne je možné vkladať vstup cez objekt \texttt{InputState} a manuálne simulovať update. Keďže mimo interaktívneho prístupu nie je herná sluťka naviazaná na reálny čas, je potrebné stanoviť čas, ktorý prejde medzi každý update krokom. Napríklad: ak chceme mať 20 krokov cez jednu simulovanú sekundu, tak čas medzi krokmi je $ 1 / 20 $ sekúnd.
+
+\begin{lstlisting}[language=python]
+surface = pygame.display.set_mode((CAMERA_SCALE * ROOM_WIDTH, CAMERA_SCALE * ROOM_HEIGHT))
+self.game_loop = GameLoop(surface, self.universe)
+
+input_state = self.universe.di.inject(InputState)
+input_state.clear()
+
+input_state.left = True
+input_state.jump = True
+# [...]
+
+game_loop.update_and_render(1 / fps)
+\end{lstlisting}
+
+\subsection*{Použitie Gymnasium prostredia}
+
+Gymnasium prostredie rieši manažment zdrojov automaticky. Pre jeho fungovanie je potrebné iba vložiť chcené parametre. 

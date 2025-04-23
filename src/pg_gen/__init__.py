@@ -11,6 +11,7 @@ import pygame
 from .actors.Player import Player
 from .debug.MapView import MapView
 from .difficulty.DifficultyOptimizer import DifficultyOptimizer
+from .difficulty.DifficultyReport import DifficultyReport
 from .difficulty.LevelSolver import LevelSolver, LevelSolverState
 from .game_core.InteractiveGameLoop import InteractiveGameLoop
 from .game_core.Universe import Universe
@@ -33,12 +34,13 @@ def main():
 
     universe = Universe()
 
-    target_difficulty = RoomParameterCollection()
+    target_difficulty = DifficultyReport()
     target_difficulty.set_all_parameters(UNUSED_PARAMETER)
     target_difficulty.set_parameter(RoomParameter.REWARD, 500)
     target_difficulty.set_parameter(RoomParameter.JUMP, 10)
     target_difficulty.set_parameter(RoomParameter.ENEMY, 100)
     target_difficulty.set_parameter(RoomParameter.SPRAWL, 50)
+
     optimizer = DifficultyOptimizer(universe, target_difficulty=target_difficulty, random=Random(108561))
 
     start = perf_counter()
