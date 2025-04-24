@@ -133,7 +133,7 @@ def test_pathfinding():
 
     target_difficulty = RoomParameterCollection()
     target_difficulty.set_all_parameters(UNUSED_PARAMETER)
-    optimizer = DifficultyOptimizer(universe, target_difficulty, Random(108560), max_population=1)
+    optimizer = DifficultyOptimizer(universe, target_difficulty, Random(108561), max_population=1)
 
     optimizer.get_parameter("max_rooms").override_value(100)
     optimizer.get_parameter("max_width").override_value(100)
