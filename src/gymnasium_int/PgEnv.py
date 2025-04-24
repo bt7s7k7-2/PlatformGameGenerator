@@ -1,5 +1,5 @@
 from dataclasses import astuple
-from typing import Literal, override
+from typing import Callable, Literal, override
 
 import numpy as np
 import pygame
@@ -10,14 +10,15 @@ from pg_gen.game_core.GameLoop import GameLoop
 from pg_gen.game_core.InputState import InputState
 from pg_gen.game_core.InteractiveGameLoop import InteractiveGameLoop
 from pg_gen.game_core.Universe import Universe
+from pg_gen.generation.Map import Map
 from pg_gen.generation.RoomController import RoomController
 from pg_gen.generation.RoomInfo import RoomInfo
 from pg_gen.generation.RoomPrefabRegistry import RoomPrefabRegistry
-from pg_gen.level_editor.ActorRegistry import ActorRegistry
-from pg_gen.support.constants import CAMERA_SCALE, ROOM_FOLDER, ROOM_HEIGHT, ROOM_WIDTH
+from pg_gen.support.constants import CAMERA_SCALE, ROOM_HEIGHT, ROOM_WIDTH
 from pg_gen.support.Point import Point
 
 RenderMode = Literal["human"] | Literal["rgb_array"] | None
+LevelFactory = Callable[[Universe], Map]
 
 
 class PgEnv(Env):
@@ -27,9 +28,7 @@ class PgEnv(Env):
     def time_per_frame(self):
         return 1 / self.metadata["render_fps"]
 
-    def __init__(self, render_mode: RenderMode = "rgb_array"):
-        self.window_size = 512  # The size of the PyGame window
-
+    def __init__(self, level: LevelFactory | str, render_mode: RenderMode = "rgb_array"):
         self.observation_space = spaces.Dict(
             {"agent": spaces.Box(low=0, high=max(ROOM_WIDTH, ROOM_HEIGHT), shape=(2,), dtype=np.float64), "score": spaces.Box(low=0, high=10000, shape=(1,), dtype=np.int32)}
         )
@@ -40,6 +39,7 @@ class PgEnv(Env):
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode: RenderMode = render_mode  # type: ignore
 
+        self.level = level
         self.universe: Universe | None = None
         self.game_loop: GameLoop | None = None
         self.terminated = False
@@ -64,16 +64,22 @@ class PgEnv(Env):
 
         self.terminated = False
 
-        ActorRegistry.load_actors()
-        RoomPrefabRegistry.load(ROOM_FOLDER)
-
-        room_info = RoomInfo(1, Point.ZERO, 0, RoomPrefabRegistry.find_rooms("empty_room", None, None)[0])
-
         self.universe = Universe()
 
-        room = RoomController.initialize_and_activate(self.universe, room_info)
-        world = room.world
-        world.add_actor(Player(position=Point(2, 2)))
+        if isinstance(self.level, str):
+            room_info = RoomInfo(1, Point.ZERO, 0, RoomPrefabRegistry.find_rooms(self.level, None, None)[0])
+            room_controller = RoomController.initialize_and_activate(self.universe, room_info)
+
+            world = room_controller.world
+            world.add_actor(Player(position=Point(2, 2)))
+        else:
+            map = self.level(self.universe)
+            self.universe.map = map
+            room_controller = RoomController.initialize_and_activate(self.universe, map.get_room(Point.ZERO), None)
+
+            world = room_controller.world
+            world.add_actor(Player(position=Point(ROOM_WIDTH / 2, ROOM_HEIGHT / 2)))
+
         self.universe.set_world(world)
 
         observation = self._get_obs()
@@ -105,8 +111,7 @@ class PgEnv(Env):
 
         info = self._get_info()
 
-        if self.render_mode == "human":
-            self._render_frame()
+        self._render_frame()
 
         return observation, reward, terminated, False, info
 
@@ -119,7 +124,6 @@ class PgEnv(Env):
         assert self.universe is not None
 
         if self.render_mode == "human":
-            pygame.init()
             if self.game_loop is None:
                 self.game_loop = InteractiveGameLoop(self.universe)
                 self.game_loop.allow_termination = False
@@ -132,8 +136,7 @@ class PgEnv(Env):
             self.game_loop.fps_keeper.tick(self.metadata["render_fps"])
         elif self.render_mode == "rgb_array":
             if self.game_loop is None:
-                pygame.init()
-                surface = pygame.display.set_mode((CAMERA_SCALE * ROOM_WIDTH, CAMERA_SCALE * ROOM_HEIGHT))
+                surface = pygame.Surface((CAMERA_SCALE * ROOM_WIDTH, CAMERA_SCALE * ROOM_HEIGHT))
                 self.game_loop = GameLoop(surface, self.universe)
 
             self.game_loop.update_and_render(self.time_per_frame)

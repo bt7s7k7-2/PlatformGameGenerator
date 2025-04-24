@@ -52,6 +52,8 @@ optimizer = DifficultyOptimizer(universe, target_difficulty=target_difficulty, r
 Nie je potrebné špecifikovať všetky parametre, nepoužité parametre ostanú ako \texttt{UNUSED\_PARAMETER}. Tieto parametre budú mať po optimizácií náhodnú hodnotu, pravdepodobne je múdre ich nastaviť na konštatnú hodnotu. Takto je možné nastaviť všetky parametre, ktoré sa menia pri optimalzácií.
 
 \begin{lstlisting}[language=python]
+from pg_gen.generation.RoomParameter import RoomParameter
+
 optimizer.get_parameter(RoomParameter.REWARD).override_value(0.5)
 \end{lstlisting}
 
@@ -90,6 +92,10 @@ game_loop.run()
 Pre použitie s modelom je potrebné vytvoriť vlastný pygame-ový \texttt{Surface} a vložiť ho do \texttt{GameLoop}. Následne je možné vkladať vstup cez objekt \texttt{InputState} a manuálne simulovať update. Keďže mimo interaktívneho prístupu nie je herná sluťka naviazaná na reálny čas, je potrebné stanoviť čas, ktorý prejde medzi každý update krokom. Napríklad: ak chceme mať 20 krokov cez jednu simulovanú sekundu, tak čas medzi krokmi je $ 1 / 20 $ sekúnd.
 
 \begin{lstlisting}[language=python]
+from pg_gen.game_core.GameLoop import GameLoop
+from pg_gen.support.constants import CAMERA_SCALE
+from pg_gen.game_core.InputState import InputState
+
 surface = pygame.display.set_mode((CAMERA_SCALE * ROOM_WIDTH, CAMERA_SCALE * ROOM_HEIGHT))
 self.game_loop = GameLoop(surface, self.universe)
 
@@ -105,4 +111,58 @@ game_loop.update_and_render(1 / fps)
 
 \subsection*{Použitie Gymnasium prostredia}
 
-Gymnasium prostredie rieši manažment zdrojov automaticky. Pre jeho fungovanie je potrebné iba vložiť chcené parametre. 
+Gymnasium prostredie rieši spustenie hernej slučky automaticky. Stačí inicializovať globálne objekty a vložiť úroveň. Najskôr však treba registrovať prostredie do Gymnasia.
+
+\begin{lstlisting}[language=python]
+from gymnasium.envs.registration import register
+from gymnasium_int.PgEnv import PgEnv
+
+register(
+    id="gymnasium_int/PgEnv",
+    entry_point=PgEnv,
+)
+\end{lstlisting}
+
+Následne je možné vytvoriť prostredie.
+
+\begin{lstlisting}[language=python]
+env = gymnasium.make("gymnasium_int/PgEnv", render_mode="rgb_array", level=level)
+observation, info = env.reset()
+\end{lstlisting}
+
+Prostredie podporuje dva render módy:
+
+\begin{itemize}
+    \item \texttt{human} ⇒ simulácia prebieha v reálnom čase a je otvorené okno, kde je možné vidieť výstup z hry
+    \item \texttt{rgb\_array} ⇒ simulácia prebieha najrýchlešie ako je možné, výstupom modelu je array obsahujúci grafický výstup hry
+\end{itemize}
+
+Pri použití \texttt{rgb\_array}, kedže sa neotovrí okno, je potrebné manuálne inicializovať grafický systém pygame-u. Najjednoduchší spôsob, ako toto dosiahnuť je vytvoriť jednopixelové skryté okno, ktoré nebude na nič využité.
+
+\begin{lstlisting}[language=python]
+if env.render_mode == "rgb_array":
+    pygame.display.set_mode((1, 1), flags=pygame.HIDDEN)
+\end{lstlisting}
+
+Ako level je možné dodať:
+
+\begin{itemize}
+    \item string ⇒ ako explicitný názov miestnosti, ktorá bude vygenerovaná; toto je možné použiť pre testovanie konkrétnej mechaniky
+    \item callback ⇒ funckia dostane ako argument referenciu na \texttt{Universe} a musí vrátiť \texttt{Map} objekt, vo funkcií spustite generáciu ako v predošlej sekcií
+\end{itemize}
+
+Toto je jednoduchý loop, pre využitie prostredia:
+
+\begin{lstlisting}[language=python]
+episode_over = False
+while not episode_over:
+    action = env.action_space.sample()
+    observation, reward, terminated, truncated, info = env.step(action)
+
+    episode_over = terminated or truncated
+    print(action, observation, info, reward)
+
+env.close()
+\end{lstlisting}
+
+
