@@ -1,18 +1,27 @@
 \usection{Príloha A: Návod k použitiu programu}
 
+\subsection*{Inštalácia programu ako knižnica}
+
+Aby bol program použiteľný ako knižnica, je potrebné ho nainštalovať z wheel súboru. Tento súbor je súčasťou C3 alebo je k dispozícií cez internet na adrese \url{https://bt7s7k7-2.github.io/PlatformGameGenerator/pg_gen-1.0.0-py3-none-any.whl}. Tento súbor, kedže je štandardným formátom pre Python knižnice, je možné nainštalovať prostredníctvom Vami zvoleného inštalačného programu. Nižšie sú uvedené príklady inštalácie prostredníctvom niekoľkých programov.
+
+\begin{lstlisting}
+pip install 'pg_gen-1.0.0-py3-none-any.whl'
+rye add pg_gen --path 'pg_gen-1.0.0-py3-none-any.whl'
+\end{lstlisting}
+
+
 \subsection*{Použitie programu priamo}
 
-Program potrebuje k svojej činnosti zdroje. Očakáva že bude mať k dispozíií priečinok \texttt{assets} umiestnený vo working directory. Zdroje sú uložené v globálnych objektoch ktoré treba načítať.
+Program potrebuje k svojej činnosti zdroje. Tieto sú manažované globálnymi objektmi, ktoré treba inicializovať.
 
 \begin{lstlisting}[language=python]
 import pygame
 from pg_gen.generation.RoomPrefabRegistry import RoomPrefabRegistry
 from pg_gen.level_editor.ActorRegistry import ActorRegistry
-from pg_gen.support.constants import ROOM_FOLDER
 
 pygame.init()
 ActorRegistry.load_actors()
-RoomPrefabRegistry.load(ROOM_FOLDER)
+RoomPrefabRegistry.load()
 \end{lstlisting}
 
 Ďalším krokom je zvoliť si obtiažnosť ktorú vyžadujete.
@@ -104,16 +113,10 @@ game_loop.update_and_render(1 / fps)
 
 \subsection*{Použitie Gymnasium prostredia}
 
-Gymnasium prostredie rieši spustenie hernej slučky automaticky. Stačí inicializovať globálne objekty a vložiť úroveň. Najskôr však treba registrovať prostredie do Gymnasia.
+Gymnasium prostredie rieši spustenie hernej slučky automaticky. Stačí inicializovať globálne objekty a vložiť úroveň. Prostredie je automaticky registrované, stačí importovať package \texttt{pg\_gen\_gym}.
 
 \begin{lstlisting}[language=python]
-from gymnasium.envs.registration import register
-from gymnasium_int.PgEnv import PgEnv
-
-register(
-    id="gymnasium_int/PgEnv",
-    entry_point=PgEnv,
-)
+import pg_gen_gym
 \end{lstlisting}
 
 Následne je možné vytvoriť prostredie.

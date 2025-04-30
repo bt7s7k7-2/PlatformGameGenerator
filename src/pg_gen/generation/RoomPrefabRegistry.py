@@ -1,6 +1,7 @@
 import json
-from os import path, walk
+from importlib.abc import Traversable
 
+from ..assets import get_pg_assets, walk_files_recursive
 from ..support.Direction import Direction
 from ..support.ObjectManifest import ObjectManifestDeserializer
 from .RoomInfo import NO_KEY, NO_PICKUP, NOT_CONNECTED, PORTAL, RoomInfo
@@ -62,41 +63,39 @@ class RoomPrefabRegistry:
         return result
 
     @classmethod
-    def load(cls, room_folder: str):
+    def load(cls):
         cls.rooms_by_group.clear()
         cls.rooms_by_name.clear()
 
-        for directory, _, files in walk(room_folder, onerror=print):
-            for room_path in files:
-                if not room_path.endswith(".json"):
-                    continue
+        def load_room(file: Traversable, room_path: str):
+            if not file.name.endswith(".json"):
+                return
 
-                name = room_path[0:-5]
-                room_path = path.join(directory, room_path)
-                print(f"Loading room {room_path}...")
+            name = file.name[0:-5]
+            print(f"Loading room {room_path}...")
 
-                file_content = ""
-                with open(room_path, "rt") as file:
-                    file_content = file.read()
+            file_content = file.read_text()
 
-                raw_data: dict = json.loads(file_content)
-                room = RoomPrefab(name, file_content)
-                cls.rooms_by_name[name] = room
-                config = raw_data["$config"]
+            raw_data: dict = json.loads(file_content)
+            room = RoomPrefab(name, file_content)
+            cls.rooms_by_name[name] = room
+            config = raw_data["$config"]
 
-                ObjectManifestDeserializer.deserialize(config, room, RoomPrefab.get_manifest())
+            ObjectManifestDeserializer.deserialize(config, room, RoomPrefab.get_manifest())
 
-                for group in room.groups:
-                    cls.rooms_by_group.setdefault(group, []).append(room)
+            for group in room.groups:
+                cls.rooms_by_group.setdefault(group, []).append(room)
 
-                print(f"Loaded room {room}")
+            print(f"Loaded room {room}")
 
-                if room.allow_flip:
-                    flipped = room.flip()
-                    cls.rooms_by_name[flipped.name] = flipped
-                    for group in flipped.groups:
-                        cls.rooms_by_group.setdefault(group, []).append(flipped)
-                    print(f"Loaded room {flipped}")
+            if room.allow_flip:
+                flipped = room.flip()
+                cls.rooms_by_name[flipped.name] = flipped
+                for group in flipped.groups:
+                    cls.rooms_by_group.setdefault(group, []).append(flipped)
+                print(f"Loaded room {flipped}")
+
+        walk_files_recursive(get_pg_assets().rooms, load_room)
 
     rooms_by_name: dict[str, RoomPrefab] = {}
     rooms_by_group: dict[str, list[RoomPrefab]] = {}

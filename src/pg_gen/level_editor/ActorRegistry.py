@@ -1,9 +1,10 @@
 from copy import copy
 from dataclasses import dataclass
 from importlib import import_module
-from os import path, walk
+from importlib.abc import Traversable
 from typing import Dict, Type
 
+from ..assets import get_pg_assets, walk_files_recursive
 from ..support.Point import Point
 from ..world.Actor import Actor
 
@@ -52,15 +53,14 @@ class ActorRegistry:
 
     @staticmethod
     def load_actors():
-        curr_dir = path.dirname(__file__)
-        actors_folder = path.normpath(path.join(curr_dir, "../actors"))
-        for directory, _, files in walk(actors_folder, onerror=print):
-            for file in files:
-                file = path.join(directory, file)
-                if not file.endswith(".py"):
-                    continue
-                relative_path = path.relpath(file, curr_dir)
-                module_import = relative_path.replace("../", "..").replace("/", ".")[:-3]
-                import_module(module_import, __package__)
+        assets = get_pg_assets()
+
+        def load_actor(file: Traversable, path: str):
+            if not path.endswith(".py"):
+                return
+            module_name = "pg_gen.actors" + path[:-3]
+            import_module(module_name, __package__)
+
+        walk_files_recursive(assets.actors, load_actor)
 
         ActorRegistry._types_array = sorted([(name, value) for name, value in ActorRegistry._types.items()], key=lambda x: x[0])

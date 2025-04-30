@@ -17,5 +17,3 @@ HIGHLIGHT_2_COLOR = Color.RED.to_pygame_color()
 MUTED_COLOR = (Color.WHITE * 0.4).to_pygame_color()
 TEXT_BG_COLOR = Color.BLACK.to_pygame_color(opacity=127)
 TEXT_SELECTION_COLOR = Color.BLUE.mix(Color.CYAN, 0.5).to_pygame_color(opacity=191)
-
-ROOM_FOLDER = "./assets/rooms"

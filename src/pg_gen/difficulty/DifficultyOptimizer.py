@@ -219,7 +219,7 @@ class DifficultyOptimizer:
     def optimize(self):
         last_best_fitness = 0
         termination_trigger = 0
-        for _ in range(self.max_population):
+        for _ in range(self.max_generations):
             new_candidates: list[LevelCandidate] = []
 
             elitism_candidates = self.valid_candidates[0 : int(len(self.valid_candidates) * self.elitism_factor)]

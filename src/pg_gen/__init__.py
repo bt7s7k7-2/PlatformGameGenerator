@@ -1,7 +1,5 @@
-import json
 import sys
 from itertools import chain, pairwise
-from os import path, walk
 from random import Random
 from time import perf_counter
 from traceback import print_exc
@@ -21,16 +19,15 @@ from .generation.RoomPrefabRegistry import RoomPrefabRegistry
 from .level_editor.ActorRegistry import ActorRegistry
 from .level_editor.LevelEditor import LevelEditor
 from .support.Color import Color
-from .support.constants import ROOM_FOLDER, ROOM_HEIGHT, ROOM_WIDTH
+from .support.constants import ROOM_HEIGHT, ROOM_WIDTH
 from .support.Point import Point
 from .world.World import World
 
 
-def main():
+def start_interactive_game_demo():
     pygame.init()
+    RoomPrefabRegistry.load()
     ActorRegistry.load_actors()
-
-    RoomPrefabRegistry.load(ROOM_FOLDER)
 
     universe = Universe()
 
@@ -41,7 +38,13 @@ def main():
     target_difficulty.set_parameter(RoomParameter.ENEMY, 100)
     target_difficulty.set_parameter(RoomParameter.SPRAWL, 50)
 
-    optimizer = DifficultyOptimizer(universe, target_difficulty=target_difficulty, random=Random(108561))
+    optimizer = DifficultyOptimizer(
+        universe,
+        target_difficulty=target_difficulty,
+        random=Random(108561),
+        max_population=10,
+        max_generations=1,
+    )
 
     start = perf_counter()
     optimizer.initialize_population()
@@ -70,7 +73,7 @@ def main():
     solution = best_candidate.solution
     assert solution is not None
     for i, path in enumerate(solution.steps):
-        add_annotation_for_path(map_view, path, i)
+        _add_annotation_for_path(map_view, path, i)
 
     room_controller.world.add_actor(Player(position=Point(ROOM_WIDTH / 2, ROOM_HEIGHT / 2)))
 
@@ -107,7 +110,7 @@ def start_editor():
 _path_colors = [Color.GREEN, Color.CYAN, Color.MAGENTA, Color.WHITE, Color.ORANGE]
 
 
-def add_annotation_for_path(map_view: MapView, path: list[Point], index: int):
+def _add_annotation_for_path(map_view: MapView, path: list[Point], index: int):
     for node, next in pairwise(chain(path, [path[-1]])):
         label = str(index)
         if node == path[0]:
@@ -123,11 +126,11 @@ def add_annotation_for_path(map_view: MapView, path: list[Point], index: int):
         map_view.add_annotation(node, ((index % 10) - 5, vector.as_direction()), _path_colors[index % len(_path_colors)])
 
 
-def test_pathfinding():
+def start_pathfinding_demo():
     pygame.init()
     ActorRegistry.load_actors()
 
-    RoomPrefabRegistry.load(ROOM_FOLDER)
+    RoomPrefabRegistry.load()
 
     universe = Universe()
 
@@ -173,7 +176,7 @@ def test_pathfinding():
                 state = level_solver.solve_path(state, end)
                 assert state is not None
                 for i, step in enumerate(state.steps):
-                    add_annotation_for_path(map_view, step, i)
+                    _add_annotation_for_path(map_view, step, i)
             except AssertionError:
                 print_exc()
                 print("!! Failed to find path")
@@ -189,21 +192,7 @@ def test_pathfinding():
     solution = best_candidate.solution
     assert solution is not None
     for i, path in enumerate(solution.steps):
-        add_annotation_for_path(map_view, path, i)
+        _add_annotation_for_path(map_view, path, i)
 
     game_loop = InteractiveGameLoop(universe)
     game_loop.run()
-
-
-def format_room_files():
-    RoomPrefabRegistry.load("./assets/rooms")
-    for directory, _, files in walk("./assets/rooms", onerror=print):
-        for room_path in files:
-            if not room_path.endswith(".json"):
-                continue
-            room_path = path.join(directory, room_path)
-            file_content = ""
-            with open(room_path, "rt") as file:
-                file_content = file.read()
-            with open(room_path, "wt") as file:
-                file.write(json.dumps(json.loads(file_content), indent=4, sort_keys=True) + "\n")

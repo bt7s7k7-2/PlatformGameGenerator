@@ -17,7 +17,6 @@ from ..generation.RoomPrefabRegistry import RoomPrefabRegistry
 from ..gui.ButtonElement import ButtonElement
 from ..gui.GuiElement import GuiContainer
 from ..gui.ObjectInput import ObjectInput
-from ..support.constants import ROOM_FOLDER
 from ..support.Point import Axis, Point
 from ..world.World import World
 from .LevelSerializer import LevelSerializer
@@ -40,7 +39,7 @@ class TestPlayController(InputClient, GuiRenderer, ResourceClient, CameraClient)
                 self.universe.set_world(play_world)
 
                 if TestPlayController.use_info:
-                    RoomPrefabRegistry.load(ROOM_FOLDER)
+                    RoomPrefabRegistry.load()
                     del TestPlayController.room_info.persistent_flags[:]
                     TestPlayController.room_info.seed = random()
                     self.room_prefab.instantiate_root(TestPlayController.room_info, None, play_world)

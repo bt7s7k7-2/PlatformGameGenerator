@@ -1,17 +1,20 @@
 import pygame
 import pygame.freetype
 
+from ..assets import get_pg_assets
 from ..support.Point import Point
 from .Texture import Texture
 
 
 class ResourceProvider:
     def __init__(self) -> None:
+        assets = get_pg_assets()
+
         self.font = pygame.freetype.SysFont("Arial", 12)
-        self.display_font = pygame.freetype.Font("./assets/Micro5/Micro5-Regular.ttf", 120)
+        self.display_font = pygame.freetype.Font(str(assets.font), 120)
 
         spritesheet = Texture(
-            pygame.image.load("./assets/spritesheet.png").convert_alpha(),
+            pygame.image.load(str(assets.spritesheet)).convert_alpha(),
         )
 
         self.key_sprite = spritesheet.slice(Point(32, 0), Point(16, 16))

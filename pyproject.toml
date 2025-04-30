@@ -1,22 +1,21 @@
 [project]
 name = "pg-gen"
-version = "0.1.0"
+version = "1.0.0"
 description = "Add your description here"
 authors = [{ name = "Branislav Trstenský", email = "bt7s7k7@hotmail.sk" }]
 dependencies = ["pygame>=2.6.0", "gymnasium>=1.0.0"]
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.12"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-start = "pg_gen:main"
-start-gym = "gymnasium_int:main"
+start = "pg_gen:start_interactive_game_demo"
+start-gym = "pg_gen_gym:start_pg_gymnasium_demo"
 start-editor = "pg_gen:start_editor"
-format-rooms = "pg_gen:format_room_files"
-test-pathfinding = "pg_gen:test_pathfinding"
+test-pathfinding = "pg_gen:start_pathfinding_demo"
 
 [tool.rye]
 managed = true
@@ -26,4 +25,8 @@ dev-dependencies = []
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pg_gen"]
+packages = ["src/pg_gen_gym", "src/pg_gen"]
+exclude = ["docs", "assets/.local"]
+include = ["assets"]
+skip-excluded-dirs = true
+directory = "dist"

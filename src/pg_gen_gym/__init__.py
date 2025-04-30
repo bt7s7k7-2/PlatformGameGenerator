@@ -10,7 +10,6 @@ from pg_gen.game_core.Universe import Universe
 from pg_gen.generation.RoomParameter import UNUSED_PARAMETER, RoomParameter
 from pg_gen.generation.RoomPrefabRegistry import RoomPrefabRegistry
 from pg_gen.level_editor.ActorRegistry import ActorRegistry
-from pg_gen.support.constants import ROOM_FOLDER
 
 from .PgEnv import PgEnv
 
@@ -20,12 +19,11 @@ register(
 )
 
 
-def main():
+def start_pg_gymnasium_demo():
     pygame.init()
-    pygame.display.init()
 
     ActorRegistry.load_actors()
-    RoomPrefabRegistry.load(ROOM_FOLDER)
+    RoomPrefabRegistry.load()
 
     def generate_level(universe: Universe):
         target_difficulty = DifficultyReport()
