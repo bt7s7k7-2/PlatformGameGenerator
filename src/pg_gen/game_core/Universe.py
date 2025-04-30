@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Callable, List
+from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
     from ..world.ServiceActor import ServiceActor
@@ -50,6 +50,6 @@ class Universe:
 
     def __init__(self):
         self.di = DependencyInjection()
-        self._pending_tasks: List[Callable[[], None]] = []
-        self._service_actors: List["ServiceActor"] = []
+        self._pending_tasks: list[Callable[[], None]] = []
+        self._service_actors: list["ServiceActor"] = []
         pass

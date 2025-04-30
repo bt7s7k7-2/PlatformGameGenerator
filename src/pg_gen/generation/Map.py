@@ -1,6 +1,5 @@
 from copy import copy
 from dataclasses import dataclass, field
-from typing import Tuple
 
 from pg_gen.generation.AreaInfo import AreaInfo
 
@@ -22,7 +21,7 @@ class Map:
     altars: list[Point] = field(default_factory=lambda: [])
     portal: Point | None = None
 
-    required_keys: list[Tuple[int, int]] = field(default_factory=lambda: [])
+    required_keys: list[tuple[int, int]] = field(default_factory=lambda: [])
 
     def add_key_requirement(self, max_depth: int, key: int):
         self.required_keys.append((max_depth, key))

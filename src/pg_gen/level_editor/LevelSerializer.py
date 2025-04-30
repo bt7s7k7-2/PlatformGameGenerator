@@ -1,6 +1,6 @@
 import json
 from copy import copy
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal
+from typing import TYPE_CHECKING, Any, Callable, Literal
 
 from ..actors.support.ConfigurableObject import ConfigurableObject
 from ..support.Point import Point
@@ -15,7 +15,7 @@ _JSON_CACHE: dict[str, Any] = {}
 
 class LevelSerializer:
     @staticmethod
-    def serialize(actors: List[Actor], types: List[ActorType], aux_data: Dict):
+    def serialize(actors: list[Actor], types: list[ActorType], aux_data: dict):
         actors_data = [
             {
                 "pos": actor.position.serialize(),

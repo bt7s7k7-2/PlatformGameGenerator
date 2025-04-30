@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Iterable, List
+from typing import TYPE_CHECKING, Iterable
 
 from ..support.Point import Point
 from ..support.resolve_intersection import is_intersection, resolve_intersection
@@ -124,7 +124,7 @@ class World:
 
     def __init__(self, universe: "Universe") -> None:
         self.universe = universe
-        self._actors: List["Actor"] = []
-        self._triggers: List["Actor"] = []
-        self._colliders: List["Actor"] = []
+        self._actors: list["Actor"] = []
+        self._triggers: list["Actor"] = []
+        self._colliders: list["Actor"] = []
         pass

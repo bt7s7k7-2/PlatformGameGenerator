@@ -1,5 +1,3 @@
-from typing import List
-
 import pygame
 
 
@@ -23,5 +21,5 @@ class InputState:
         self.down = False
 
     def __init__(self) -> None:
-        self.events: List[pygame.event.Event] = []
+        self.events: list[pygame.event.Event] = []
         pass

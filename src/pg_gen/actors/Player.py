@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Flag
 from math import copysign
-from typing import TYPE_CHECKING, Callable, List, override
+from typing import TYPE_CHECKING, Callable, override
 
 import pygame
 
@@ -32,7 +32,7 @@ class Player(InputClient, GuiRenderer, SpriteActor):
     size: Point = field(default=Point(1, 1))
     sprite: str | None = field(default="player_sprite")
 
-    _inventory: List[InventoryItem | None] = field(default_factory=lambda: [None] * 5, init=False)
+    _inventory: list[InventoryItem | None] = field(default_factory=lambda: [None] * 5, init=False)
 
     velocity: Point = Point.ZERO
     _is_grounded: bool = False

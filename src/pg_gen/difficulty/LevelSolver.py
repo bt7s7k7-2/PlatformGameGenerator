@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from itertools import chain, pairwise
 from time import perf_counter
-from typing import Tuple
 
 from ..generation.Map import Map
 from ..generation.RoomInfo import NO_KEY, NOT_CONNECTED
@@ -19,7 +18,7 @@ class LevelSolverState:
     length: float = 0
     steps: list[list[Point]] = field(default_factory=lambda: [])
     _keys: dict[int, int] = field(default_factory=lambda: {})
-    unlock_state: set[Tuple[Point, Direction | None]] = field(default_factory=lambda: set())
+    unlock_state: set[tuple[Point, Direction | None]] = field(default_factory=lambda: set())
 
     def get_steps_as_single_path(self):
         previous: Point | None = None

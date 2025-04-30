@@ -1,5 +1,5 @@
 from dataclasses import astuple, dataclass, field
-from typing import Callable, Tuple, override
+from typing import Callable, override
 
 import pygame
 
@@ -26,8 +26,8 @@ class MapView(CameraClient, InputClient, ResourceClient, GuiRenderer, ServiceAct
 
     click_callback: Callable[[int, Point], None] | None = None
     always_show: bool = False
-    _last_click: Tuple[int, Point] | None = None
-    _annotations: dict[Point, list[Tuple[str | tuple[int, Direction], Color]]] = field(default_factory=lambda: {})
+    _last_click: tuple[int, Point] | None = None
+    _annotations: dict[Point, list[tuple[str | tuple[int, Direction], Color]]] = field(default_factory=lambda: {})
 
     def add_annotation(self, position: Point, content: str | tuple[int, Direction], color: Color):
         self._annotations.setdefault(position, []).append((content, color))

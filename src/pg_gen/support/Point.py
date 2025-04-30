@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from math import floor, hypot, isnan, nan, sqrt
-from typing import ClassVar, Dict, override
+from typing import ClassVar, override
 
 from .Direction import Direction
 from .support import lerp
@@ -148,7 +148,7 @@ class Point:
         return self.right() if axis == Axis.ROW else self.down()
 
     @staticmethod
-    def deserialize(data: Dict[str, float]):
+    def deserialize(data: dict[str, float]):
         return Point(data["x"], data["y"])
 
     @staticmethod

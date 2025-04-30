@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 
 class DependencyInjection:
@@ -40,5 +40,5 @@ class DependencyInjection:
         raise KeyError(f"Cannot find service {service_type}")
 
     def __init__(self):
-        self._lookup: Dict[type, Any] = {}
+        self._lookup: dict[type, Any] = {}
         pass

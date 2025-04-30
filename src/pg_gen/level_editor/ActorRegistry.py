@@ -2,7 +2,7 @@ from copy import copy
 from dataclasses import dataclass
 from importlib import import_module
 from importlib.abc import Traversable
-from typing import Dict, Type
+from typing import Type
 
 from ..assets import get_pg_assets, walk_files_recursive
 from ..support.Point import Point
@@ -25,7 +25,7 @@ class ActorType:
 
 class ActorRegistry:
 
-    _types: Dict[str, ActorType] = {}
+    _types: dict[str, ActorType] = {}
     _types_array: list[tuple[str, ActorType]] = []
 
     @staticmethod

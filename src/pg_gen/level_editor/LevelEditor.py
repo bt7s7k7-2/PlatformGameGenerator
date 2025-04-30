@@ -5,7 +5,7 @@ from enum import Enum
 from functools import cached_property
 from os import path
 from traceback import print_exc
-from typing import Callable, Dict, List, Tuple, override
+from typing import Callable, override
 
 import pygame
 
@@ -47,10 +47,10 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
     file_path: str | None = None
     type: LevelEditorType = LevelEditorType.NORMAL
 
-    _managed_actors: List[Actor] = field(init=False, default_factory=lambda: [])
-    _managed_actors_types: List[ActorType] = field(init=False, default_factory=lambda: [])
-    _undo_history: List[str] = field(init=False, repr=False, default_factory=lambda: [])
-    _redo_history: List[str] = field(init=False, repr=False, default_factory=lambda: [])
+    _managed_actors: list[Actor] = field(init=False, default_factory=lambda: [])
+    _managed_actors_types: list[ActorType] = field(init=False, default_factory=lambda: [])
+    _undo_history: list[str] = field(init=False, repr=False, default_factory=lambda: [])
+    _redo_history: list[str] = field(init=False, repr=False, default_factory=lambda: [])
 
     _selected_actor_type: ActorType | None = None
     _design_mode: bool = True
@@ -311,7 +311,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
 
         return callback
 
-    def get_selection_handles(self) -> List[Tuple[Point, Point, Callable[[Point], Callable[[Point], None]]]]:
+    def get_selection_handles(self) -> list[tuple[Point, Point, Callable[[Point], Callable[[Point], None]]]]:
         if self.selected_actor is None:
             return []
 
@@ -330,7 +330,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
             (position, size, self.create_move_callback()),
         ]
 
-    def get_save_data(self, aux_data: Dict):
+    def get_save_data(self, aux_data: dict):
         return LevelSerializer.serialize(self._managed_actors, self._managed_actors_types, aux_data)
 
     def apply_save_data(self, raw_data: str):
@@ -370,7 +370,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
             # If the level file is not found we are creating a new level, we can keep the current, empty, state
             pass
 
-    def _create_history_entry(self, target: List[str]):
+    def _create_history_entry(self, target: list[str]):
         if self._multiselect_actors:
             selected_index = [self._managed_actors.index(v) for v in self._multiselect_actors]
         elif self.selected_actor is not None:
@@ -381,7 +381,7 @@ class LevelEditor(GuiRenderer, ResourceClient, InputClient, CameraClient):
         state = self.get_save_data({"selected_index": selected_index})
         target.append(state)
 
-    def _apply_history_entry(self, target: List[str]):
+    def _apply_history_entry(self, target: list[str]):
         if len(target) == 0:
             return False
 
