@@ -11,7 +11,7 @@ cd "$target_dir"
 git pull
 cd -
 
-cp docs/index.pdf dist/* "$target_dir"
+cp docs/index.pdf docs/index_*.pdf dist/* "$target_dir"
 
 cd "$target_dir"
 git add .

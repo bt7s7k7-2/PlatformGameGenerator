@@ -1,0 +1,92 @@
+\documentclass[11pt,slovak,a4paper,usepdftitle=false]{article}
+
+\usepackage[slovak]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{url} % \url
+\usepackage{hyperref} % Automatic links
+\usepackage{parskip}
+\usepackage[left=2cm, right=2cm]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{placeins}
+\usepackage{cite}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{pgfkeys}
+\usepackage{pdfpages}
+\usepackage{tabto}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{array}
+
+\newcommand{\spc}{\,}
+
+\setlist{itemsep=0.4em, parsep=0em, midpenalty=3000}
+
+\pgfkeys{
+    /codeblock/.is family, /codeblock,
+    default/.style = {start = 1, end = 1, language=None},
+    start/.estore in = \codeblockStart,
+    end/.estore in = \codeblockEnd,
+    language/.estore in = \codeblockLanguage,
+}
+\newcommand\codeblock[2][]{\pgfkeys{/codeblock, default, #1}\lstinputlisting[firstnumber=\codeblockStart,firstline=\codeblockStart,lastline=\codeblockEnd,language=\codeblockLanguage]{#2}}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codedark}{rgb}{0.3,0.3,0.3}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+
+\lstdefinestyle{mystyle}{ 
+    %commentstyle=\sffamily\color{codegreen},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize\color{codedark},
+    breakatwhitespace=true,
+    identifierstyle=\color{black},      
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4
+}
+
+\lstdefinelanguage{json}
+{
+    morestring=[b]",
+    morestring=[d]'
+}
+
+\lstset{
+	style=mystyle,
+	inputencoding=utf8,
+    columns=fullflexible,
+	literate={ú}{{\'u}}1 {í}{{\'i}}1 {á}{{\'a}}1 {ĺ}{{\'l}}1 {é}{{\'e}}1 {ý}{{\'y}}1 {ó}{{\'o}}1 {ž}{{\v{z}}}1 {š}{{\v{s}}}1 {ď}{{\v{d}}}1 {č}{{\v{c}}}1 {ň}{{\v{n}}}1 {ť}{{\v{t}}}1 {ľ}{{\v{l}}}1 {ä}{{\"{a}}}1 {Δ}{{\ensuremath{\Delta}}}1
+}
+
+\DeclareUnicodeCharacter{21D2}{\ensuremath{\Rightarrow}}
+
+\renewcommand{\familydefault}{\sfdefault} % Sans serif
+\raggedright
+
+% použiť hiearchiálne ordered lists
+\renewcommand{\labelenumii}{\theenumii}
+\renewcommand{\theenumii}{\theenumi.\arabic{enumii}.}
+
+\renewcommand{\labelenumiii}{\theenumiii}
+\renewcommand{\theenumiii}{\theenumii\arabic{enumiii}.}
+
+\renewcommand{\labelenumiv}{\theenumiv}
+\renewcommand{\theenumiv}{\theenumiii\arabic{enumiv}.}
+
+\pagestyle{plain}
+\pagenumbering{roman}

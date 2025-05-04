@@ -1,4 +1,5 @@
 index.pdf
 index.log
+index_*.pdf
 *.synctex.gz
 doc.*
