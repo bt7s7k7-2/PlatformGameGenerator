@@ -104,9 +104,8 @@ class PgEnv(Env):
 
         observation = self._get_obs()
 
-        reward = 0 if terminated else 1
         score = float(observation["score"])
-        reward += score - self.last_score
+        reward = score - self.last_score
         self.last_score = score
 
         info = self._get_info()
