@@ -1,4 +1,31 @@
-\section*{Príloha A: Návod k použitiu programu}
+\setcounter{page}{1}
+\renewcommand{\thepage}{A.\arabic{page}}
+
+\section*{Príloha A: Obsah digitálnej časti práce}
+
+Digitálna časť práce obsahuje zdrojový kód vo forme Python projektu v pôvodnej forme a taktiež v inštalovateľnom balíčku typu wheel, pre inštaláciu projektu ako knižnica.
+
+Obsiahnuté sú tiež všetky zdroje programu, t.j. grafické prvky, súčasti miestností a písma. Tieto súbory sú obsiahnuté v priečinku \texttt{src/pg\_gen/assets}. Všetky použité zdroje sú pod licenciou, ktorá umožnuje ďalšiu distribúciu. Kópia alebo odkaz na relevantnú licenciu je umiestnený popri súbore na ktorý sa vzťahuje. 
+
+\begin{itemize}
+    \item Zdrojový kód sa nachádza v priečinku: \texttt{PlatformGameGenerator} 
+    \item Inštalovateľný balíček je súbor: \texttt{pg\_gen-1.0.0-py3-none-any.whl}
+\end{itemize}
+
+Zdrojový kód obsahuje štandardný súbor vyjadrujúci knižnice a verziu Pythonu, potrebnú pre jeho spustenie, v súbore \texttt{pyproject.py}. Na manažment knižniíc bol použitý program \texttt{rye} verzie \texttt{0.44.0}, ktorý je možné stiahnuť cez internet z adresy \url{https://rye.astral.sh/}. Po inštalácií danej aplikácie je možné nainštalovať potrebné knižnice príkazom \texttt{rye sync}. Tento príkaz vytvorí Python virtuálne prostredie, ktoré je možné aktivovať príkazom vhodným pre Váš operačný systém.
+
+Projekt definuje príkazy, ktoré služia na spustenie komponentov práce bez potreby písania ďalšieho kódu. Tieto príkazy je možné spustiť po aktivácií Python prostredia.
+
+\begin{itemize}
+    \item \texttt{start} ⇒ vygeneruje úroveň a sputí interaktívnu hru
+    \item \texttt{start-editor <súbor>} ⇒ spustí editor a otvorí súčasť miestnosti definovanú v špecifikovanom súbore
+\end{itemize}
+
+\newpage
+\setcounter{page}{1}
+\renewcommand{\thepage}{B.\arabic{page}}
+
+\section*{Príloha B: Návod k použitiu programu}
 
 \subsection*{Inštalácia programu ako knižnica}
 
