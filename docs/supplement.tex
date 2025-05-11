@@ -5,14 +5,14 @@
 
 Digitálna časť práce obsahuje zdrojový kód vo forme Python projektu v pôvodnej forme a taktiež v inštalovateľnom balíčku typu wheel, pre inštaláciu projektu ako knižnica.
 
-Obsiahnuté sú tiež všetky zdroje programu, t.j. grafické prvky, súčasti miestností a písma. Tieto súbory sú obsiahnuté v priečinku \texttt{src/pg\_gen/assets}. Všetky použité zdroje sú pod licenciou, ktorá umožnuje ďalšiu distribúciu. Kópia alebo odkaz na relevantnú licenciu je umiestnený popri súbore na ktorý sa vzťahuje. 
+Obsiahnuté sú tu tiež všetky zdroje programu, t.j. grafické prvky, súčasti miestností a písma. Tieto súbory sa nachádzajú v priečinku \texttt{src/pg\_gen/assets}. Všetky použité zdroje sú pod licenciou, ktorá umožňuje ich ďalšiu distribúciu. Kópia alebo odkaz na relevantnú licenciu je umiestnený popri súbore, na ktorý sa vzťahuje. 
 
 \begin{itemize}
     \item Zdrojový kód sa nachádza v priečinku: \texttt{PlatformGameGenerator} 
     \item Inštalovateľný balíček je súbor: \texttt{pg\_gen-1.0.0-py3-none-any.whl}
 \end{itemize}
 
-Zdrojový kód obsahuje štandardný súbor vyjadrujúci knižnice a verziu Pythonu, potrebnú pre jeho spustenie, v súbore \texttt{pyproject.py}. Na manažment knižniíc bol použitý program \texttt{rye} verzie \texttt{0.44.0}, ktorý je možné stiahnuť cez internet z adresy \url{https://rye.astral.sh/}. Po inštalácií danej aplikácie je možné nainštalovať potrebné knižnice príkazom \texttt{rye sync}. Tento príkaz vytvorí Python virtuálne prostredie, ktoré je možné aktivovať príkazom vhodným pre Váš operačný systém.
+Zdrojový kód obsahuje súbor \texttt{pyproject.toml} vyjadrujúci knižnice a verziu Pythonu, potrebnú pre jeho spustenie. Na manažment knižníc bol použitý program \texttt{rye} verzie \texttt{0.44.0}, ktorý je možné stiahnuť cez internet z adresy \url{https://rye.astral.sh/}. Po inštalácií danej aplikácie je možné nainštalovať potrebné knižnice príkazom \texttt{rye sync}. Tento príkaz vytvorí Python virtuálne prostredie, ktoré je možné aktivovať príkazom vhodným pre Váš operačný systém.
 
 Projekt definuje príkazy, ktoré služia na spustenie komponentov práce bez potreby písania ďalšieho kódu. Tieto príkazy je možné spustiť po aktivácií Python prostredia.
 
@@ -25,11 +25,11 @@ Projekt definuje príkazy, ktoré služia na spustenie komponentov práce bez po
 \setcounter{page}{1}
 \renewcommand{\thepage}{B.\arabic{page}}
 
-\section*{Príloha B: Návod k použitiu programu}
+\section*{Príloha B: Návod na použitie programu}
 
 \subsection*{Inštalácia programu ako knižnica}
 
-Aby bol program použiteľný ako knižnica, je potrebné ho nainštalovať z wheel súboru. Tento súbor je súčasťou C3 alebo je k dispozícií cez internet na adrese \url{https://bt7s7k7-2.github.io/PlatformGameGenerator/pg_gen-1.0.0-py3-none-any.whl}. Tento súbor, kedže je štandardným formátom pre Python knižnice, je možné nainštalovať prostredníctvom Vami zvoleného inštalačného programu. Nižšie sú uvedené príklady inštalácie prostredníctvom niekoľkých programov.
+Aby bol program použiteľný ako knižnica, je potrebné ho nainštalovať z wheel súboru. Tento súbor je súčasťou C3 alebo je k dispozícií na internetovej adrese \url{https://bt7s7k7-2.github.io/PlatformGameGenerator/pg_gen-1.0.0-py3-none-any.whl}. Tento súbor, kedže je štandardným formátom pre Python knižnice, je možné nainštalovať prostredníctvom Vami zvoleného inštalačného programu. Nižšie sú uvedené príklady inštalácie prostredníctvom niektorých programov.
 
 \begin{lstlisting}
 pip install 'pg_gen-1.0.0-py3-none-any.whl'
@@ -39,7 +39,7 @@ rye add pg_gen --path 'pg_gen-1.0.0-py3-none-any.whl'
 
 \subsection*{Použitie programu priamo}
 
-Program potrebuje k svojej činnosti zdroje. Tieto sú manažované globálnymi objektmi, ktoré treba inicializovať.
+Program potrebuje pre svoju činnosť zdroje. Tieto sú manažované globálnymi objektami, ktoré treba inicializovať.
 
 \begin{lstlisting}[language=python]
 import pygame
@@ -51,7 +51,7 @@ ActorRegistry.load_actors()
 RoomPrefabRegistry.load()
 \end{lstlisting}
 
-Ďalším krokom je zvoliť si obtiažnosť ktorú vyžadujete.
+Ďalším krokom je zvoliť si obtiažnosť, ktorú požadujete.
 
 \begin{lstlisting}[language=python]
 from pg_gen.generation.RoomParameter import UNUSED_PARAMETER
@@ -67,7 +67,7 @@ target_difficulty.set_parameter(RoomParameter.SPRAWL, 50)
 
 
 
-Následne je potrebné vytvoriť optimizátor, a vložiť do neho zvolené parametre. Optimizátor ďalej príjima argumenty \texttt{random}, kde je potrebné vložiť náhodný generátor - tu je možné nastaviť konsistetný seed. Optimizátor má možnosť nastaviť populáciu cez parameter \texttt{max\_population} a počet iterácií cez parameter \texttt{max\_generations}.
+Následne je potrebné vytvoriť optimalizátor a vložiť zvolené parametre. Optimalizátor ďalej príjima argumenty \texttt{random}, kde je potrebné vložiť náhodný generátor - tu je možné nastaviť konzistentný seed. Optimalizátor má možnosť nastaviť populáciu jedincov genetického algoritmu cez parameter \texttt{max\_population} a počet iterácií genetického algoritmu cez parameter \texttt{max\_generations}.
 
 \begin{lstlisting}[language=python]
 from random import Random
@@ -78,7 +78,7 @@ universe = Universe()
 optimizer = DifficultyOptimizer(universe, target_difficulty=target_difficulty, random=Random(108561))
 \end{lstlisting}
 
-Nie je potrebné špecifikovať všetky parametre, nepoužité parametre ostanú ako \texttt{UNUSED\_PARAMETER}. Tieto parametre budú mať po optimizácií náhodnú hodnotu, pravdepodobne je múdre ich nastaviť na konštatnú hodnotu. Takto je možné nastaviť všetky parametre, ktoré sa menia pri optimalzácií.
+Nie je potrebné špecifikovať všetky parametre. Nepoužité parametre ostanú ako \texttt{UNUSED\_PARAMETER}. Tieto parametre budú mať po optimizácií náhodnú hodnotu, preto je vhodné nastaviť ich nastaviť na konštatnú hodnotu. Takto je možné nastaviť všetky parametre, ktoré sa menia pri optimalzácií.
 
 \begin{lstlisting}[language=python]
 from pg_gen.generation.RoomParameter import RoomParameter
@@ -86,14 +86,14 @@ from pg_gen.generation.RoomParameter import RoomParameter
 optimizer.get_parameter(RoomParameter.REWARD).override_value(0.5)
 \end{lstlisting}
 
-Po zvolení parametrov a obtiažnosti je možné spustiť optimizátor.
+Po zvolení parametrov a obtiažnosti je možné spustiť optimalizátor.
 
 \begin{lstlisting}[language=python]
 optimizer.initialize_population()
 optimizer.optimize()
 \end{lstlisting}
 
-Po optimizácií je možné vybrať najbližšieho kandidáta a použiť jeho úroveň. Následne je potrebné aktivovať koreňovú miestnosť a vložiť do nej objekt hráča.
+Po optimizácií je možné vybrať najvhodnejšieho kandidáta a použiť jeho úroveň. Následne je potrebné aktivovať koreňovú miestnosť a vložiť do nej objekt hráča.
 
 \begin{lstlisting}[language=python]
 from pg_gen.generation.RoomController import RoomController
@@ -109,7 +109,7 @@ room_controller = RoomController.initialize_and_activate(universe, map.get_room(
 room_controller.world.add_actor(Player(position=Point(ROOM_WIDTH / 2, ROOM_HEIGHT / 2)))
 \end{lstlisting}
 
-Pre použitie hry interaktívne stači spustiť \texttt{InteractiveGameLoop}.
+Pre použitie hry interaktívne, stači spustiť \texttt{InteractiveGameLoop}.
 
 \begin{lstlisting}[language=python]
 from pg_gen.game_core.InteractiveGameLoop import InteractiveGameLoop
@@ -118,7 +118,7 @@ game_loop = InteractiveGameLoop(universe)
 game_loop.run()
 \end{lstlisting}
 
-Pre použitie s modelom je potrebné vytvoriť vlastný pygame-ový \texttt{Surface} a vložiť ho do \texttt{GameLoop}. Následne je možné vkladať vstup cez objekt \texttt{InputState} a manuálne simulovať update. Keďže mimo interaktívneho prístupu nie je herná sluťka naviazaná na reálny čas, je potrebné stanoviť čas, ktorý prejde medzi každý update krokom. Napríklad: ak chceme mať 20 krokov cez jednu simulovanú sekundu, tak čas medzi krokmi je $ 1 / 20 $ sekúnd.
+Pre použitie s modelom, je potrebné vytvoriť vlastný pygame-ový \texttt{Surface} a vložiť ho do \texttt{GameLoop}. Následne je možné vkladať vstup cez objekt \texttt{InputState} a manuálne simulovať update. Keďže mimo interaktívneho prístupu nie je herná slučka naviazaná na reálny čas, je potrebné stanoviť čas, ktorý prejde medzi každý update krokom. Napríklad: ak chceme mať 20 krokov cez jednu simulovanú sekundu, tak čas medzi krokmi je $ 1 / 20 $ sekúnd.
 
 \begin{lstlisting}[language=python]
 from pg_gen.game_core.GameLoop import GameLoop
@@ -160,18 +160,18 @@ Prostredie podporuje dva render módy:
     \item \texttt{rgb\_array} ⇒ simulácia prebieha najrýchlešie ako je možné, výstupom modelu je array obsahujúci grafický výstup hry
 \end{itemize}
 
-Pri použití \texttt{rgb\_array}, kedže sa neotovrí okno, je potrebné manuálne inicializovať grafický systém pygame-u. Najjednoduchší spôsob, ako toto dosiahnuť je vytvoriť jednopixelové skryté okno, ktoré nebude na nič využité.
+Pri použití \texttt{rgb\_array}, kedže sa neotovrí okno, je potrebné manuálne inicializovať grafický systém pygame-u. Najjednoduchší spôsob, ako to dosiahnuť, je vytvoriť jednopixelové skryté okno, ktoré nebude na nič využité.
 
 \begin{lstlisting}[language=python]
 if env.render_mode == "rgb_array":
     pygame.display.set_mode((1, 1), flags=pygame.HIDDEN)
 \end{lstlisting}
 
-Ako level je možné dodať:
+Ako parameter \texttt{level} je možné dodať:
 
 \begin{itemize}
     \item string ⇒ ako explicitný názov miestnosti, ktorá bude vygenerovaná; toto je možné použiť pre testovanie konkrétnej mechaniky
-    \item callback ⇒ funckia dostane ako argument referenciu na \texttt{Universe} a musí vrátiť \texttt{Map} objekt, vo funkcií spustite generáciu ako v predošlej sekcií
+    \item callback ⇒ funckia dostane ako argument referenciu na \texttt{Universe} a musí vrátiť \texttt{Map} objekt; vo funkcií spustite generáciu ako v predošlej sekcii
 \end{itemize}
 
 Toto je jednoduchý loop, pre využitie prostredia:
@@ -189,3 +189,10 @@ env.close()
 \end{lstlisting}
 
 
+\newpage
+\setcounter{page}{1}
+\renewcommand{\thepage}{C.\arabic{page}}
+
+\section*{Príloha C: Harmonogram práce}
+
+\input{schedule.tex}
